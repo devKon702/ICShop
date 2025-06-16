@@ -1,0 +1,16 @@
+export const ROUTE = {
+  home: "/",
+  category: "/category",
+  product: "",
+  user: "/user",
+  admin: "/admin",
+  adminDashboard: "/admin",
+  adminOrder: "/admin/order",
+  adminProduct: "/admin/product",
+  adminCategory: "/admin/category",
+  adminUser: "/admin/user",
+  cart: "/cart",
+  userAccount: "/account",
+  userOrder: "/account/order",
+  userAddress: "/account/address",
+};

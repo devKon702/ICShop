@@ -1,0 +1,31 @@
+import { CartDetail } from "@/libs/models/cart-detail";
+import { Category } from "@/libs/models/category";
+import { OrderDetail } from "@/libs/models/order-detail";
+import { ProductAttribute } from "@/libs/models/product-attribute";
+import { ProductImage } from "@/libs/models/product-image";
+import { Wholesale } from "@/libs/models/wholesale";
+
+export type Product = {
+  id: number | string;
+  name: string;
+  categoryId: number;
+  datasheetLink?: string;
+  minQuantity: number;
+  maxQuantity: number;
+  quantityStep: number;
+  unit: string;
+  slug: string;
+  desc?: string;
+  vat: number;
+  activeWholesaleId?: number;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  category?: Category;
+  attributes?: ProductAttribute[];
+  images?: ProductImage[];
+  wholesales?: Wholesale[];
+  activeWholesale?: Wholesale;
+  orderDetails?: OrderDetail[];
+  cartDetails?: CartDetail[];
+};
