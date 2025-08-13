@@ -8,8 +8,9 @@ dist/
 prisma/dev.db
 prisma/dev.db-journal
 
-# Environment variables
+# dotenv environment variables file
 .env
+.env.*.local
 
 # Logs
 logs

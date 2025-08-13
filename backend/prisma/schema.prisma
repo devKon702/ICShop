@@ -8,45 +8,68 @@ datasource db {
 }
 
 model Product {
-  id                 Int               @id @default(autoincrement())
-  name               String
-  categoryId         Int
-  datasheetLink      String?
-  minQuantity        Int
-  maxQuantity        Int
-  quantityStep       Int
-  unit               String
-  slug               String            @unique
-  desc               String?
-  vat                Float
-  activeWholesaleId  Int?              @unique
+  id                 Int               @id @default(autoincrement()) @db.UnsignedInt
+  /// Tên sản phẩm (tiếng Việt)
+  name               String            @db.Text
+  /// Đường dẫn đến ảnh mô tả sản phẩm
+  posterUrl          String            @db.VarChar(255)
+  /// ID của danh mục
+  categoryId         Int               @db.UnsignedInt
+  category           Category          @relation(fields: [categoryId], references: [id])
+  /// Đường dẫn đến datasheet của sản phẩm
+  datasheetLink      String?           @db.VarChar(255)
+  /// Đuôi đường dẫn đến trang thông tin sản phẩm
+  slug               String            @db.VarChar(200) @unique
+  /// Mô tả của sản phẩm, chứa mã HTML
+  desc               String?           @db.Text
+  /// Giá thuế theo đơn vị phần trăm
+  vat                Int               @db.TinyInt @default(0)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("ProductCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("ProductModified", fields: [modifierId], references: [id])
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+  /// Trạng thái hiển thị của sản phẩm
   isActive           Boolean           @default(true)
 
-  category           Category          @relation(fields: [categoryId], references: [id])
+  wholesale          Wholesale?
   attributes         ProductAttribute[]
   images             ProductImage[]
-  wholesales         Wholesale[]
-  activeWholesale    Wholesale?        @relation("ActiveWholeSale",fields: [activeWholesaleId], references: [id])
+  highlights         ProductHighlight[]
   orderDetails       OrderDetail[]
   cartDetails        CartDetail[]
 
-  @@fulltext([slug, desc])
-  @@index([slug, name ])
+  @@fulltext([name])
+  @@index([slug])
 }
 
 model Category {
-  id         Int        @id @default(autoincrement())
-  name       String
-  imageUrl   String?
-  parentId   Int?
-  level      Int
-  slug       String     @unique
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-
+  id         Int        @id @default(autoincrement()) @db.UnsignedInt
+  /// Tên danh mục (tiếng Việt)
+  name       String     @db.Text
+  /// Đường dẫn đến ảnh danh mục
+  imageUrl   String?    @db.VarChar(255)
+  /// ID của danh mục cha - level 1 thì null
+  parentId   Int?       @db.UnsignedInt
   parent     Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  /// Bậc của danh mục từ 1 đến 3
+  level      Int        @db.UnsignedTinyInt
+  /// Đuôi đường dẫn đến trang danh mục
+  slug       String     @db.VarChar(150) @unique
+  // Trạng thái hiển thị cho danh mục
+  isActive           Boolean           @default(true)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("CategoryCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("CategoryModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
   children   Category[] @relation("CategoryHierarchy")
   products   Product[]
   attributes Attribute[]
@@ -55,183 +78,401 @@ model Category {
 }
 
 model Attribute {
-  id         Int               @id @default(autoincrement())
-  name       String
-  categoryId Int
-
+  id         Int               @id @default(autoincrement()) @db.UnsignedInt
+  // Tên thông số (tiếng Việt)
+  name       String            @db.Text
+  // ID danh mục chứa thông số
+  categoryId Int               @db.UnsignedInt
   category   Category          @relation(fields: [categoryId], references: [id])
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("AttributeCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("AttributeModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
   values     AttributeValue[]
 }
 
 model AttributeValue {
-  id           BigInt          @id @default(autoincrement())
-  attributeId  Int
-  value        String
+  id           Int          @id @default(autoincrement()) @db.UnsignedInt
+  /// ID thông só chứa giá trị này
+  attributeId  Int          @db.UnsignedInt
+  /// Giá trị của thông số (tiếng Việt)
+  value        String          @db.Text
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("AttrValCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("AttrValModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   attribute    Attribute       @relation(fields: [attributeId], references: [id])
   products     ProductAttribute[]
 }
 
 model ProductAttribute {
-  id              BigInt             @id @default(autoincrement())
-  productId       Int
-  attributeValueId BigInt
-
+  id              Int             @id @default(autoincrement()) @db.UnsignedInt
+  /// ID của sản phẩm có giá trị thông số này
+  productId       Int             @db.UnsignedInt
   product         Product         @relation(fields: [productId], references: [id])
+  /// ID của giá trị thông số
+  attributeValueId Int            @db.UnsignedInt
   attributeValue  AttributeValue @relation(fields: [attributeValueId], references: [id])
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("ProdAttrCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("ProdAttrModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
 }
 
 model ProductImage {
-  id         Int     @id @default(autoincrement())
-  productId  Int
-  imageUrl   String
-
+  id         Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// ID của sản phẩm
+  productId  Int     @db.UnsignedInt
   product    Product @relation(fields: [productId], references: [id])
+  /// Đường dẫn đến ảnh
+  imageUrl   String   @db.VarChar(255)
+  /// Vị trí hiển thị trong danh sách ảnh
+  position   Int       @db.UnsignedInt @default(1)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("ProdImgCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("ProdImgModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
 }
 
 model Wholesale {
   id         Int             @id @default(autoincrement())
-  productId  Int
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-  
+  /// ID của sản phẩm
+  productId  Int             @unique @db.UnsignedInt
+  product    Product         @relation(fields: [productId], references: [id])
+  /// Số lượng mua tối thiểu
+  min_quantity  Int          @default(1) @db.UnsignedTinyInt
+  /// Số lượng mua tối đa
+  max_quantity  Int?         @db.UnsignedInt
+  ///  Bội số mua
+  quanity_step  Int          @db.UnsignedTinyInt @default(1)
+  /// Đơn vị mua (tiếng Việt)
+  unit        String         @db.TinyText
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("WholesaleCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("WholesaleModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
   details    WholesaleDetail[]
-  product    Product         @relation(fields:[productId], references:[id])
-  isActiveFor   Product?      @relation("ActiveWholeSale")  
 }
 
 model WholesaleDetail {
-  id          BigInt        @id @default(autoincrement())
-  wholesaleId Int
-  desc        String
-  min         Int
-  max         Int
-  price       Float
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id          Int         @id @default(autoincrement()) @db.UnsignedInt
+  /// ID của bảng giá
+  wholesaleId Int         @db.UnsignedInt
+  /// Dòng mô tả cho phạm vi giá áp dụng
+  desc        String      @db.TinyText
+  /// Giá trị dưới để áp dụng giá
+  min         Int         @db.UnsignedInt
+  /// Giá trị trên để áp dụng giá
+  max         Int?        @db.UnsignedInt
+  /// Đơn giá
+  price       Decimal     @db.Decimal(13,3)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("WhDetCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("WhDetModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   wholesale   Wholesale  @relation(fields: [wholesaleId], references: [id])
 }
 
-model Role {
-  id String @id
-  accounts Account[]
+enum HighlightType {
+  new
+  hot
+  bestsell
+}
+
+model ProductHighlight {
+  id        Int           @id @default(autoincrement()) @db.UnsignedTinyInt
+  /// ID của sản phẩm
+  productId Int       @db.UnsignedInt
+  product   Product    @relation(fields: [productId], references: [id])
+  /// Loại danh sách nổi bật
+  type      HighlightType
+  /// Vị trí hiển thị trong danh sách
+  position  Int       @db.UnsignedTinyInt @default(1)
+  
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("ProdHighCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("ProdHighModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+enum Role {
+  user
+  admin
 }
 
 model Account {
-  id            Int       @id @default(autoincrement())
+  id            Int       @id @default(autoincrement()) @db.UnsignedInt
+  /// Địa chỉ email
   email         String    @unique
-  password      String
-  roleId          String
+  /// Mật khẩu
+  password      String?
+  /// Phân quyền của tài khoản
+  role          Role      @default(user)
+  /// Tài khoản được đăng ký bằng google hay không
+  isGoogleSigned  Boolean   @default(false)
+  /// Tài khoản đã xác thực email
+  isEmailAuth   Boolean   @default(false)
+  /// Tài khoản đang khả dụng và có thể đăng nhập
   isActive      Boolean   @default(true)
-  isGoogleAuth  Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int?               @db.UnsignedInt
+  creator            User?              @relation("AccountCreated", fields: [creatorId], references: [id])
+  modifierId         Int?               @db.UnsignedInt
+  modifier           User?              @relation("AccountModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   user          User?      
-  roleModel     Role      @relation(fields: [roleId], references: [id])
-
   @@index([email])
 }
 
 model User {
   id          Int       @id @default(autoincrement())
-  accountId   Int       @unique
-  name        String
-  avatarUrl   String?
-  updatedAt   DateTime  @updatedAt
+  /// ID của tài khoản liên kết
+  accountId   Int       @unique @db.UnsignedInt
+  /// Tên người dùng
+  name        String    @db.TinyText
+  /// Đường dẫn đến ảnh đại diện
+  avatarUrl   String?   @db.VarChar(255)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int?               @db.UnsignedInt
+  creator            User?              @relation("UserCreated", fields: [creatorId], references: [id])
+  modifierId         Int?               @db.UnsignedInt
+  modifier           User?              @relation("UserModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   account     Account   @relation(fields: [accountId], references: [id])
-  orderTimelines OrderTimeline[]
   addresses   Address[]
   orders      Order[]
   cartDetails CartDetail[]
 
-  @@index([name])
+  @@fulltext([name])
+  ProductCreateds Product[] @relation("ProductCreated") @ignore
+  ProductModifieds Product[] @relation("ProductModified") @ignore
+  CategoryCreateds Category[] @relation("CategoryCreated") @ignore
+  CategoryModifieds Category[] @relation("CategoryModified") @ignore
+  // Attribute
+  AttributeCreateds Attribute[] @relation("AttributeCreated") @ignore
+  AttributeModifieds Attribute[] @relation("AttributeModified") @ignore
+
+  // AttributeValue
+  AttributeValueCreateds AttributeValue[] @relation("AttrValCreated") @ignore
+  AttributeValueModifieds AttributeValue[] @relation("AttrValModified") @ignore
+
+  // ProductAttribute
+  ProductAttributeCreateds ProductAttribute[] @relation("ProdAttrCreated") @ignore
+  ProductAttributeModifieds ProductAttribute[] @relation("ProdAttrModified") @ignore
+
+  // ProductImage
+  ProductImageCreateds ProductImage[] @relation("ProdImgCreated") @ignore
+  ProductImageModifieds ProductImage[] @relation("ProdImgModified") @ignore
+
+  // Wholesale
+  WholesaleCreateds Wholesale[] @relation("WholesaleCreated") @ignore
+  WholesaleModifieds Wholesale[] @relation("WholesaleModified") @ignore
+
+  // WholesaleDetail
+  WholesaleDetailCreateds WholesaleDetail[] @relation("WhDetCreated") @ignore
+  WholesaleDetailModifieds WholesaleDetail[] @relation("WhDetModified") @ignore
+
+  // ProductHighlight
+  ProductHighlightCreateds ProductHighlight[] @relation("ProdHighCreated") @ignore
+  ProductHighlightModifieds ProductHighlight[] @relation("ProdHighModified") @ignore
+
+  // Account
+  AccountCreateds Account[] @relation("AccountCreated") @ignore
+  AccountModifieds Account[] @relation("AccountModified") @ignore
+
+  // User
+  UserCreateds User[] @relation("UserCreated") @ignore
+  UserModifieds User[] @relation("UserModified") @ignore
+
+  // Order
+  OrderCreateds Order[] @relation("OrderCreated") @ignore
+  OrderModifieds Order[] @relation("OrderModified") @ignore
+
+  // OrderDetail
+  OrderDetailCreateds OrderDetail[] @relation("OrdDetCreated") @ignore
+  OrderDetailModifieds OrderDetail[] @relation("OrdDetModified") @ignore
+
+  // OrderTimeline
+  OrderTimelineCreateds OrderTimeline[] @relation("OrdTimeCreated") @ignore
+  OrderTimelineModifieds OrderTimeline[] @relation("OrdTimeModified") @ignore
+
+  // Banner
+  BannerCreateds Banner[] @relation("BannerCreated") @ignore
+  BannerModifieds Banner[] @relation("BannerModified") @ignore
 }
 
 model Address {
-  id            BigInt     @id @default(autoincrement())
-  userId        Int
-  alias         String
-  receiverName  String
-  receiverPhone String
-  province      String
-  district      String
-  commune       String
-  detail        String
+  id            Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// ID người dùng
+  userId        Int       @db.UnsignedInt
+  /// Tên định danh cho địa chỉ (tiếng Việt)
+  alias         String    @db.TinyText
+  /// Tên người nhận (tiếng Việt)
+  receiverName  String    @db.TinyText
+  /// Số điện thoại người nhận
+  receiverPhone String    @db.VarChar(15)
+  /// Tên tỉnh
+  province      String    @db.TinyText
+  /// Tên quận, huyện
+  district      String    @db.TinyText
+  /// Tên xã
+  commune       String    @db.TinyText
+  /// Địa chỉ chi tiết
+  detail        String    @db.Text
+
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   user          User    @relation(fields: [userId], references: [id])
 }
 
 model Order {
-  id                   String             @id
-  userId               Int
-  orderStatusId        Int
-  address              String
-  receiverName         String
-  receiverPhone        String
-  deliveryTypeId       String
-  vat                  Float
-  deliveryFee          Float
+  id                   Int            @id @default(autoincrement()) @db.UnsignedInt
+  /// Mã đơn hàng để public
+  code                 String         @default(cuid())
+  /// ID người đặt đơn hàng
+  userId               Int            @db.UnsignedInt
+  /// Trạng thái (1:pending, 2:paid, 3: processing, 4: shipping, 5: done, 0: cancelel)
+  status               Int            @db.TinyInt
+  /// Địa chỉ giao hàng (tiếng Việt)
+  address              String         @db.Text
+  /// Tên người nhận
+  receiverName         String         @db.TinyText
+  /// Số điện thoại người nhận
+  receiverPhone        String         @db.VarChar(15)
+  /// Hình thức giao (1: Tại cửa hàng, 2: Bưu điện)
+  deliveryType         Int            @db.TinyInt
+  /// Phí giao hàng
+  deliveryFee          Decimal        @db.Decimal(10,3)
+  /// Thời gian nhận sớm nhất
   earliestReceiveTime  DateTime
+  /// Thời gian nhận trễ nhất
   latestReceiveTime    DateTime
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("OrderCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("OrderModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   user                 User            @relation(fields: [userId], references: [id])
-  orderStatus          OrderStatus     @relation(fields: [orderStatusId], references: [id])
-  deliveryType         DeliveryType    @relation(fields: [deliveryTypeId], references: [type])
   details              OrderDetail[]
   timelines            OrderTimeline[]
 }
 
-model DeliveryType {
-  type  String  @id
-  name  String
-  orders Order[]
-}
-
-model OrderStatus {
-  id        Int     @id @default(autoincrement())
-  name      String
-  orders    Order[]
-  orderTimelines OrderTimeline[]
-}
-
-model OrderTimeline {
-  id             BigInt         @id @default(autoincrement())
-  orderId        String
-  orderStatusId  Int
-  userId         Int
-  desc           String
-  createdAt      DateTime    @default(now())
-
-  user           User        @relation(fields: [userId], references: [id])
-  order          Order       @relation(fields: [orderId], references: [id])
-  orderStatus    OrderStatus @relation(fields: [orderStatusId], references: [id])
-}
-
 model OrderDetail {
-  id         BigInt     @id @default(autoincrement())
-  orderId    String
-  productId  Int
-  quantity   Int
-  totalPrice Float
+  id         Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// ID đơn hàng
+  orderId    Int     @db.UnsignedInt
+  /// ID sản phẩm
+  productId  Int     @db.UnsignedInt
+  /// Số lượng đặt
+  quantity   Int     @db.UnsignedInt
+  /// Đơn giá
+  unitPrice  Decimal  @db.Decimal(13,3)
+  /// Phần trăm thuế áp dụng
+  vat        Int      @db.TinyInt
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("OrdDetCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("OrdDetModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   product    Product @relation(fields: [productId], references: [id])
   order      Order   @relation(fields: [orderId], references: [id])
 }
 
+model OrderTimeline {
+  id             Int         @id @default(autoincrement()) @db.UnsignedInt
+  orderId        Int         @db.UnsignedInt
+  /// Trạng thái (1:pending, 2:paid, 3: processing, 4: shipping, 5: done, 0: cancel)
+  status         Int         @db.TinyInt
+  /// Hiển thị thông báo cho khách đặt đơn
+  isRead         Boolean     @default(false)
+  /// Ghi chú cho trạng thái
+  desc           String
+  
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("OrdTimeCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("OrdTimeModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  order          Order       @relation(fields: [orderId], references: [id])
+}
+
 model CartDetail {
-  id         Int     @id @default(autoincrement())
-  userId     Int
-  productId  Int
-  quantity   Int
+  id         Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// ID người dùng
+  userId     Int     @db.UnsignedInt
+  /// ID sản phẩm
+  productId  Int     @db.UnsignedInt
+
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
   user       User    @relation(fields: [userId], references: [id])
   product    Product @relation(fields: [productId], references: [id])
+}
+
+model Banner {
+  id        Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// Đường dẫn đến ảnh quảng cáo
+  imageUrl  String  @db.VarChar(255)
+  /// Vị trí hiển thị trong danh sách
+  position  Int     @db.UnsignedTinyInt @default(1)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("BannerCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("BannerModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 }

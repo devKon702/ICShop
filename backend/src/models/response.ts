@@ -1,3 +1,4 @@
+import { AnyZodObject } from "zod";
 import { safeStringify } from "../utils/safeStringify";
 
 export enum StatusCode {
@@ -10,7 +11,7 @@ export enum StatusCode {
 }
 
 export class ResponseObject {
-  code: number | StatusCode;
+  code: number | StatusCode | string;
   message: string;
   data: object | null | object[];
   constructor(
@@ -22,4 +23,9 @@ export class ResponseObject {
     this.message = message;
     this.data = JSON.parse(safeStringify(data));
   }
+}
+
+export interface BaseSchema {
+  createSchema: AnyZodObject;
+  updateSchema: AnyZodObject;
 }

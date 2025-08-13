@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ResponseObject, StatusCode } from "../models/response";
 import productRepository from "../repositories/product.repository";
 import { TypedRequest } from "../types/TypedRequest";
-import { PaginationResponse } from "../models/pagination-response";
+import { PaginationResponse } from "../models/PaginationResponse";
 
 const getProductBySlug = async (
   req: TypedRequest<{ slug: string }>,
