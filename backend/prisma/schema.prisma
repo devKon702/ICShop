@@ -155,7 +155,7 @@ model ProductImage {
 }
 
 model Wholesale {
-  id         Int             @id @default(autoincrement())
+  id         Int             @id @default(autoincrement()) @db.UnsignedInt
   /// ID của sản phẩm
   productId  Int             @unique @db.UnsignedInt
   product    Product         @relation(fields: [productId], references: [id])
@@ -261,7 +261,7 @@ model Account {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
   /// ID của tài khoản liên kết
   accountId   Int       @unique @db.UnsignedInt
   /// Tên người dùng

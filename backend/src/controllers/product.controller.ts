@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import { ResponseObject, StatusCode } from "../models/response";
 import productRepository from "../repositories/product.repository";
 import { TypedRequest } from "../types/TypedRequest";
-import { PaginationResponse } from "../models/PaginationResponse";
+import { HttpStatus } from "../constants/http-status";
+import { failResponse, successResponse } from "../utils/response";
+import { ProductResponseCode } from "../constants/codes/product.code";
 
 const getProductBySlug = async (
   req: TypedRequest<{ slug: string }>,
@@ -41,8 +43,8 @@ const filter = async (
       pageNumber,
       limitNumber
     );
-    res.json(
-      new PaginationResponse(StatusCode.OK, "success", products, {
+    res.status(HttpStatus.OK).json(
+      successResponse(ProductResponseCode.OK, "success", products, {
         total,
         page: pageNumber,
         limit: limitNumber,
@@ -51,7 +53,7 @@ const filter = async (
   } catch (e) {
     console.log(e);
     res
-      .status(400)
+      .status(HttpStatus.BAD_REQUEST)
       .json(new ResponseObject(StatusCode.BAD_REQUEST, "fail", null));
   }
 };
@@ -72,8 +74,8 @@ const getProductByCategoryId = async (
       Number(page),
       Number(limit)
     );
-    res.json(
-      new PaginationResponse(StatusCode.OK, "success", products, {
+    res.status(HttpStatus.OK).json(
+      successResponse(ProductResponseCode.OK, "success", products, {
         total,
         limit: Number(limit),
         page: Number(page),
@@ -82,8 +84,8 @@ const getProductByCategoryId = async (
   } catch (e) {
     console.log(e);
     res
-      .status(400)
-      .json(new ResponseObject(StatusCode.BAD_REQUEST, "fail", null));
+      .status(HttpStatus.BAD_REQUEST)
+      .json(failResponse(ProductResponseCode.FAIL, "fail"));
   }
 };
 

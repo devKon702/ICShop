@@ -49,7 +49,7 @@ const getCategoryOverview = async () => {
               products: {
                 take: 5,
                 include: {
-                  activeWholesale: { include: { details: { take: 1 } } },
+                  wholesale: { include: { details: { take: 1 } } },
                   images: { take: 1 },
                 },
               },

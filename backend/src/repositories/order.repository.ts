@@ -4,9 +4,7 @@ const getOrderByUserId = (userId: number, page: number, limit: number) => {
   return prisma.order.findMany({
     where: { userId },
     include: {
-      deliveryType: true,
       details: true,
-      orderStatus: true,
     },
     take: limit,
     skip: (page - 1) * limit,
@@ -20,11 +18,9 @@ const getOrderByUserIdAndOrderStatusId = (
   limit: number
 ) => {
   return prisma.order.findMany({
-    where: { userId, orderStatusId },
+    where: { userId },
     include: {
-      deliveryType: true,
       details: true,
-      orderStatus: true,
     },
     take: limit,
     skip: (page - 1) * limit,

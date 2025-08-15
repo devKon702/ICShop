@@ -4,7 +4,7 @@ const findBySlug = async (slug: string) => {
   return prisma.product.findUnique({
     where: { slug, isActive: true },
     include: {
-      activeWholesale: { include: { details: true } },
+      wholesale: { include: { details: true } },
       attributes: true,
       images: true,
       category: {
@@ -53,7 +53,7 @@ const filter = async (
           },
         },
         images: { take: 1 },
-        activeWholesale: { include: { details: true } },
+        wholesale: { include: { details: true } },
       },
     }),
     prisma.product.count({ where }),

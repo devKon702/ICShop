@@ -1,21 +1,26 @@
 import { prisma } from "../prisma";
 
-const findByEmail = async (email: string) => {
-  return await prisma.account.findUnique({
-    where: { email },
-    include: { user: true },
-  });
-};
+class AccountRepository {
+  findFirstAdmin = async () => {
+    return prisma.account.findFirst({ where: { role: "admin" } });
+  };
 
-const findAccountById = async (id: number) => {
-  return await prisma.account.findUnique({
-    where: { id },
-    include: {
-      user: true,
-    },
-  });
-};
+  findByEmail = async (email: string) => {
+    return await prisma.account.findUnique({
+      where: { email },
+      include: { user: true },
+    });
+  };
 
-const createAccount = async () => {};
+  findAccountById = async (id: number) => {
+    return await prisma.account.findUnique({
+      where: { id },
+      include: {
+        user: true,
+      },
+    });
+  };
 
-export default { findByEmail, createAccount, findAccountById };
+  createAccount = async () => {};
+}
+export default new AccountRepository();
