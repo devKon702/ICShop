@@ -8,6 +8,7 @@ import { ValidateResponseCode } from "../constants/codes/validate.code";
 import { Prisma } from "@prisma/client";
 import { AppError } from "../utils/app-error";
 import { fail } from "assert";
+import { logger } from "../logger";
 
 export function errorHandler(
   err: unknown,
