@@ -1,4 +1,4 @@
 export enum ValidateResponseCode {
   INVALID_INPUT = "VLD_INVALID_INPUT",
-  MISSING_INPUT = "VLD_MISSING_INPUT",
+  INVALID_FILE = "VLD_INVALID_FILE",
 }

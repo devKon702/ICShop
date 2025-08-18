@@ -9,6 +9,6 @@ export function successResponse(
     : { code, message, data };
 }
 
-export function failResponse(code: string, message: string) {
-  return { code, message, data: null };
+export function failResponse(code: string, message: string, errors?: any) {
+  return { code, message, errors };
 }

@@ -3,23 +3,22 @@ import accountRepository from "../repositories/account.repository";
 import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response";
 import { AuthResponseCode } from "../constants/codes/auth.code";
-import { LoginType, SignupType } from "../schemas/auth.schema";
-import { AppError } from "../utils/app-error";
-import { createAccessToken } from "../utils/jwt";
-import { comparePassword } from "../utils/bcrypt";
+import { LoginIType, SignupIType } from "../schemas/auth.schema";
+import { AppError } from "../errors/app-error";
+import { createAccessToken, createRefreshToken } from "../utils/jwt";
+import { comparePassword, hashPassword } from "../utils/bcrypt";
+import { Role } from "../constants/db";
+import { JWTConfig } from "../constants/jwt";
+import { logger } from "../utils/logger";
+import { JwtPayload } from "../types/jwt-payload";
 
 class AuthController {
-  login = async (req: Request<any, any, LoginType["body"]>, res: Response) => {
+  login = async (req: Request<any, any, LoginIType["body"]>, res: Response) => {
     try {
       const { email, password } = req.body;
       const account = await accountRepository.findByEmail(email);
       // Không tìm thấy
       if (!account) {
-        // res
-        //   .status(HttpStatus.NOT_FOUND)
-        //   .json(
-        //     failResponse(AuthResponseCode.NOT_FOUND, "Không tìm thấy tài khoản")
-        //   );
         throw new AppError(
           HttpStatus.NOT_FOUND,
           AuthResponseCode.NOT_FOUND,
@@ -32,10 +31,7 @@ class AuthController {
         !account.password ||
         !(await comparePassword(password, account.password))
       ) {
-        // res
-        //   .status(HttpStatus.UNAUTHORIZED)
-        //   .json(failResponse(AuthResponseCode.WRONG_PASSWORD, "Sai mật khẩu"));
-        // return;
+        Role;
         throw new AppError(
           HttpStatus.UNAUTHORIZED,
           AuthResponseCode.WRONG_PASSWORD,
@@ -45,9 +41,6 @@ class AuthController {
       }
       // Tài khoản bị khoá
       else if (!account.isActive)
-        // res.json(
-        //   new ResponseObject(StatusCode.UNAUTHORIZED, "Account blocked", null)
-        // );
         throw new AppError(
           HttpStatus.FORBIDDEN,
           AuthResponseCode.USER_BLOCKED,
@@ -56,15 +49,50 @@ class AuthController {
         );
       // Thành công
       else {
-        const { password, ...accountWithoutPassword } = account;
-        const token = createAccessToken({
+        const {
+          password,
+          version,
+          createdAt,
+          updatedAt,
+          modifierId,
+          creatorId,
+          ...publicAccount
+        } = account;
+        const accessToken = createAccessToken({
           sub: account.user!.id,
-          role: account.role,
+          role: account.role as Role,
         });
+        const refreshToken = createRefreshToken(
+          { sub: account.user!.id, role: account.role as Role },
+          account.role as Role
+        );
+        // Tạo nơi lưu trữ refresh token
+        switch (account.role) {
+          // Tạo cookie thường
+          case Role.USER:
+            res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, refreshToken, {
+              httpOnly: true,
+              sameSite: "strict",
+              path: "/auth/refresh",
+              expires: new Date(
+                Date.now() + JWTConfig.JWT_REFRESH_EXPIRE_USER * 1000
+              ),
+            });
+            break;
+          case Role.ADMIN:
+          default:
+            // Tạo session cookie
+            res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, refreshToken, {
+              httpOnly: true,
+              sameSite: "strict",
+              path: "/auth/refresh",
+            });
+            break;
+        }
         res.status(HttpStatus.OK).json(
           successResponse(AuthResponseCode.OK, "Đăng nhập thành công", {
-            account: accountWithoutPassword,
-            token,
+            account: publicAccount,
+            token: accessToken,
           })
         );
       }
@@ -74,9 +102,56 @@ class AuthController {
   };
 
   signup = async (
-    req: Request<any, any, SignupType["body"]>,
+    req: Request<any, any, SignupIType["body"]>,
     res: Response
-  ) => {};
+  ) => {
+    try {
+      const { email, password, name } = req.body;
+
+      const existAccount = await accountRepository.findByEmail(email);
+      // Nếu trùng
+      if (existAccount)
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          AuthResponseCode.EMAIL_EXIST,
+          "Email đã được sử dụng",
+          true
+        );
+      // Không trùng
+      const hashedPassword = await hashPassword(password);
+      const { password: passwordIgnored, ...newAccount } =
+        await accountRepository.createAccount(email, hashedPassword, name);
+      res
+        .status(HttpStatus.CREATED)
+        .json(
+          successResponse(
+            AuthResponseCode.OK,
+            "Tạo tài khoản thành công",
+            newAccount
+          )
+        );
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  logout = (req: Request, res: Response) => {
+    // Xóa cookie, truyền option giống với khi tạo cookie
+    res.clearCookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, {
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/auth/refresh",
+    });
+    // Xóa refresh token trong whitelist
+    // ...
+    const tokenPayload = res.locals.tokenPayload as JwtPayload;
+
+    logger.info(`User [${tokenPayload.sub}] logged out`);
+
+    res
+      .status(HttpStatus.OK)
+      .json(successResponse(AuthResponseCode.OK, "Đăng xuất thành công", null));
+  };
 
   test(req: Request, res: Response) {
     const payload = res.locals.payload;

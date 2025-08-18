@@ -1,14 +1,10 @@
-// middleware/errorHandler.ts
 import { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "../constants/http-status";
-import { ResponseObject } from "../models/response";
-import { ZodError } from "zod";
 import { failResponse } from "../utils/response";
-import { ValidateResponseCode } from "../constants/codes/validate.code";
-import { Prisma } from "@prisma/client";
-import { AppError } from "../utils/app-error";
-import { fail } from "assert";
-import { logger } from "../logger";
+import { AppError } from "../errors/app-error";
+import { logger } from "../utils/logger";
+import { ValidateError } from "../errors/validate-error";
+import { JWTError } from "../errors/jwt-error";
 
 export function errorHandler(
   err: unknown,
@@ -16,19 +12,21 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  console.error("Error:", err);
+  logger.error("Error", err);
 
-  // 1. Zod validation error
-  if (err instanceof ZodError) {
-    res
-      .status(HttpStatus.BAD_REQUEST)
-      .json(
-        failResponse(ValidateResponseCode.INVALID_INPUT, "Tham số không hợp lệ")
-      );
-    return;
+  // JWT Error
+  if (err instanceof JWTError) {
+    res.status(err.htttpCode).json(failResponse(err.code, err.message));
   }
 
-  // 2. Prisma errors
+  // Validation Error
+  if (err instanceof ValidateError) {
+    res
+      .status(err.htttpCode)
+      .json(failResponse(err.code, err.message, err.errors));
+  }
+
+  // Prisma errors
   // if (err instanceof Prisma.PrismaClientKnownRequestError) {
   //   // Lỗi unique constraint
   //   if (err.code === "P2002") {
@@ -53,12 +51,13 @@ export function errorHandler(
   //   });
   // }
 
-  // 3. Custom AppError
+  // Other App Error
   if (err instanceof AppError && err.isOperational) {
     res.status(err.htttpCode).json(failResponse(err.code, err.message));
+    return;
   }
 
-  // 4. Fallback - Unknown error
+  // Fallback - Unknown error
   res
     .status(HttpStatus.INTERNAL_SERVER_ERROR)
     .json(failResponse("ERROR", "Internal Server Error"));
