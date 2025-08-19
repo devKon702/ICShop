@@ -5,15 +5,49 @@ import { successResponse } from "../utils/response";
 import { AuthResponseCode } from "../constants/codes/auth.code";
 import { LoginIType, SignupIType } from "../schemas/auth.schema";
 import { AppError } from "../errors/app-error";
-import { createAccessToken, createRefreshToken } from "../utils/jwt";
+import {
+  createAccessToken,
+  createRefreshToken,
+  verifyToken,
+} from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 import { Role } from "../constants/db";
 import { JWTConfig } from "../constants/jwt";
 import { logger } from "../utils/logger";
-import { JwtPayload } from "../types/jwt-payload";
+import { TokenPayload } from "../types/token-payload";
+import { JWTError } from "../errors/jwt-error";
+import { JWTResponseCode } from "../constants/codes/jwt.code";
 
 class AuthController {
-  login = async (req: Request<any, any, LoginIType["body"]>, res: Response) => {
+  private createCookieToken = (res: Response, token: string, role: Role) => {
+    switch (role) {
+      // Tạo cookie thường
+      case Role.USER:
+        res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, token, {
+          httpOnly: true,
+          sameSite: "strict",
+          path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
+          expires: new Date(
+            Date.now() + JWTConfig.JWT_REFRESH_EXPIRE_USER * 1000
+          ),
+        });
+        break;
+      case Role.ADMIN:
+      default:
+        // Tạo session cookie
+        res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, token, {
+          httpOnly: true,
+          sameSite: "strict",
+          path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
+        });
+        break;
+    }
+  };
+
+  public login = async (
+    req: Request<any, any, LoginIType["body"]>,
+    res: Response
+  ) => {
     try {
       const { email, password } = req.body;
       const account = await accountRepository.findByEmail(email);
@@ -67,28 +101,8 @@ class AuthController {
           account.role as Role
         );
         // Tạo nơi lưu trữ refresh token
-        switch (account.role) {
-          // Tạo cookie thường
-          case Role.USER:
-            res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, refreshToken, {
-              httpOnly: true,
-              sameSite: "strict",
-              path: "/auth/refresh",
-              expires: new Date(
-                Date.now() + JWTConfig.JWT_REFRESH_EXPIRE_USER * 1000
-              ),
-            });
-            break;
-          case Role.ADMIN:
-          default:
-            // Tạo session cookie
-            res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, refreshToken, {
-              httpOnly: true,
-              sameSite: "strict",
-              path: "/auth/refresh",
-            });
-            break;
-        }
+        this.createCookieToken(res, refreshToken, account.role as Role);
+
         res.status(HttpStatus.OK).json(
           successResponse(AuthResponseCode.OK, "Đăng nhập thành công", {
             account: publicAccount,
@@ -101,7 +115,7 @@ class AuthController {
     }
   };
 
-  signup = async (
+  public signup = async (
     req: Request<any, any, SignupIType["body"]>,
     res: Response
   ) => {
@@ -135,22 +149,76 @@ class AuthController {
     }
   };
 
-  logout = (req: Request, res: Response) => {
+  public logout = (req: Request, res: Response) => {
     // Xóa cookie, truyền option giống với khi tạo cookie
     res.clearCookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, {
       httpOnly: true,
       sameSite: "strict",
-      path: "/auth/refresh",
+      path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
     });
     // Xóa refresh token trong whitelist
     // ...
-    const tokenPayload = res.locals.tokenPayload as JwtPayload;
+    const tokenPayload = res.locals.tokenPayload as TokenPayload;
 
-    logger.info(`User [${tokenPayload.sub}] logged out`);
+    logger.info(
+      `[${res.locals.requestId}] User [${tokenPayload.sub}] logged out`
+    );
 
     res
       .status(HttpStatus.OK)
       .json(successResponse(AuthResponseCode.OK, "Đăng xuất thành công", null));
+  };
+
+  public refresh = async (req: Request, res: Response) => {
+    try {
+      // Lấy refresh token từ cookie
+      const token = req.cookies[JWTConfig.JWT_REFRESH_COOKIE_NAME];
+      // Không có token
+      if (!token)
+        throw new JWTError(
+          JWTResponseCode.TOKEN_MISSING,
+          "Không tìm thấy token"
+        );
+      // Xác thực token
+      const { sub } = verifyToken(token, "refresh");
+      // Kiểm tra blacklist
+      // ...
+      const user = await accountRepository.findByUserId(sub);
+      // Không tìm thấy user
+      if (!user)
+        throw new JWTError(JWTResponseCode.INVALID_TOKEN, "Token không hợp lệ");
+      // Tài khoản bị khóa
+      if (!user.account.isActive)
+        throw new AppError(
+          HttpStatus.FORBIDDEN,
+          AuthResponseCode.USER_BLOCKED,
+          "Tài khoản đã bị khóa",
+          true
+        );
+      // Xác thực thành công -> refresh
+      const accessToken = createAccessToken({
+        sub,
+        role: user.account.role as Role,
+      });
+      const refreshToken = createRefreshToken(
+        { sub, role: user.account.role as Role },
+        user.account.role as Role
+      );
+      // Tạo nơi lưu trữ refresh token
+      this.createCookieToken(res, refreshToken, user.account.role as Role);
+
+      res
+        .status(HttpStatus.OK)
+        .json(
+          successResponse(
+            AuthResponseCode.OK,
+            "Làm mới token thành công",
+            accessToken
+          )
+        );
+    } catch (err) {
+      throw err;
+    }
   };
 
   test(req: Request, res: Response) {

@@ -1,6 +1,6 @@
 import express from "express";
 import authController from "../controllers/auth.controller";
-import { verifyToken } from "../middlewares/jwt.middleware";
+import { verifyAccessToken } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { loginSchema, signupSchema } from "../schemas/auth.schema";
 
@@ -15,8 +15,10 @@ authRouter.post(
   authController.signup
 );
 
-authRouter.post(path + "/logout", verifyToken, authController.logout);
+authRouter.post(path + "/logout", verifyAccessToken, authController.logout);
 
-authRouter.get(path + "/testToken", verifyToken, authController.test);
+authRouter.post(path + "/refresh", authController.refresh);
+
+authRouter.get(path + "/testToken", verifyAccessToken, authController.test);
 
 export default authRouter;

@@ -1,3 +1,4 @@
+import { Role } from "../constants/db";
 import { prisma } from "../prisma";
 
 class AccountRepository {
@@ -35,7 +36,8 @@ class AccountRepository {
   public createAccount = async (
     email: string,
     password: string,
-    name: string
+    name: string,
+    role: Role = Role.USER
   ) => {
     const newAccount = await prisma.account.create({
       data: {
@@ -44,6 +46,7 @@ class AccountRepository {
         user: {
           create: { name },
         },
+        role,
       },
       include: { user: true },
     });

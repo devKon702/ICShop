@@ -12,18 +12,26 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  logger.error("Error", err);
+  // Lỗi nghiệp vụ
+  if (err instanceof AppError && err.isOperational) {
+    logger.info(`[${res.locals.requestId}] ${err.message}`);
+    // JWT Error
+    if (err instanceof JWTError) {
+      res.status(err.htttpCode).json(failResponse(err.code, err.message));
+      return;
+    }
 
-  // JWT Error
-  if (err instanceof JWTError) {
+    // Validation Error
+    if (err instanceof ValidateError) {
+      res
+        .status(err.htttpCode)
+        .json(failResponse(err.code, err.message, err.errors));
+      return;
+    }
+
+    // Other App Error
     res.status(err.htttpCode).json(failResponse(err.code, err.message));
-  }
-
-  // Validation Error
-  if (err instanceof ValidateError) {
-    res
-      .status(err.htttpCode)
-      .json(failResponse(err.code, err.message, err.errors));
+    return;
   }
 
   // Prisma errors
@@ -51,14 +59,9 @@ export function errorHandler(
   //   });
   // }
 
-  // Other App Error
-  if (err instanceof AppError && err.isOperational) {
-    res.status(err.htttpCode).json(failResponse(err.code, err.message));
-    return;
-  }
-
   // Fallback - Unknown error
   res
     .status(HttpStatus.INTERNAL_SERVER_ERROR)
     .json(failResponse("ERROR", "Internal Server Error"));
+  logger.error(`[${res.locals.requestId}] Unknown Error`, err);
 }

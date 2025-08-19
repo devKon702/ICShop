@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { UpdateUserIType } from "../schemas/user.schema";
-import { JwtPayload } from "../types/jwt-payload";
+import { TokenPayload } from "../types/token-payload";
 import userRepository from "../repositories/user.repository";
 import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response";
@@ -12,9 +12,9 @@ class UserController {
     res: Response
   ) => {
     try {
-      const { sub: userId } = res.locals.tokenPayload as JwtPayload;
+      const { sub } = res.locals.tokenPayload as TokenPayload;
       const { name } = req.body;
-      const user = await userRepository.updateName(userId, name);
+      const user = await userRepository.updateName(sub, name);
       res
         .status(HttpStatus.OK)
         .json(

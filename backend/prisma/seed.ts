@@ -2,29 +2,28 @@ import { PrismaClient } from "@prisma/client";
 import accountRepository from "../src/repositories/account.repository";
 import { hashPassword } from "../src/utils/bcrypt";
 import { Role } from "../src/constants/db";
+import { logger } from "../src/utils/logger";
 const prisma = new PrismaClient();
 
 async function main() {
   // Kiểm tra nếu chưa có admin thì tạo mới
   const admin = await accountRepository.findFirstAdmin();
   if (!admin) {
-    await prisma.account.create({
-      data: {
-        email: "nhatkha117@gmail.com",
-        password: await hashPassword("123456"),
-        role: Role.ADMIN,
-        user: { create: { name: "Nhật Kha" } },
-      },
-    });
+    await accountRepository.createAccount(
+      "nhatkha117@gmail.com",
+      await hashPassword("123456"),
+      "Admin",
+      Role.ADMIN
+    );
   }
 }
 
 main()
   .then(() => {
-    console.log("Seed data created");
+    logger.info("Seed data created");
   })
   .catch((e) => {
-    console.error(e);
+    logger.error("Seed data failed");
     process.exit(1);
   })
   .finally(async () => {

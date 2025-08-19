@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import accountRepository from "../repositories/account.repository";
 import { TypedRequest } from "../types/TypedRequest";
 import { ResponseObject, StatusCode } from "../models/response";
-import { JwtPayload } from "../types/jwt-payload";
+import { TokenPayload } from "../types/token-payload";
 import { AppError } from "../errors/app-error";
 import { HttpStatus } from "../constants/http-status";
 import { AuthResponseCode } from "../constants/codes/auth.code";
@@ -31,8 +31,8 @@ class AccountController {
 
   public getMyInformation = async (req: Request, res: Response) => {
     try {
-      const { sub: userId } = res.locals.tokenPayload as JwtPayload;
-      const user = await accountRepository.findByUserId(userId);
+      const { sub } = res.locals.tokenPayload as TokenPayload;
+      const user = await accountRepository.findByUserId(sub);
       if (!user)
         throw new AppError(
           HttpStatus.NOT_FOUND,
