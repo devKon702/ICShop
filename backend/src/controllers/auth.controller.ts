@@ -12,7 +12,7 @@ import {
 } from "../utils/jwt";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 import { Role } from "../constants/db";
-import { JWTConfig } from "../constants/jwt";
+import { JWTConfig } from "../constants/jwt-config";
 import { logger } from "../utils/logger";
 import { TokenPayload } from "../types/token-payload";
 import { JWTError } from "../errors/jwt-error";

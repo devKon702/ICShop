@@ -19,6 +19,7 @@ class UserRepository {
       },
       data: {
         name,
+        version: { increment: 1 },
       },
     });
   };

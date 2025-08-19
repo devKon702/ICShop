@@ -1,6 +1,6 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-import { NODE_ENV } from "../constants/env";
+import { env } from "../constants/env";
 
 const { combine, timestamp, printf, align, colorize, errors, json } =
   winston.format;
@@ -12,7 +12,7 @@ const logFormat = printf(({ level, message, timestamp, stack }) => {
 // log level: error > warn > info > http > verbose > debug > silly
 
 export const logger = winston.createLogger({
-  level: NODE_ENV === "production" ? "info" : "debug",
+  level: env.NODE_ENV === "production" ? "info" : "debug",
   format: combine(
     timestamp({ format: "YYYY-MM-DD HH:mm::ss.SSS" }),
     errors({ stack: true })

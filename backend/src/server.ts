@@ -1,7 +1,7 @@
 import express from "express";
+import { env } from "./constants/env";
 import router from "./routes";
 import { errorHandler } from "./middlewares/error-handler.middleware";
-import { PORT } from "./constants/env";
 import { requestLogger } from "./middlewares/logger.middleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -28,6 +28,6 @@ app.use("/api", router);
 // Error handling
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(env.PORT, () => {
+  console.log(`Server running on port ${env.PORT}`);
 });

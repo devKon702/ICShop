@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { JWTError } from "../errors/jwt-error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import { verifyToken } from "../utils/jwt";
