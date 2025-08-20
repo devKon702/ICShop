@@ -9,6 +9,9 @@ import cors from "cors";
 const app = express();
 app.use(express.json());
 
+// Static route
+app.use("/uploads", express.static(env.UPLOAD_DIR));
+
 // Cross-origin
 app.use(
   cors({

@@ -3,7 +3,7 @@ import { verifyAccessToken } from "../middlewares/jwt.middleware";
 import userController from "../controllers/user.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { updateUserSchema } from "../schemas/user.schema";
-import { singleUpload } from "../utils/multer";
+import { singleUpload, upload } from "../utils/multer";
 
 const userRouter = express.Router();
 
@@ -19,7 +19,7 @@ userRouter.patch(
 userRouter.patch(
   path + "/upload-avatar",
   verifyAccessToken,
-  singleUpload("avatar"),
+  upload.single("avatar"),
   userController.changeAvatar
 );
 

@@ -20,6 +20,20 @@ class UserRepository {
       data: {
         name,
         version: { increment: 1 },
+        modifierId: userId,
+      },
+    });
+  };
+
+  public updateAvatar = async (userId: number, avatarUrl: string) => {
+    return prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        avatarUrl,
+        version: { increment: 1 },
+        modifierId: userId,
       },
     });
   };

@@ -1,8 +1,9 @@
+import { env } from "../constants/env";
 import { IFileStorage } from "./file-storage.interface";
 import { LocalStorage } from "./local-storage";
 
 let storage: IFileStorage;
 
-storage = new LocalStorage("uploads");
+storage = new LocalStorage(env.UPLOAD_DIR);
 
 export default storage;
