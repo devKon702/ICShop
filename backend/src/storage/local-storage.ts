@@ -3,6 +3,7 @@ import { IFileStorage } from "./file-storage.interface";
 import fs from "fs/promises";
 import path from "path";
 import { getFileTail } from "../utils/file";
+import { env } from "../constants/env";
 
 export class LocalStorage implements IFileStorage {
   private uploadDir: string;
@@ -18,12 +19,13 @@ export class LocalStorage implements IFileStorage {
   ): Promise<string> {
     const fileType = getFileTail(mimeType);
     const filePath = path.join(this.uploadDir, `${fileName}.${fileType}`);
+    console.log(filePath);
 
     // Tạo nếu folder chưa tồn tại
     await fs.mkdir(this.uploadDir, { recursive: true });
     await fs.writeFile(filePath, fileBuffer);
-    // Trả về static path để client gọi
-    return `${fileName}.${fileType}`;
+    // Trả về serve url để client gọi - http url nên không dùng path được
+    return `${env.SERVE_DIR}/${fileName}.${fileType}`;
   }
 
   async delete(fileUrl: string): Promise<void> {

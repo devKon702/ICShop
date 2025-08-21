@@ -45,11 +45,12 @@ export const validateFile = (
       },
     ]);
   }
-
-  // Hợp lệ
-  return true;
 };
 
 export const getFileTail = (mimeType: string) => {
   return mimeType.split("/").pop() ?? "";
+};
+
+export const getFileName = (serveUrl: string) => {
+  return serveUrl.split("/").pop() ?? "";
 };

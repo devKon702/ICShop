@@ -13,6 +13,7 @@ const envSchema = z.object({
   JWT_REFRESH_KEY: z.string().min(32, "KEY phải có ít nhất 32 ký tự"),
   UPLOAD_TYPE: z.string().default("local"),
   UPLOAD_DIR: z.string().nonempty("Cần cung cấp địa chỉ lưu file"),
+  SERVE_DIR: z.string().nonempty("Cần cung cấp đường dẫn public"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
