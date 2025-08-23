@@ -1,23 +1,24 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import addressRepository from "../repositories/address.repository";
-import { TypedRequest } from "../types/TypedRequest";
-import { ResponseObject, StatusCode } from "../models/response";
+import { TokenPayload } from "../types/token-payload";
+import { HttpStatus } from "../constants/http-status";
+import { successResponse } from "../utils/response";
+import { AddressResponseCode } from "../constants/codes/address.code";
 
-const getAddressByUserId = async (
-  req: TypedRequest<{ userId: string }>,
-  res: Response
-) => {
-  const { userId } = req.params;
-  try {
-    const addresses = await addressRepository.findAddressByUserId(
-      Number(userId)
-    );
-    res.json(new ResponseObject(StatusCode.OK, "success", addresses));
-  } catch {
+class AddressController {
+  public getMyAddress = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const addresses = await addressRepository.findAddressByUserId(sub);
     res
-      .status(400)
-      .json(new ResponseObject(StatusCode.BAD_REQUEST, "fail", null));
-  }
-};
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AddressResponseCode.OK,
+          "Lấy danh sách địa chỉ thành công",
+          addresses
+        )
+      );
+  };
+}
 
-export default { getAddressByUserId };
+export default new AddressController();

@@ -10,7 +10,6 @@ prisma/dev.db-journal
 
 # dotenv environment variables file
 .env
-.env.*.local
 
 # Logs
 logs

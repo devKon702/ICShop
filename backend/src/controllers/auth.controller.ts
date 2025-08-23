@@ -134,7 +134,7 @@ class AuthController {
       // Không trùng
       const hashedPassword = await hashPassword(password);
       const { password: passwordIgnored, ...newAccount } =
-        await accountRepository.createAccount(email, hashedPassword, name);
+        await accountRepository.create(email, hashedPassword, name);
       res
         .status(HttpStatus.CREATED)
         .json(
@@ -183,12 +183,12 @@ class AuthController {
       const { sub } = verifyToken(token, "refresh");
       // Kiểm tra blacklist
       // ...
-      const user = await accountRepository.findByUserId(sub);
+      const account = await accountRepository.findByUserId(sub);
       // Không tìm thấy user
-      if (!user)
+      if (!account)
         throw new JWTError(JWTResponseCode.INVALID_TOKEN, "Token không hợp lệ");
       // Tài khoản bị khóa
-      if (!user.account.isActive)
+      if (!account.isActive)
         throw new AppError(
           HttpStatus.FORBIDDEN,
           AuthResponseCode.USER_BLOCKED,
@@ -198,14 +198,14 @@ class AuthController {
       // Xác thực thành công -> refresh
       const accessToken = createAccessToken({
         sub,
-        role: user.account.role as Role,
+        role: account.role as Role,
       });
       const refreshToken = createRefreshToken(
-        { sub, role: user.account.role as Role },
-        user.account.role as Role
+        { sub, role: account.role as Role },
+        account.role as Role
       );
       // Tạo nơi lưu trữ refresh token
-      this.createCookieToken(res, refreshToken, user.account.role as Role);
+      this.createCookieToken(res, refreshToken, account.role as Role);
 
       res
         .status(HttpStatus.OK)

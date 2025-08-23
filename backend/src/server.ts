@@ -5,9 +5,13 @@ import { errorHandler } from "./middlewares/error-handler.middleware";
 import { requestLogger } from "./middlewares/logger.middleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
 
 const app = express();
 app.use(express.json());
+
+// Helmet
+app.use(helmet());
 
 // Static route
 app.use("/uploads", express.static(env.UPLOAD_DIR));

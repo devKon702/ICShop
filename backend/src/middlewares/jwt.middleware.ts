@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { JWTError } from "../errors/jwt-error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import { verifyToken } from "../utils/jwt";
+import { TokenPayload } from "../types/token-payload";
 export const verifyAccessToken = (
   req: Request,
   res: Response,

@@ -23,17 +23,27 @@ class AccountRepository {
   };
 
   public findByUserId = async (userId: number) => {
-    return prisma.user.findUnique({
+    return prisma.account.findFirst({
       where: {
-        id: userId,
+        user: {
+          id: userId,
+        },
       },
       include: {
-        account: { omit: { password: true } },
+        user: true,
       },
     });
+    // return prisma.user.findUnique({
+    //   where: {
+    //     id: userId,
+    //   },
+    //   include: {
+    //     account: { omit: { password: true } },
+    //   },
+    // });
   };
 
-  public createAccount = async (
+  public create = async (
     email: string,
     password: string,
     name: string,
@@ -60,6 +70,85 @@ class AccountRepository {
         user: { update: { creatorId: userId, modifierId: userId } },
       },
       include: { user: true },
+    });
+  };
+
+  public changePassword = async (
+    accountId: number,
+    userId: number,
+    newPass: string
+  ) => {
+    return prisma.account.update({
+      data: {
+        password: newPass,
+        version: { increment: 1 },
+        modifierId: userId,
+      },
+      where: {
+        id: accountId,
+      },
+    });
+  };
+
+  public filter = async ({
+    email,
+    name,
+    role,
+    page,
+    limit,
+  }: {
+    email: string | undefined;
+    name: string | undefined;
+    role: Role;
+    page: number;
+    limit: number;
+  }) => {
+    const whereObj = {
+      ...(email && { email: { contains: email } }),
+      ...(name && {
+        user: {
+          name: { contains: name },
+        },
+      }),
+      role,
+    };
+    const filterPs = prisma.account.findMany({
+      where: whereObj,
+      select: {
+        id: true,
+        email: true,
+        isEmailAuth: true,
+        isGoogleSigned: true,
+        createdAt: true,
+        creatorId: true,
+        modifierId: true,
+        updatedAt: true,
+        version: true,
+        role: true,
+        isActive: true,
+        user: true,
+      },
+      take: limit,
+      skip: limit * (page - 1 < 0 ? 0 : page - 1),
+    });
+    const countPs = prisma.account.count({ where: whereObj });
+    return Promise.all([filterPs, countPs]);
+  };
+
+  public lock = async (
+    accountId: number,
+    isActive: boolean,
+    modifierId: number
+  ) => {
+    return prisma.account.update({
+      data: {
+        isActive,
+        modifierId,
+        version: { increment: 1 },
+      },
+      where: {
+        id: accountId,
+      },
     });
   };
 }

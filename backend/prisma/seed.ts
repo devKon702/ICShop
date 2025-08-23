@@ -9,7 +9,7 @@ async function main() {
   // Kiểm tra nếu chưa có admin thì tạo mới
   const admin = await accountRepository.findFirstAdmin();
   if (!admin) {
-    await accountRepository.createAccount(
+    await accountRepository.create(
       "nhatkha117@gmail.com",
       await hashPassword("123456"),
       "Admin",
