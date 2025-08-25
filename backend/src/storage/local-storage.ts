@@ -19,17 +19,21 @@ export class LocalStorage implements IFileStorage {
   ): Promise<string> {
     const fileType = getFileTail(mimeType);
     const filePath = path.join(this.uploadDir, `${fileName}.${fileType}`);
-    console.log(filePath);
 
     // Tạo nếu folder chưa tồn tại
     await fs.mkdir(this.uploadDir, { recursive: true });
     await fs.writeFile(filePath, fileBuffer);
     // Trả về serve url để client gọi - http url nên không dùng path được
-    return `${env.SERVE_DIR}/${fileName}.${fileType}`;
+    // return `${env.SERVE_DIR}/${fileName}.${fileType}`;
+    return this.getEarlyDir(fileName, mimeType);
   }
 
   async delete(fileUrl: string): Promise<void> {
     const filePath = path.join(this.uploadDir, path.basename(fileUrl));
     await fs.unlink(filePath).catch(() => {}); // ignore nếu không tồn tại
+  }
+
+  getEarlyDir(fileName: string, mimeType: string): string {
+    return `${env.SERVE_DIR}/${fileName}.${getFileTail(mimeType)}`;
   }
 }

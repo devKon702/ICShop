@@ -33,7 +33,7 @@ class UserController {
 
       // Kiểm tra file - ko hợp lệ -> throw error
       validateFile(avatarFile, {
-        field: "avatar",
+        inputField: "avatar",
         maxSize: 1 * 1024 * 1024,
         type: "image",
       });

@@ -5,6 +5,8 @@ import { AppError } from "../errors/app-error";
 import { logger } from "../utils/logger";
 import { ValidateError } from "../errors/validate-error";
 import { JWTError } from "../errors/jwt-error";
+import { Prisma } from "@prisma/client";
+import { DBResponseCode } from "../constants/codes/db.code";
 
 export function errorHandler(
   err: unknown,
@@ -35,29 +37,42 @@ export function errorHandler(
   }
 
   // Prisma errors
-  // if (err instanceof Prisma.PrismaClientKnownRequestError) {
-  //   // Lỗi unique constraint
-  //   if (err.code === "P2002") {
-  //     res.status(409).json({
-  //       status: "fail",
-  //       message: `Field(s) ${err.meta?.target} must be unique`,
-  //     });
-  //     return;
-  //   }
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    // Lỗi unique constraint
+    if (err.code === "P2002") {
+      res
+        .status(HttpStatus.CONFLICT)
+        .json(
+          failResponse(
+            DBResponseCode.CONFLICT_UNIQUE_KEY,
+            "Dữ liệu bị trùng lặp"
+          )
+        );
+      return;
+    }
 
-  //   // Record not found
-  //   if (err.code === "P2025") {
-  //     return res.status(404).json({
-  //       status: "fail",
-  //       message: "Record not found",
-  //     });
-  //   }
+    if (err.code === "P2003") {
+      res
+        .status(HttpStatus.CONFLICT)
+        .json(
+          failResponse(DBResponseCode.CONFLICT_FK, "Còn dữ liệu tham chiếu")
+        );
+      return;
+    }
 
-  //   return res.status(400).json({
-  //     status: "fail",
-  //     message: `Database error: ${err.message}`,
-  //   });
-  // }
+    // Record not found
+    if (err.code === "P2025") {
+      res
+        .status(HttpStatus.CONFLICT)
+        .json(
+          failResponse(
+            DBResponseCode.NOT_FOUND,
+            "Không tìm thấy dữ liệu tham chiếu"
+          )
+        );
+      return;
+    }
+  }
 
   // Fallback - Unknown error
   res

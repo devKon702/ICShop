@@ -37,5 +37,7 @@ export const updateAddressSchema = z.object({
 });
 
 export const deleteAddressSchema = z.object({
-  params: z.object({ id: z.coerce.number() }),
+  params: z.object({
+    id: z.coerce.number().min(1, "ID không hợp lệ"),
+  }),
 });

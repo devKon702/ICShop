@@ -12,7 +12,7 @@ const videoSupportedType = ["video/mp4"];
 export const validateFile = (
   file: Express.Multer.File | undefined,
   options: {
-    field: string;
+    inputField: string;
     maxSize: number;
     type: "image" | "video";
   }
@@ -20,7 +20,7 @@ export const validateFile = (
   // Kiểm tra file tồn tại
   if (!file)
     throw new ValidateError(ValidateResponseCode.INVALID_FILE, [
-      { field: options.field, message: "Không tìm thấy file" },
+      { field: options.inputField, message: "Không tìm thấy file" },
     ]);
 
   // Kiểm tra định dạng
@@ -29,7 +29,7 @@ export const validateFile = (
   if (!supportedFile.includes(file.mimetype))
     throw new ValidateError(ValidateResponseCode.UNSUPPORTED_FILE, [
       {
-        field: options.field,
+        field: options.inputField,
         message: `File phải có định dạng ${supportedFile.join(", ")}`,
       },
     ]);
@@ -38,7 +38,7 @@ export const validateFile = (
   if (options.maxSize < file.size) {
     throw new ValidateError(ValidateResponseCode.OVERSIZE_FILE, [
       {
-        field: options.field,
+        field: options.inputField,
         message: `File có kích thước tối đa ${Math.floor(
           options.maxSize / (1024 * 1024)
         )} MB`,
