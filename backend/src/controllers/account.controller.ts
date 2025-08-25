@@ -150,7 +150,7 @@ class AccountController {
       throw new AppError(
         HttpStatus.FORBIDDEN,
         AccountResponseCode.SELF_LOCK,
-        "Không thể tự khóa bản thân",
+        "Không thể thao tác trên tài khoản bản thân",
         true
       );
     // Tìm kiếm tài khoản

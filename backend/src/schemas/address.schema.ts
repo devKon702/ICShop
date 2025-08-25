@@ -10,10 +10,10 @@ export const createAddressSchema = z.object({
     receiverName: z
       .string()
       .regex(vietnameseRegex(false), "Tên chỉ bao gồm chữ cái"),
-    detail: z.string(),
-    commune: z.string(),
+    detail: z.string().nonempty(),
+    commune: z.string().nonempty(),
     district: z.string(),
-    province: z.string(),
+    province: z.string().nonempty(),
   }),
 });
 
@@ -29,10 +29,10 @@ export const updateAddressSchema = z.object({
     receiverName: z
       .string()
       .regex(vietnameseRegex(false), "Tên chỉ bao gồm chữ cái"),
-    detail: z.string(),
-    commune: z.string(),
+    detail: z.string().nonempty(),
+    commune: z.string().nonempty(),
     district: z.string(),
-    province: z.string(),
+    province: z.string().nonempty(),
   }),
 });
 

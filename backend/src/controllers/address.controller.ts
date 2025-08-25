@@ -25,7 +25,6 @@ class AddressController {
         )
       );
   };
-
   public createAddress = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
@@ -40,7 +39,7 @@ class AddressController {
       },
     } = createAddressSchema.parse(req);
 
-    const address = addressRepository.create({
+    const address = await addressRepository.create({
       userId: sub,
       receiverName,
       receiverPhone,
