@@ -24,6 +24,7 @@ model Product {
   desc               String?           @db.Text
   /// Giá thuế theo đơn vị phần trăm
   vat                Int               @db.TinyInt @default(0)
+  weight             Int               @db.UnsignedInt
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -122,7 +123,7 @@ model ProductAttribute {
   product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   /// ID của giá trị thông số
   attributeValueId Int            @db.UnsignedInt
-  attributeValue  AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Restrict)
+  attributeValue  AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -422,8 +423,8 @@ model OrderDetail {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
-  product    Product @relation(fields: [productId], references: [id])
-  order      Order   @relation(fields: [orderId], references: [id])
+  product    Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Restrict)
 }
 
 model OrderTimeline {
@@ -444,7 +445,7 @@ model OrderTimeline {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
-  order          Order       @relation(fields: [orderId], references: [id])
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Restrict)
 }
 
 model CartDetail {

@@ -55,4 +55,5 @@ categoryRouter.delete(
   validate(deleteAddressSchema),
   categoryController.delete
 );
+
 export default categoryRouter;

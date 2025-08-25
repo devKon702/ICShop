@@ -1,0 +1,6 @@
+export enum AttributeResponseCode {
+  OK = "ATTR_OK",
+  CATEGORY_NOT_FOUND = "ATTR_CTGR_NOT_FOUND",
+  NOT_FOUND = "ATTR_NOT_FOUND",
+  INVALID_CATEGORY = "ATTR_INVALID_CATEGORY",
+}
