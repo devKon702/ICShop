@@ -34,8 +34,8 @@ export const filterAccountSchema = z.object({
       .string()
       .transform((val) => (val.trim() ? val : undefined))
       .optional(),
-    page: z.coerce.number().min(1, "Số trang phải lớn hơn 0").default(1),
-    limit: z.coerce.number().min(1, "SỐ lượng phải lớn hơn 0").default(10),
+    page: z.coerce.number().min(1, "Số trang phải lớn hơn 0"),
+    limit: z.coerce.number().min(1, "SỐ lượng phải lớn hơn 0"),
     role: z.enum([Role.ADMIN, Role.USER]).default(Role.USER),
   }),
 });

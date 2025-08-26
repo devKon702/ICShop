@@ -33,6 +33,17 @@ export class AttributeRepository {
   public delete = async (id: number) => {
     return prisma.attribute.delete({ where: { id } });
   };
+
+  public getByCategoryId = async (categoryId: number) => {
+    return prisma.attribute.findMany({
+      where: {
+        categoryId,
+      },
+      include: {
+        values: true,
+      },
+    });
+  };
 }
 
 export default new AttributeRepository();

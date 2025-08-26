@@ -2,18 +2,49 @@ import { prisma } from "../prisma";
 
 class CategoryRepository {
   public findBySlug = async (slug: string) => {
+    const privateOmit = {
+      version: true,
+      creatorId: true,
+      createdAt: true,
+      modifierId: true,
+      updatedAt: true,
+      isActive: true,
+    };
     return prisma.category.findUnique({
       where: { slug },
+      omit: privateOmit,
       include: {
-        parent: { include: { parent: true } },
+        parent: {
+          omit: privateOmit,
+          include: { parent: { omit: privateOmit } },
+        },
         children: {
+          omit: privateOmit,
           include: {
-            children: true,
+            children: { omit: privateOmit },
           },
         },
-        products: true,
+        products: {
+          omit: privateOmit,
+          include: {
+            wholesale: {
+              select: {
+                details: {
+                  select: { price: true },
+                  take: 1,
+                  orderBy: { min: "asc" },
+                },
+                unit: true,
+              },
+            },
+          },
+        },
         attributes: {
-          include: { values: { include: { attribute: true } } },
+          select: {
+            id: true,
+            name: true,
+            values: { select: { id: true, value: true } },
+          },
         },
       },
     });
@@ -31,13 +62,14 @@ class CategoryRepository {
     });
   };
 
+  // ?
   findByName = async (search: string, limit: number = 10) => {
     return prisma.category.findMany({
       where: { name: { contains: search } },
       take: limit,
     });
   };
-
+  // ?
   getCategoryOverview = async () => {
     return prisma.category.findMany({
       where: { level: 1 },
