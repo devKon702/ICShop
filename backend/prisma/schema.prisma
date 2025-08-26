@@ -12,7 +12,7 @@ model Product {
   /// Tên sản phẩm (tiếng Việt)
   name               String            @db.Text
   /// Đường dẫn đến ảnh mô tả sản phẩm
-  posterUrl          String            @db.VarChar(255)
+  posterUrl          String?            @db.VarChar(255)
   /// ID của danh mục
   categoryId         Int               @db.UnsignedInt
   category           Category          @relation(fields: [categoryId], references: [id])
@@ -284,8 +284,8 @@ model User {
   cartDetails CartDetail[]
 
   @@fulltext([name])
-  ProductCreateds Product[] @relation("ProductCreated") @ignore
-  ProductModifieds Product[] @relation("ProductModified") @ignore
+  ProductCreateds Product[] @relation("ProductCreated") 
+  ProductModifieds Product[] @relation("ProductModified") 
   CategoryCreateds Category[] @relation("CategoryCreated") @ignore
   CategoryModifieds Category[] @relation("CategoryModified") @ignore
   // Attribute

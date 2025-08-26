@@ -1,17 +1,78 @@
 import { prisma } from "../prisma";
 
 class ProductRepository {
-  findBySlug = async (slug: string) => {
+  public findBySlug = async (slug: string) => {
     return prisma.product.findUnique({
       where: { slug, isActive: true },
+      omit: {
+        version: true,
+        creatorId: true,
+        createdAt: true,
+        modifierId: true,
+        updatedAt: true,
+        isActive: true,
+      },
       include: {
-        wholesale: { include: { details: true } },
-        attributes: true,
-        images: true,
-        category: {
-          include: {
-            parent: { include: { parent: { include: { parent: true } } } },
+        wholesale: {
+          select: {
+            id: true,
+            min_quantity: true,
+            max_quantity: true,
+            quanity_step: true,
+            unit: true,
+            details: {
+              select: {
+                id: true,
+                desc: true,
+                min: true,
+                max: true,
+                price: true,
+              },
+            },
           },
+        },
+        attributes: {
+          select: {
+            id: true,
+            attributeValue: {
+              select: {
+                id: true,
+                value: true,
+                attribute: { select: { name: true } },
+              },
+            },
+          },
+        },
+        images: { select: { id: true, imageUrl: true, position: true } },
+        category: {
+          select: {
+            name: true,
+            slug: true,
+            level: true,
+            parent: {
+              select: {
+                name: true,
+                slug: true,
+                level: true,
+                parent: { select: { name: true, slug: true, level: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+  };
+
+  public findById = async (id: number) => {
+    return prisma.product.findUnique({
+      where: { id },
+      include: {
+        creator: true,
+        modifier: true,
+        images: true,
+        wholesale: { include: { details: true } },
+        attributes: {
+          include: { attributeValue: { include: { attribute: true } } },
         },
       },
     });
@@ -81,12 +142,11 @@ class ProductRepository {
     data: {
       name: string;
       categoryId: number;
-      desc: string;
-      datasheetLink?: string;
+      desc: string | null;
+      datasheetLink: string | null;
       weight: number;
       vat: number;
       slug: string;
-      posterUrl: string;
       wholesale: {
         min_quantity: number;
         max_quantity: number;
@@ -94,13 +154,12 @@ class ProductRepository {
         quantity_step: number;
         details: {
           min: number;
-          max: number;
+          max: number | null;
           price: number;
           desc: string;
         }[];
       };
       valueIds: number[];
-      imageUrls: string[];
     }
   ) => {
     return prisma.product.create({
@@ -108,17 +167,20 @@ class ProductRepository {
         slug: data.slug,
         name: data.name,
         categoryId: data.categoryId,
-        posterUrl: data.posterUrl,
         desc: data.desc,
         datasheetLink: data.datasheetLink,
         weight: data.weight,
         vat: data.vat,
+        creatorId: userId,
+        modifierId: userId,
         wholesale: {
           create: {
             min_quantity: data.wholesale.min_quantity,
             max_quantity: data.wholesale.max_quantity,
             unit: data.wholesale.unit,
             quanity_step: data.wholesale.quantity_step,
+            creatorId: userId,
+            modifierId: userId,
             details: {
               create: data.wholesale.details.map((detail) => ({
                 min: detail.min,
@@ -138,20 +200,9 @@ class ProductRepository {
             modifierId: userId,
           })),
         },
-        images: {
-          create: data.imageUrls.map((url) => ({
-            imageUrl: url,
-            creatorId: userId,
-            modifierId: userId,
-            position: 1,
-          })),
-        },
-        creatorId: userId,
-        modifierId: userId,
       },
       include: {
         attributes: true,
-        images: true,
         wholesale: { include: { details: true } },
       },
     });
