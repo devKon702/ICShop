@@ -50,3 +50,5 @@ highlightRouter.delete(
   validate(deleteHighlightSchema),
   highlightController.delete
 );
+
+export default highlightRouter;

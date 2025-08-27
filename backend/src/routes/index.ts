@@ -9,6 +9,8 @@ import orderRouter from "./order.route";
 import userRouter from "./user.route";
 import attributeRouter from "./attribute.route";
 import attributeValueRouter from "./attribute-value.route";
+import highlightRouter from "./highlight.route";
+import productImageRouter from "./product-image.route";
 
 const router = express.Router();
 
@@ -20,6 +22,8 @@ router.use("/v1", categoryRouter);
 router.use("/v1", attributeRouter);
 router.use("/v1", attributeValueRouter);
 router.use("/v1", productRouter);
+router.use("/v1", productImageRouter);
+router.use("/v1", highlightRouter);
 router.use("/v1", cartRouter);
 router.use("/v1", orderRouter);
 

@@ -40,3 +40,5 @@ productImageRouter.patch(
   validate(updateProductImageSchema),
   productImageController.updatePosition
 );
+
+export default productImageRouter;
