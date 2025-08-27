@@ -6,15 +6,33 @@ class ProductImageRepository {
       data: { productId, creatorId: userId, modifierId: userId, imageUrl: url },
     });
   };
-  public update = async (userId: number, id: number, url: string) => {
-    return prisma.productImage.update({
-      where: { id },
-      data: { version: { increment: 1 }, modifierId: userId, imageUrl: url },
-    });
-  };
+  // public update = async (userId: number, id: number, url: string) => {
+  //   return prisma.productImage.update({
+  //     where: { id },
+  //     data: { version: { increment: 1 }, modifierId: userId, imageUrl: url },
+  //   });
+  // };
 
   public delete = async (id: number) => {
     return prisma.productImage.delete({ where: { id } });
+  };
+
+  public updatePosition = async (
+    userId: number,
+    data: { id: number; position: number }[]
+  ) => {
+    return Promise.all(
+      data.map((item) =>
+        prisma.productImage.update({
+          where: { id: item.id },
+          data: {
+            position: item.position,
+            version: { increment: 1 },
+            modifierId: userId,
+          },
+        })
+      )
+    );
   };
 }
 

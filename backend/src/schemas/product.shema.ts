@@ -224,7 +224,3 @@ export const updateWholesaleProductSchema = z.object({
       "Bảng giá chưa bao quát hết số lượng mua của sản phẩm"
     ),
 });
-
-export const addImage2GallerySchema = z.object({
-  params: z.object({ id: z.number().min(1, "ID không hợp lệ") }),
-});
