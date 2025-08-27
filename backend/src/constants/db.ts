@@ -16,3 +16,9 @@ export enum DeliveryType {
   SHOP = 1,
   POST = 2,
 }
+
+export enum HighlightType {
+  NEW = "new",
+  HOT = "hot",
+  BEST_SELL = "bestsell",
+}
