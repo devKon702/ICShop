@@ -1,6 +1,7 @@
-import z from "zod";
+import z, { boolean, number } from "zod";
 import { PaginationSchema } from "./pagination.schema";
 import { vietnameseRegex } from "../utils/regex";
+import { brotliDecompress } from "zlib";
 
 // export const FilterProductSchema = PaginationSchema.extend({
 //   name: z
@@ -103,8 +104,127 @@ export const getProductByIdSchema = z.object({
 
 export const filterProductSchema = z.object({
   query: z.object({
-    name: z.string(),
-    c: z.string(),
-    attrid: z.string(),
+    name: z
+      .string()
+      .nonempty()
+      .trim()
+      .transform((val) => val.split("+").join(" "))
+      .optional(),
+    cid: z.coerce.number().min(1, "ID không hợp lệ").optional(),
+    page: z.coerce
+      .number()
+      .transform((val) => (val <= 0 ? 1 : val))
+      .default(1),
+    limit: z.coerce
+      .number()
+      .transform((val) => (val <= 0 ? 10 : val))
+      .default(10),
+    order: z.enum(["price_asc", "price_desc", "none"]).default("none"),
+    active: z
+      .enum(["0", "1"])
+      .transform((val) => !!-val)
+      .optional(),
   }),
+});
+
+export const getProductByName = z.object({
+  query: z.object({
+    name: z
+      .string()
+      .nonempty()
+      .transform((val) => val.split("+").join(" ")),
+    page: z.coerce
+      .number()
+      .transform((val) => (val <= 0 ? 1 : val))
+      .default(1),
+    limit: z.coerce
+      .number()
+      .transform((val) => (val <= 0 ? 1 : val))
+      .default(10),
+  }),
+});
+
+export const updatePosterSchema = z.object({
+  params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
+});
+
+export const updateProductSchema = z.object({
+  body: z.object({
+    name: z.string().nonempty(),
+    desc: z.string().nullable(),
+    datasheetLink: z.string().max(250, "Tối đa 250 kí tự").nullable(),
+    weight: z.number().min(0, "Cân nặng tối thiểu 0 gram"),
+    vat: z.number().min(0, "Giá thuế tối thiểu là 0%"),
+  }),
+  params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
+});
+
+export const updateProductCategorySchema = z.object({
+  body: z.object({
+    categoryId: z.number(),
+    vids: z.array(z.number()),
+  }),
+  params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
+});
+
+export const updateActiveProductSchema = z.object({
+  body: z.object({ isActive: z.boolean() }),
+  params: z.object({
+    id: z.coerce.number().min(1, "ID không hợp lệ"),
+  }),
+});
+
+export const updateWholesaleProductSchema = z.object({
+  params: z.object({
+    id: z.coerce.number().min(1, "ID không hợp lệ"),
+  }),
+  body: z
+    .object({
+      min_quantity: z.number(),
+      max_quantity: z.number(),
+      unit: z.string().nonempty(),
+      quantity_step: z.number().min(1, "Bội số tối thiểu là 1"),
+      details: z
+        .array(
+          z
+            .object({
+              min: z.number(),
+              max: z.number().nullable(),
+              price: z.number(),
+              desc: z.string().nonempty(),
+            })
+            .refine(
+              (val) => val.max == null || val.min <= val.max,
+              "Khoảng giá không hợp lệ"
+            )
+        )
+        .min(1, "Tối thiểu có một giá bán")
+        .transform((arr) =>
+          arr.sort((a, b) => {
+            if (a.max === null) return 1;
+            if (b.max === null) return -1;
+            return a.min - b.min;
+          })
+        )
+        .refine(
+          (arr) =>
+            !hasGap(arr.map((item) => ({ min: item.min, max: item.max }))),
+          "Bảng giá có khoảng trông"
+        ),
+    })
+    .refine(
+      (data) => data.max_quantity >= data.min_quantity,
+      "Phạm vi số lượng mua không hợp lệ"
+    )
+    .refine(
+      (data) =>
+        data.details.some(
+          (item) => item.max === null || item.max >= data.max_quantity
+        ) && data.details.some((item) => item.min <= data.min_quantity),
+      "Bảng giá chưa bao quát hết số lượng mua của sản phẩm"
+    ),
+});
+
+export const addImage2GallerySchema = z.object({
+  params: z.object({ id: z.number().min(1, "ID không hợp lệ") }),
 });

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `product` ADD COLUMN `price` DECIMAL(13, 3) NOT NULL DEFAULT 0;

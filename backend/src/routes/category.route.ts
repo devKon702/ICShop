@@ -6,6 +6,7 @@ import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
 import {
   createCategorySchema,
+  getCategoryBySlugSchema,
   udpateCategorySchema,
 } from "../schemas/category.schema";
 import { upload } from "../utils/multer";
@@ -18,7 +19,11 @@ const path = "/category";
 categoryRouter.get(path, categoryController.getAll);
 
 // GET /category/slug/:slug
-categoryRouter.get(path + "/slug/:slug", categoryController.getBySlug);
+categoryRouter.get(
+  path + "/slug/:slug",
+  validate(getCategoryBySlugSchema),
+  categoryController.getBySlug
+);
 
 // GET category/:id
 categoryRouter.get(

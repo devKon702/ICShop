@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { ResponseObject, StatusCode } from "../models/response";
 import productRepository from "../repositories/product.repository";
 import { TypedRequest } from "../types/TypedRequest";
 import { HttpStatus } from "../constants/http-status";
@@ -8,19 +7,25 @@ import { ProductResponseCode } from "../constants/codes/product.code";
 import { TokenPayload } from "../types/token-payload";
 import {
   createProductSchema,
+  filterProductSchema,
   getProductByIdSchema,
+  getProductByName,
   getProductBySlugSchema,
+  updateActiveProductSchema,
+  updatePosterSchema,
+  updateProductCategorySchema,
+  updateProductSchema,
+  updateWholesaleProductSchema,
 } from "../schemas/product.shema";
 import categoryRepository from "../repositories/category.repository";
 import { AppError } from "../errors/app-error";
-import { CategoryResponseCode } from "../constants/codes/category.code";
 import attributeRepository from "../repositories/attribute.repository";
-import { ValidateResponseCode } from "../constants/codes/validate.code";
-import { ValidateError } from "../errors/validate-error";
 import { validateFile } from "../utils/file";
 import { createSlug } from "../utils/slug";
 import storage from "../storage";
-import { appendFile } from "fs";
+import { sanitizeHtml } from "../utils/sanitize";
+import attributeValueRepository from "../repositories/attribute-value.repository";
+import wholesaleRepository from "../repositories/wholesale.repository";
 
 class ProductController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -46,7 +51,7 @@ class ProductController {
       );
   };
 
-  public findById = async (req: Request, res: Response) => {
+  public getById = async (req: Request, res: Response) => {
     const {
       params: { id },
     } = getProductByIdSchema.parse(req);
@@ -69,43 +74,46 @@ class ProductController {
       );
   };
 
-  filter = async (
-    req: TypedRequest<
-      { categorySlug: string },
-      any,
-      { name?: string; attrids?: string; page?: string; limit?: string }
-    >,
-    res: Response
-  ) => {
-    const { categorySlug } = req.params;
-    const { attrids, name, page = "1", limit = "10" } = req.query;
+  public getByName = async (req: Request, res: Response) => {
+    const {
+      query: { name, page, limit },
+    } = getProductByName.parse(req);
+    const [products, total] = await productRepository.findByName(
+      name,
+      page,
+      limit
+    );
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductResponseCode.OK,
+          "Tìm kiếm thành công",
+          products,
+          { page, limit, total }
+        )
+      );
+  };
 
-    const pageNumber = parseInt(page as string, 10);
-    const limitNumber = parseInt(limit as string, 10);
-    const attrIds = attrids
-      ? attrids.split(",").map((id) => BigInt(id.trim()))
-      : [];
-    try {
-      const [products, total] = await productRepository.filter(
-        categorySlug,
-        attrIds,
-        name,
-        pageNumber,
-        limitNumber
-      );
-      res.status(HttpStatus.OK).json(
-        successResponse(ProductResponseCode.OK, "success", products, {
-          total,
-          page: pageNumber,
-          limit: limitNumber,
-        })
-      );
-    } catch (e) {
-      console.log(e);
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .json(new ResponseObject(StatusCode.BAD_REQUEST, "fail", null));
-    }
+  public filter = async (req: Request, res: Response) => {
+    const {
+      query: { name, cid, page, limit, order, active },
+    } = filterProductSchema.parse(req);
+    const [products, total] = await productRepository.filter(
+      cid,
+      name,
+      page,
+      limit,
+      order,
+      active
+    );
+    res.status(HttpStatus.OK).json(
+      successResponse(ProductResponseCode.OK, "Lọc thành công", products, {
+        page,
+        limit,
+        total,
+      })
+    );
   };
 
   getProductByCategoryId = async (
@@ -139,7 +147,6 @@ class ProductController {
     }
   };
 
-  // New
   public create = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
@@ -198,6 +205,7 @@ class ProductController {
       desc,
       vat,
       weight,
+      price: wholesale.details[0].price,
       datasheetLink,
       valueIds,
       wholesale,
@@ -213,53 +221,213 @@ class ProductController {
         )
       );
   };
-  public uploadImage = async (req: Request, res: Response) => {
-    const { poster, gallery } = req.files as {
-      poster: Express.Multer.File[];
-      gallery: Express.Multer.File[];
-    };
+
+  public updatePoster = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      params: { id },
+    } = updatePosterSchema.parse(req);
+    const poster = req.file;
     // Check poster provided
-    if (poster.length == 0)
-      throw new ValidateError(ValidateResponseCode.INVALID_FILE, [
-        { field: "poster", message: "Phải cung cấp ảnh poster" },
-      ]);
-    else {
-      // Validate file uploads
-      validateFile(poster[0], {
-        inputField: "poster",
-        maxSize: 1024 * 1024,
-        type: "image",
-      });
-      gallery.forEach((item) =>
-        validateFile(item, {
-          inputField: "gallery",
-          maxSize: 1024 * 1024,
-          type: "image",
-        })
+    if (!poster)
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        ProductResponseCode.POSTER_REQUIRED,
+        "Không tìm thấy file",
+        true
       );
-    }
+
+    // Validate file uploads
+    validateFile(poster, {
+      inputField: "poster",
+      maxSize: 1024 * 1024,
+      type: "image",
+    });
+
     // Get early fil url
     const posterFileName = String(Date.now());
-    const galleryFileNames = gallery.map(
-      (_, index) => String(Date.now()) + index
+    const posterUrl = storage.getEarlyDir(posterFileName, poster.mimetype);
+
+    const product = await productRepository.findById(id);
+    if (!product)
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        ProductResponseCode.NOT_FOUND,
+        "Không tìm thấy sản phẩm",
+        true
+      );
+
+    const newProduct = await productRepository.updatePoster(sub, id, posterUrl);
+    // Xóa ảnh cũ và lưu ảnh mới
+    product.posterUrl && (await storage.delete(product.posterUrl));
+    await storage.save(poster.buffer, posterFileName, poster.mimetype);
+
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductResponseCode.OK,
+          "Cập nhật poster thành công",
+          newProduct
+        )
+      );
+  };
+
+  public updateInfo = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      body: { datasheetLink, desc, name, vat, weight },
+      params: { id },
+    } = updateProductSchema.parse(req);
+
+    // Sannitize desc
+    const sanitizedDesc = desc === null ? null : sanitizeHtml(desc);
+
+    // Cập nhật
+    const newProduct = await productRepository.updateInfo(sub, id, {
+      name,
+      datasheetLink,
+      desc: sanitizedDesc,
+      vat,
+      weight,
+    });
+
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductResponseCode.OK,
+          "Cập nhật sản phẩm thành công",
+          newProduct
+        )
+      );
+  };
+
+  public updateCategory = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      body: { vids, categoryId },
+      params: { id },
+    } = updateProductCategorySchema.parse(req);
+    const product = await productRepository.findById(id);
+    if (!product)
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        ProductResponseCode.NOT_FOUND,
+        "Không tìm thấy sản phẩm",
+        true
+      );
+    // Check valid category
+    const category = await categoryRepository.findById(categoryId);
+    // Check exists
+    if (!category)
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        ProductResponseCode.CATEGORY_NOT_FOUND,
+        "Không tìm thấy danh mục",
+        true
+      );
+    // Only add product to category level 3
+    if (product.categoryId !== categoryId && category.level !== 3)
+      throw new AppError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ProductResponseCode.INVALID_CATEGORY,
+        "Chỉ có thể chọn danh mục cấp 3",
+        true
+      );
+
+    const oldValueIds = product.attributes.map((item) => item.attributeValueId);
+    // value ids that need to be add link
+    const addValueIds = vids.filter((item) => !oldValueIds.includes(item));
+    // value ids that need to be delete link
+    const deleteValueIds = oldValueIds.filter((item) => !vids.includes(item));
+    // Check valid value id
+    if (addValueIds.length > 0) {
+      const validValue: number[] = [];
+      category.attributes.forEach((attr) =>
+        attr.values.forEach((value) => validValue.push(value.id))
+      );
+      if (addValueIds.some((item) => !validValue.includes(item)))
+        throw new AppError(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          ProductResponseCode.INVALID_ATTRIBUTE_VALUE,
+          "Thuộc tính không thuộc danh mục",
+          true
+        );
+    }
+    // Update category and add value
+    const result = await productRepository.updateCategory(sub, id, {
+      categoryId,
+      vids: addValueIds,
+    });
+    // Delete value id
+    const deletePs = deleteValueIds.map((item) =>
+      attributeValueRepository.delete(item)
     );
-    const posterUrl = storage.getEarlyDir(posterFileName, poster[0].mimetype);
-    const galleryUrls = galleryFileNames.map((item, index) =>
-      storage.getEarlyDir(item, gallery[index].mimetype)
+    await Promise.all(deletePs);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductResponseCode.OK,
+          "Cập nhật danh mục thành công",
+          result
+        )
+      );
+  };
+
+  public updateActive = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      body: { isActive },
+      params: { id },
+    } = updateActiveProductSchema.parse(req);
+    const product = await productRepository.updateActive(sub, id, isActive);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductResponseCode.OK,
+          `${isActive ? "Mở khóa" : "Khóa"} sản phẩm thành công`
+        )
+      );
+  };
+
+  public updateWholesale = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      body: { details, max_quantity, min_quantity, quantity_step, unit },
+      params: { id },
+    } = updateWholesaleProductSchema.parse(req);
+    // Cập nhật bảng giá
+    const wholesale = await wholesaleRepository.updateWholesaleByProductId(
+      sub,
+      id,
+      { min_quantity, max_quantity, quantity_step, unit, details }
     );
-    // Create succesfully -> upload files
-    // if (product) {
-    //   await Promise.all([
-    //     storage.save(poster[0].buffer, String(Date.now()), poster[0].mimetype),
-    //     ...gallery.map((item, index) =>
-    //       storage.save(
-    //         item.buffer,
-    //         String(Date.now()) + "" + index,
-    //         item.mimetype
-    //       )
-    //     ),
-    //   ]);
-    // }
+    // Mảng detail id vừa thêm vào -> để xóa các detail khác
+    const excludeIds = wholesale.details.map((item) => item.id);
+    // Cặp nhật giá hiển thị mặc định cho sản phẩm
+    const updatePricePs = productRepository.updatePrice(
+      sub,
+      id,
+      details[0].price
+    );
+    // Xóa các detail giá dư thừa
+    const deleteOtherDetailPs = wholesaleRepository.deleteAllDetailByProductId(
+      id,
+      excludeIds
+    );
+    await Promise.all([updatePricePs, deleteOtherDetailPs]);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductResponseCode.OK,
+          "Cập nhật bảng giá thành công",
+          wholesale
+        )
+      );
   };
 }
 

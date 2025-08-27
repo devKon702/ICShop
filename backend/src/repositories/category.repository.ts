@@ -1,7 +1,14 @@
 import { prisma } from "../prisma";
 
 class CategoryRepository {
-  public findBySlug = async (slug: string) => {
+  public findBySlug = async (
+    slug: string,
+    filter: {
+      vids: number[] | undefined;
+      limit: number;
+      page: number;
+    }
+  ) => {
     const privateOmit = {
       version: true,
       creatorId: true,
@@ -10,10 +17,14 @@ class CategoryRepository {
       updatedAt: true,
       isActive: true,
     };
+    const productWhere: any = filter.vids
+      ? { attributes: { some: { id: { in: filter.vids } } } }
+      : {};
     return prisma.category.findUnique({
       where: { slug },
       omit: privateOmit,
       include: {
+        _count: { select: { products: { where: productWhere } } },
         parent: {
           omit: privateOmit,
           include: { parent: { omit: privateOmit } },
@@ -25,14 +36,18 @@ class CategoryRepository {
           },
         },
         products: {
+          // where: { id: 1 },
           omit: privateOmit,
+          take: filter.limit,
+          skip: filter.limit * (filter.page - 1),
+          where: productWhere,
           include: {
             wholesale: {
               select: {
                 details: {
                   select: { price: true },
-                  take: 1,
                   orderBy: { min: "asc" },
+                  take: 1,
                 },
                 unit: true,
               },
@@ -109,7 +124,11 @@ class CategoryRepository {
   public findById = async (id: number) => {
     return prisma.category.findUnique({
       where: { id },
-      include: {},
+      include: {
+        attributes: {
+          select: { name: true, values: { select: { id: true, value: true } } },
+        },
+      },
     });
   };
   public create = async (

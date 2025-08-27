@@ -24,8 +24,13 @@ class CategoryController {
   public getBySlug = async (req: Request, res: Response) => {
     const {
       params: { slug },
+      query: { vids, limit, page },
     } = getCategoryBySlugSchema.parse(req);
-    const category = await categoryRepository.findBySlug(slug);
+    const category = await categoryRepository.findBySlug(slug, {
+      vids,
+      limit,
+      page,
+    });
     if (!category)
       throw new AppError(
         HttpStatus.NOT_FOUND,

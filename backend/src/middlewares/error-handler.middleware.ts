@@ -38,7 +38,7 @@ export function errorHandler(
 
   // Prisma errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    // Lỗi unique constraint
+    // Unique constraint
     if (err.code === "P2002") {
       res
         .status(HttpStatus.CONFLICT)
@@ -50,13 +50,11 @@ export function errorHandler(
         );
       return;
     }
-
+    // FK Error
     if (err.code === "P2003") {
       res
         .status(HttpStatus.CONFLICT)
-        .json(
-          failResponse(DBResponseCode.CONFLICT_FK, "Còn dữ liệu tham chiếu")
-        );
+        .json(failResponse(DBResponseCode.CONFLICT_FK, "Lỗi dữ liệu liên kết"));
       return;
     }
 
@@ -64,12 +62,7 @@ export function errorHandler(
     if (err.code === "P2025") {
       res
         .status(HttpStatus.CONFLICT)
-        .json(
-          failResponse(
-            DBResponseCode.NOT_FOUND,
-            "Không tìm thấy dữ liệu tham chiếu"
-          )
-        );
+        .json(failResponse(DBResponseCode.NOT_FOUND, "Không tìm thấy dữ liệu"));
       return;
     }
   }

@@ -7,32 +7,28 @@ import { validate } from "../middlewares/validate.middleware";
 import {
   createProductSchema,
   filterProductSchema,
+  getProductByName,
   getProductByIdSchema,
   getProductBySlugSchema,
+  updatePosterSchema,
+  updateProductSchema,
+  updateProductCategorySchema,
+  updateActiveProductSchema,
+  updateWholesaleProductSchema,
+  addImage2GallerySchema,
 } from "../schemas/product.shema";
 import { upload } from "../utils/multer";
 
 const productRouter = express.Router();
 const path = "/product";
 
-// GET /product/admin?
+// GET /product?cid=&name=&order=&active=&page=&limit=
 productRouter.get(
-  path + "/admin",
+  path,
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  validate(filterProductSchema)
-);
-
-// GET /product?name=&c=&attrid=&order=
-productRouter.get(path, validate(filterProductSchema));
-
-// GET /product/:id
-productRouter.get(
-  path + "/:id",
-  verifyAccessToken,
-  authorize([Role.ADMIN]),
-  validate(getProductByIdSchema),
-  productController.findById
+  validate(filterProductSchema),
+  productController.filter
 );
 
 // GET /product/slug/:slug
@@ -42,6 +38,23 @@ productRouter.get(
   productController.getBySlug
 );
 
+// GET /product/search?name=&page=&limit=
+productRouter.get(
+  path + "/search",
+  validate(getProductByName),
+  productController.getByName
+);
+
+// GET /product/:id
+productRouter.get(
+  path + "/:id",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(getProductByIdSchema),
+  productController.getById
+);
+
+// POST /product
 productRouter.post(
   path,
   verifyAccessToken,
@@ -50,14 +63,49 @@ productRouter.post(
   productController.create
 );
 
+// PATCH /product/poster
 productRouter.patch(
-  path + "/upload",
+  path + "/:id/poster",
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  upload.fields([
-    { name: "poster", maxCount: 1 },
-    { name: "gallery", maxCount: 10 },
-  ])
+  upload.single("poster"),
+  validate(updatePosterSchema),
+  productController.updatePoster
 );
 
+// PATCH /product/:id/info
+productRouter.patch(
+  path + "/:id/info",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(updateProductSchema),
+  productController.updateInfo
+);
+
+// PATCH /product/:id/category
+productRouter.patch(
+  path + "/:id/category",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(updateProductCategorySchema),
+  productController.updateCategory
+);
+
+// PATCH /product/:id/lock
+productRouter.patch(
+  path + "/:id/lock",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(updateActiveProductSchema),
+  productController.updateActive
+);
+
+// PATCH /product/:id/wholesale
+productRouter.patch(
+  path + "/:id/wholesale",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(updateWholesaleProductSchema),
+  productController.updateWholesale
+);
 export default productRouter;

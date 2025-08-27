@@ -1,3 +1,4 @@
+import { isAborted } from "zod";
 import { prisma } from "../prisma";
 
 class ProductRepository {
@@ -67,6 +68,7 @@ class ProductRepository {
     return prisma.product.findUnique({
       where: { id },
       include: {
+        category: true,
         creator: true,
         modifier: true,
         images: true,
@@ -78,14 +80,43 @@ class ProductRepository {
     });
   };
 
-  filter = async (
-    categorySlug: string,
-    attrids: BigInt[],
-    name?: string,
-    page: number = 1,
-    limit: number = 10
+  public findByName = async (name: string, page: number, limit: number) => {
+    const productsPs = prisma.product.findMany({
+      where: { name: { contains: name } },
+      take: limit,
+      skip: limit * (page - 1),
+      omit: {
+        version: true,
+        createdAt: true,
+        updatedAt: true,
+        creatorId: true,
+        modifierId: true,
+        isActive: true,
+      },
+      include: {
+        wholesale: {
+          select: { unit: true, details: { select: { price: true }, take: 1 } },
+        },
+      },
+    });
+    const countPs = prisma.product.count({
+      where: { name: { contains: name } },
+    });
+    return Promise.all([productsPs, countPs]);
+  };
+
+  public filter = async (
+    cid: number | undefined,
+    name: string | undefined,
+    page: number,
+    limit: number,
+    order: "price_asc" | "price_desc" | "none",
+    active: boolean | undefined
   ) => {
-    const where: any = { category: { slug: categorySlug } };
+    const where: any = { isActive: active };
+    if (cid !== undefined) {
+      where.category = { id: cid };
+    }
 
     // Lọc theo name
     if (name) {
@@ -93,29 +124,36 @@ class ProductRepository {
         contains: name,
       };
     }
-    // Lọc theo attrid
-    if (attrids.length != 0) {
-      where.attributes = {
-        some: {
-          attributeValueId: {
-            in: attrids,
-          },
-        },
-      };
+    const omit = {
+      version: true,
+      createdAt: true,
+      updatedAt: true,
+      creatorId: true,
+      modifierId: true,
+      isActive: true,
+    };
+
+    let orderBy: any;
+    switch (order) {
+      case "price_asc":
+        orderBy = { price: "asc" };
+        break;
+      case "price_desc":
+        orderBy = { price: "desc" };
+        break;
+      case "none":
+        orderBy = undefined;
     }
+
     return Promise.all([
       prisma.product.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
+        omit,
+        orderBy,
         include: {
-          attributes: {
-            include: {
-              attributeValue: true,
-            },
-          },
-          images: { take: 1 },
-          wholesale: { include: { details: true } },
+          wholesale: { include: { details: { take: 1 } } },
         },
       }),
       prisma.product.count({ where }),
@@ -147,6 +185,7 @@ class ProductRepository {
       weight: number;
       vat: number;
       slug: string;
+      price: number;
       wholesale: {
         min_quantity: number;
         max_quantity: number;
@@ -207,7 +246,100 @@ class ProductRepository {
       },
     });
   };
-  public update = async () => {};
+  public updateInfo = async (
+    userId: number,
+    productId: number,
+    data: {
+      name: string;
+      datasheetLink: string | null;
+      desc: string | null;
+      weight: number;
+      vat: number;
+    }
+  ) => {
+    return prisma.product.update({
+      where: { id: productId },
+      data: { ...data, version: { increment: 1 }, modifierId: userId },
+      include: { modifier: true },
+    });
+  };
+
+  public updateCategory = async (
+    userId: number,
+    productId: number,
+    data: { categoryId: number; vids: number[] }
+  ) => {
+    return prisma.product.update({
+      where: { id: productId },
+      data: {
+        categoryId: data.categoryId,
+        version: { increment: 1 },
+        modifierId: userId,
+        attributes: {
+          createMany: {
+            data: data.vids.map((item) => ({
+              attributeValueId: item,
+              creatorId: userId,
+              modifierId: userId,
+            })),
+          },
+        },
+      },
+      include: {
+        modifier: true,
+        attributes: {
+          select: {
+            attributeValue: {
+              select: {
+                id: true,
+                value: true,
+                attribute: { select: { id: true, name: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+  };
+
+  public updatePoster = async (
+    userId: number,
+    productId: number,
+    posterUrl: string
+  ) => {
+    return prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: { posterUrl, modifierId: userId, version: { increment: 1 } },
+      include: {
+        modifier: true,
+      },
+    });
+  };
+
+  public updateActive = async (
+    userId: number,
+    productId: number,
+    isActive: boolean
+  ) => {
+    return prisma.product.update({
+      where: { id: productId },
+      data: { isActive, modifierId: userId, version: { increment: 1 } },
+    });
+  };
+
+  public updatePrice = async (
+    userId: number,
+    productId: number,
+    price: number
+  ) => {
+    return prisma.product.update({
+      where: { id: productId },
+      data: { price, version: { increment: 1 }, modifierId: userId },
+    });
+  };
+
   public delete = async () => {};
 }
 
