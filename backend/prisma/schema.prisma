@@ -27,7 +27,7 @@ model Product {
   /// Cân nặng tính theo gram 
   weight             Int               @db.UnsignedInt
   /// Giá mặc định để hiển thị
-  price              Decimal           @db.Decimal(13,3) @default(0)
+  price              Decimal           @db.Decimal(10,3) @default(0)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -195,7 +195,7 @@ model WholesaleDetail {
   /// Giá trị trên để áp dụng giá
   max         Int?        @db.UnsignedInt
   /// Đơn giá
-  price       Decimal     @db.Decimal(13,3)
+  price       Decimal     @db.Decimal(10,3)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -377,8 +377,14 @@ model Order {
   userId               Int            @db.UnsignedInt
   /// Trạng thái (1:pending, 2:paid, 3: processing, 4: shipping, 5: done, 0: cancelel)
   status               Int            @db.TinyInt
-  /// Địa chỉ giao hàng (tiếng Việt)
-  address              String         @db.Text
+  /// Tên tỉnh
+  province      String    @db.TinyText
+  /// Tên quận, huyện
+  district      String    @db.TinyText
+  /// Tên xã
+  commune       String    @db.TinyText
+  /// Địa chỉ chi tiết
+  detail        String    @db.Text
   /// Tên người nhận
   receiverName         String         @db.TinyText
   /// Số điện thoại người nhận
@@ -391,6 +397,8 @@ model Order {
   earliestReceiveTime  DateTime
   /// Thời gian nhận trễ nhất
   latestReceiveTime    DateTime
+  /// Tổng tiền
+  total              Decimal           @db.Decimal(10,3)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -414,7 +422,7 @@ model OrderDetail {
   /// Số lượng đặt
   quantity   Int     @db.UnsignedInt
   /// Đơn giá
-  unitPrice  Decimal  @db.Decimal(13,3)
+  unitPrice  Decimal  @db.Decimal(10,3)
   /// Phần trăm thuế áp dụng
   vat        Int      @db.TinyInt
 

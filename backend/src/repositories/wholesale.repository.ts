@@ -51,6 +51,20 @@ class WholesaleRepository {
       where: { wholesale: { productId }, id: { notIn: excludeIds } },
     });
   };
+
+  public findByQuantity = async (productId: number, quantity: number) => {
+    return prisma.wholesaleDetail.findFirst({
+      where: {
+        wholesale: { productId },
+        min: { lte: quantity },
+        OR: [{ max: { gte: quantity } }, { max: null }],
+      },
+      orderBy: {
+        min: "desc",
+      },
+      select: { price: true },
+    });
+  };
 }
 
 export default new WholesaleRepository();

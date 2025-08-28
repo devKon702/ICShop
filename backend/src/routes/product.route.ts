@@ -15,7 +15,6 @@ import {
   updateProductCategorySchema,
   updateActiveProductSchema,
   updateWholesaleProductSchema,
-  addImage2GallerySchema,
 } from "../schemas/product.shema";
 import { upload } from "../utils/multer";
 
