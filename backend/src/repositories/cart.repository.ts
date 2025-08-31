@@ -11,7 +11,6 @@ class CartRepository {
             name: true,
             slug: true,
             posterUrl: true,
-            vat: true,
             price: true,
             wholesale: {
               select: {
@@ -20,6 +19,7 @@ class CartRepository {
                 max_quantity: true,
                 quanity_step: true,
                 unit: true,
+                vat: true,
                 details: {
                   select: {
                     id: true,

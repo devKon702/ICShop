@@ -20,7 +20,8 @@ productImageRouter.post(
   verifyAccessToken,
   authorize([Role.ADMIN]),
   upload.single("image"),
-  validate(createProductImageSchema)
+  validate(createProductImageSchema),
+  productImageController.create
 );
 
 // DELETE /gallery/:id

@@ -65,6 +65,29 @@ class WholesaleRepository {
       select: { price: true },
     });
   };
+
+  public findByProductSlug = async (slug: string) => {
+    return prisma.wholesale.findFirst({
+      where: { product: { slug } },
+      select: {
+        id: true,
+        min_quantity: true,
+        max_quantity: true,
+        quanity_step: true,
+        unit: true,
+        vat: true,
+        details: {
+          select: {
+            id: true,
+            desc: true,
+            min: true,
+            max: true,
+            price: true,
+          },
+        },
+      },
+    });
+  };
 }
 
 export default new WholesaleRepository();

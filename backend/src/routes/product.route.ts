@@ -20,22 +20,7 @@ import { upload } from "../utils/multer";
 
 const productRouter = express.Router();
 const path = "/product";
-
-// GET /product?cid=&name=&order=&active=&page=&limit=
-productRouter.get(
-  path,
-  verifyAccessToken,
-  authorize([Role.ADMIN]),
-  validate(filterProductSchema),
-  productController.filter
-);
-
-// GET /product/slug/:slug
-productRouter.get(
-  path + "/slug/:slug",
-  validate(getProductBySlugSchema),
-  productController.getBySlug
-);
+const adminPath = "/admin/product";
 
 // GET /product/search?name=&page=&limit=
 productRouter.get(
@@ -44,27 +29,43 @@ productRouter.get(
   productController.getByName
 );
 
-// GET /product/:id
+// GET /product/:slug
 productRouter.get(
-  path + "/:id",
+  path + "/:slug",
+  validate(getProductBySlugSchema),
+  productController.getBySlug
+);
+
+// GET /admin/product/:id
+productRouter.get(
+  adminPath + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(getProductByIdSchema),
-  productController.getById
+  productController.getById4Admin
 );
 
-// POST /product
+// GET /admin/product?cid=&name=&active=&page=&limit=&order=
+productRouter.get(
+  adminPath,
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(filterProductSchema),
+  productController.filter4Admin
+);
+
+// POST /admin/product
 productRouter.post(
-  path,
+  adminPath,
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(createProductSchema),
   productController.create
 );
 
-// PATCH /product/poster
+// PATCH /admin/product/:id/poster
 productRouter.patch(
-  path + "/:id/poster",
+  adminPath + "/:id/poster",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   upload.single("poster"),
@@ -72,36 +73,36 @@ productRouter.patch(
   productController.updatePoster
 );
 
-// PATCH /product/:id/info
+// PATCH /admin/product/:id/info
 productRouter.patch(
-  path + "/:id/info",
+  adminPath + "/:id/info",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(updateProductSchema),
   productController.updateInfo
 );
 
-// PATCH /product/:id/category
+// PATCH /admin/product/:id/category
 productRouter.patch(
-  path + "/:id/category",
+  adminPath + "/:id/category",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(updateProductCategorySchema),
   productController.updateCategory
 );
 
-// PATCH /product/:id/lock
+// PATCH /admin/product/:id/lock
 productRouter.patch(
-  path + "/:id/lock",
+  adminPath + "/:id/lock",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(updateActiveProductSchema),
   productController.updateActive
 );
 
-// PATCH /product/:id/wholesale
+// PATCH /admin/product/:id/wholesale
 productRouter.patch(
-  path + "/:id/wholesale",
+  adminPath + "/:id/wholesale",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(updateWholesaleProductSchema),

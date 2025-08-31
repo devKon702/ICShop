@@ -1,19 +1,18 @@
-import { isAborted } from "zod";
 import { prisma } from "../prisma";
 
 class ProductRepository {
   public findBySlug = async (slug: string) => {
     return prisma.product.findUnique({
       where: { slug, isActive: true },
-      omit: {
-        version: true,
-        creatorId: true,
-        createdAt: true,
-        modifierId: true,
-        updatedAt: true,
-        isActive: true,
-      },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        posterUrl: true,
+        slug: true,
+        datasheetLink: true,
+        desc: true,
+        price: true,
+        weight: true,
         wholesale: {
           select: {
             id: true,
@@ -21,6 +20,7 @@ class ProductRepository {
             max_quantity: true,
             quanity_step: true,
             unit: true,
+            vat: true,
             details: {
               select: {
                 id: true,
@@ -64,7 +64,7 @@ class ProductRepository {
     });
   };
 
-  public findById = async (id: number) => {
+  public findById4Admin = async (id: number) => {
     return prisma.product.findUnique({
       where: { id },
       include: {
@@ -80,32 +80,34 @@ class ProductRepository {
     });
   };
 
+  public findById4Check = async (productId: number) => {
+    return prisma.product.findUnique({
+      where: { id: productId },
+      include: { attributes: true },
+    });
+  };
+
   public findByName = async (name: string, page: number, limit: number) => {
+    const where = { name: { contains: name }, isActive: true };
     const productsPs = prisma.product.findMany({
-      where: { name: { contains: name } },
+      where,
       take: limit,
       skip: limit * (page - 1),
-      omit: {
-        version: true,
-        createdAt: true,
-        updatedAt: true,
-        creatorId: true,
-        modifierId: true,
-        isActive: true,
-      },
-      include: {
-        wholesale: {
-          select: { unit: true, details: { select: { price: true }, take: 1 } },
-        },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        price: true,
+        posterUrl: true,
       },
     });
     const countPs = prisma.product.count({
-      where: { name: { contains: name } },
+      where,
     });
     return Promise.all([productsPs, countPs]);
   };
 
-  public filter = async (
+  public filter4Admin = async (
     cid: number | undefined,
     name: string | undefined,
     page: number,
@@ -124,15 +126,8 @@ class ProductRepository {
         contains: name,
       };
     }
-    const omit = {
-      version: true,
-      createdAt: true,
-      updatedAt: true,
-      creatorId: true,
-      modifierId: true,
-      isActive: true,
-    };
 
+    // Sắp xếp
     let orderBy: any;
     switch (order) {
       case "price_asc":
@@ -150,11 +145,8 @@ class ProductRepository {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        omit,
+        include: { creator: true, modifier: true, category: true },
         orderBy,
-        include: {
-          wholesale: { include: { details: { take: 1 } } },
-        },
       }),
       prisma.product.count({ where }),
     ]);
@@ -183,7 +175,6 @@ class ProductRepository {
       desc: string | null;
       datasheetLink: string | null;
       weight: number;
-      vat: number;
       slug: string;
       price: number;
       wholesale: {
@@ -191,6 +182,7 @@ class ProductRepository {
         max_quantity: number;
         unit: string;
         quantity_step: number;
+        vat: number;
         details: {
           min: number;
           max: number | null;
@@ -209,7 +201,6 @@ class ProductRepository {
         desc: data.desc,
         datasheetLink: data.datasheetLink,
         weight: data.weight,
-        vat: data.vat,
         creatorId: userId,
         modifierId: userId,
         wholesale: {
@@ -218,6 +209,7 @@ class ProductRepository {
             max_quantity: data.wholesale.max_quantity,
             unit: data.wholesale.unit,
             quanity_step: data.wholesale.quantity_step,
+            vat: data.wholesale.vat,
             creatorId: userId,
             modifierId: userId,
             details: {
@@ -243,6 +235,7 @@ class ProductRepository {
       include: {
         attributes: true,
         wholesale: { include: { details: true } },
+        creator: true,
       },
     });
   };
@@ -326,6 +319,7 @@ class ProductRepository {
     return prisma.product.update({
       where: { id: productId },
       data: { isActive, modifierId: userId, version: { increment: 1 } },
+      include: { modifier: true },
     });
   };
 

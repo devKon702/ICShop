@@ -22,8 +22,6 @@ model Product {
   slug               String            @db.VarChar(200) @unique
   /// Mô tả của sản phẩm, chứa mã HTML
   desc               String?           @db.Text
-  /// Giá thuế theo đơn vị phần trăm
-  vat                Int               @db.TinyInt @default(0)
   /// Cân nặng tính theo gram 
   weight             Int               @db.UnsignedInt
   /// Giá mặc định để hiển thị
@@ -171,6 +169,8 @@ model Wholesale {
   quanity_step  Int          @db.UnsignedTinyInt @default(1)
   /// Đơn vị mua (tiếng Việt)
   unit        String         @db.TinyText
+  /// Thuế sản phẩm theo đơn vị phần trăm
+  vat         Int            @db.UnsignedTinyInt @default(0)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
