@@ -6,7 +6,9 @@ import { loginSchema, signupSchema } from "../schemas/auth.schema";
 
 const authRouter = express.Router();
 const path = "/auth";
+const adminPath = "/admin/auth";
 
+// POST /auth/login
 authRouter.post(path + "/login", validate(loginSchema), authController.login);
 
 authRouter.post(

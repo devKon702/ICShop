@@ -1,7 +1,11 @@
 "use client";
 import { useUserContext } from "@/libs/contexts/UserContext";
-import { Breadcrump } from "@/types/breadcrump";
 import { useEffect } from "react";
+
+type Breadcrump = {
+  label: string;
+  href: string;
+};
 
 export default function SetBreadCrump({
   breadcrumps,

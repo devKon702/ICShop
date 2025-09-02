@@ -6,8 +6,7 @@ import ProductPagination from "@/components/features/product/product-pagination"
 import { ROUTE } from "@/constants/routes";
 import { FilterProvider } from "@/libs/contexts/FilterContext";
 import { Category } from "@/libs/models/category";
-import { categoryService } from "@/libs/services/category-service";
-import { Breadcrump } from "@/types/breadcrump";
+import { categoryService } from "@/libs/services/category.service";
 import { notFound } from "next/navigation";
 import React from "react";
 
@@ -25,7 +24,7 @@ interface CategoryPageProps {
 
 function generateBreadcump(category: Category) {
   // Tạo danh sách breadcrump
-  const breadcrumps: Breadcrump[] = [
+  const breadcrumps = [
     { label: category.name, href: ROUTE.category + "/" + category.slug },
   ];
   if (category.parent)

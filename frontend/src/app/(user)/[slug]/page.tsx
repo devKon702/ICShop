@@ -4,7 +4,7 @@ import ProductMediaGallery from "@/components/features/product/product-media-gal
 import ProductWholesaleTable from "@/components/features/product/product-wholesale-table";
 import AddToCartForm from "@/components/forms/add-to-cart-form";
 import { ROUTE } from "@/constants/routes";
-import { productService } from "@/libs/services/product-service";
+import { productService } from "@/libs/services/product.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";

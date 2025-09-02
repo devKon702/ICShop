@@ -6,7 +6,7 @@ import Footer from "@/components/layouts/footer";
 import Header from "@/components/layouts/header";
 import { UserProvider } from "@/libs/contexts/UserContext";
 import React from "react";
-import { categoryService } from "@/libs/services/category-service";
+import { categoryService } from "@/libs/services/category.service";
 import { notFound } from "next/navigation";
 
 export default async function UserLayout({
