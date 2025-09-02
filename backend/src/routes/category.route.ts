@@ -7,6 +7,7 @@ import { validate } from "../middlewares/validate.middleware";
 import {
   createCategorySchema,
   getCategoryBySlugSchema,
+  getProductFromRootCategorySchema,
   udpateCategorySchema,
 } from "../schemas/category.schema";
 import { upload } from "../utils/multer";
@@ -14,29 +15,48 @@ import { deleteAddressSchema } from "../schemas/address.schema";
 
 const categoryRouter = express.Router();
 const path = "/category";
+const adminPath = "/admin/category";
 
 // GET /category
-categoryRouter.get(path, categoryController.getAll);
+categoryRouter.get(path, categoryController.getAll4User);
 
-// GET /category/slug/:slug
+// GET /category/:slug?vids=&page=&limit=&order=
 categoryRouter.get(
-  path + "/slug/:slug",
+  path + "/:slug",
   validate(getCategoryBySlugSchema),
   categoryController.getBySlug
 );
 
-// GET category/:id
+// GET /category/:id/showroom
 categoryRouter.get(
-  path + "/:id",
+  path + "/:id/showroom",
+  validate(getProductFromRootCategorySchema),
+  categoryController.getProductFromRootCategory
+);
+
+// GET /admin/category
+categoryRouter.get(
+  adminPath,
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  categoryController.getAll4Admin
+);
+
+// GET /admin/category/:id
+categoryRouter.get(
+  adminPath + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   categoryController.getById
 );
-categoryRouter.get(path + "/overview", categoryController.getCategoryOverview);
+categoryRouter.get(
+  path + "/overview",
+  categoryController.getProductFromRootCategory
+);
 
-// POST /category
+// POST /admin/category
 categoryRouter.post(
-  path,
+  adminPath,
   verifyAccessToken,
   authorize([Role.ADMIN]),
   upload.single("image"),
@@ -44,8 +64,9 @@ categoryRouter.post(
   categoryController.create
 );
 
+// PUT /admin/category/:id
 categoryRouter.put(
-  path + "/:id",
+  adminPath + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   upload.single("image"),
@@ -53,8 +74,9 @@ categoryRouter.put(
   categoryController.update
 );
 
+// DELETE /admin/category/:id
 categoryRouter.delete(
-  path + "/:id",
+  adminPath + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(deleteAddressSchema),

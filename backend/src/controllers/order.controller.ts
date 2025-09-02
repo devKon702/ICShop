@@ -43,6 +43,7 @@ class OrderController {
         wholesaleRepository.findByQuantity(item.productId, item.quantity)
       )
     );
+    // Check if some productId not exist
     if (productPrices.some((item) => item === null))
       throw new AppError(
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -51,17 +52,44 @@ class OrderController {
         true
       );
 
+    // Check valid product quantity
+    products.forEach((item, index) => {
+      const { max_quantity, min_quantity, quanity_step } =
+        productPrices[index]!.wholesale;
+      if (item.quantity < min_quantity)
+        throw new AppError(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          OrderResponseCode.INVALID_PRODUCT_QUANTITY,
+          `Tối thiểu mua ${min_quantity}`,
+          true
+        );
+      if (item.quantity > max_quantity)
+        throw new AppError(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          OrderResponseCode.INVALID_PRODUCT_QUANTITY,
+          `Tối đa mua ${max_quantity}`,
+          true
+        );
+      if (item.productId % quanity_step)
+        throw new AppError(
+          HttpStatus.UNPROCESSABLE_ENTITY,
+          OrderResponseCode.INVALID_PRODUCT_QUANTITY,
+          `Bội số mua là ${quanity_step}`,
+          true
+        );
+    });
+
     const details = products.map((item, index) => ({
       productId: item.productId,
       quantity: item.quantity,
       unitPrice: productPrices[index]!.price,
-      vat: 10,
+      vat: productPrices[index]!.wholesale.vat,
     }));
     // Get delivery fee
-    const deliveryFee = Decimal(10000);
+    const deliveryFee = Decimal(0);
     // Get expected receive time
-    const earliestReceiveTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const latestReceiveTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const earliestReceiveTime = new Date(Date.now());
+    const latestReceiveTime = new Date(Date.now());
 
     const order = await orderRepository.create(sub, {
       receiverName,

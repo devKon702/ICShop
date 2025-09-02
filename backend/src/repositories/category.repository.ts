@@ -1,3 +1,4 @@
+import { isAborted } from "zod";
 import { prisma } from "../prisma";
 
 class CategoryRepository {
@@ -7,52 +8,43 @@ class CategoryRepository {
       vids: number[] | undefined;
       limit: number;
       page: number;
+      order: "price_asc" | "price_desc";
     }
   ) => {
-    const privateOmit = {
-      version: true,
-      creatorId: true,
-      createdAt: true,
-      modifierId: true,
-      updatedAt: true,
-      isActive: true,
+    const categorySelect = {
+      id: true,
+      imageUrl: true,
+      level: true,
+      name: true,
+      slug: true,
+      parentId: true,
     };
     const productWhere: any = filter.vids
-      ? { attributes: { some: { id: { in: filter.vids } } } }
-      : {};
+      ? { attributes: { some: { id: { in: filter.vids } } }, isActive: true }
+      : { isActive: true };
     return prisma.category.findUnique({
-      where: { slug },
-      omit: privateOmit,
-      include: {
+      where: { slug, isActive: true },
+      select: {
+        ...categorySelect,
         _count: { select: { products: { where: productWhere } } },
         parent: {
-          omit: privateOmit,
-          include: { parent: { omit: privateOmit } },
+          select: { ...categorySelect, parent: { select: categorySelect } },
         },
         children: {
-          omit: privateOmit,
-          include: {
-            children: { omit: privateOmit },
-          },
+          select: { ...categorySelect, children: { select: categorySelect } },
         },
         products: {
-          // where: { id: 1 },
-          omit: privateOmit,
+          where: { ...productWhere },
           take: filter.limit,
           skip: filter.limit * (filter.page - 1),
-          where: productWhere,
-          include: {
-            wholesale: {
-              select: {
-                details: {
-                  select: { price: true },
-                  orderBy: { min: "asc" },
-                  take: 1,
-                },
-                unit: true,
-              },
-            },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            posterUrl: true,
+            price: true,
           },
+          orderBy: { price: filter.order === "price_asc" ? "asc" : "desc" },
         },
         attributes: {
           select: {
@@ -64,7 +56,33 @@ class CategoryRepository {
       },
     });
   };
-  public getCategoryTree = async () => {
+
+  public getCategoryTree4User = async () => {
+    const categorySelect = {
+      id: true,
+      name: true,
+      slug: true,
+      level: true,
+      imageUrl: true,
+    };
+    return prisma.category.findMany({
+      where: { level: 1, isActive: true },
+      select: {
+        ...categorySelect,
+        children: {
+          where: { isActive: true },
+          select: {
+            ...categorySelect,
+            children: {
+              where: { isActive: true },
+              select: { ...categorySelect },
+            },
+          },
+        },
+      },
+    });
+  };
+  public getCategoryTree4Admin = async () => {
     return prisma.category.findMany({
       where: {
         level: 1,
@@ -85,9 +103,9 @@ class CategoryRepository {
     });
   };
   // ?
-  getCategoryOverview = async () => {
+  getProductFromRoot = async (id: number, limit: number) => {
     return prisma.category.findMany({
-      where: { level: 1 },
+      where: { id, level: 1, isActive: true },
       select: {
         id: true,
         slug: true,
@@ -95,22 +113,28 @@ class CategoryRepository {
         level: true,
         imageUrl: true,
         children: {
+          where: { isActive: true },
           select: {
             id: true,
             slug: true,
             name: true,
             level: true,
             children: {
+              where: { isActive: true },
               select: {
                 id: true,
                 slug: true,
                 name: true,
                 level: true,
                 products: {
-                  take: 5,
-                  include: {
-                    wholesale: { include: { details: { take: 1 } } },
-                    images: { take: 1 },
+                  where: { isActive: true },
+                  take: limit,
+                  select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    posterUrl: true,
+                    price: true,
                   },
                 },
               },

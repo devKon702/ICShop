@@ -45,10 +45,14 @@ export const getCategoryBySlugSchema = z.object({
       .number()
       .transform((val) => (val <= 0 ? 10 : val))
       .default(10),
-    price: z.enum(["asc", "desc"]).optional(),
+    order: z.enum(["price_asc", "price_desc"]).default("price_asc"),
   }),
 });
 
 export const getCategoryByIdSchema = z.object({
+  params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
+});
+
+export const getProductFromRootCategorySchema = z.object({
   params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
 });

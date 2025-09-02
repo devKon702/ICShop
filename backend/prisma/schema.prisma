@@ -164,7 +164,7 @@ model Wholesale {
   /// Số lượng mua tối thiểu
   min_quantity  Int          @default(1) @db.UnsignedTinyInt
   /// Số lượng mua tối đa
-  max_quantity  Int?         @db.UnsignedInt
+  max_quantity  Int         @db.UnsignedInt
   ///  Bội số mua
   quanity_step  Int          @db.UnsignedTinyInt @default(1)
   /// Đơn vị mua (tiếng Việt)
@@ -289,59 +289,59 @@ model User {
   @@fulltext([name])
   ProductCreateds Product[] @relation("ProductCreated") 
   ProductModifieds Product[] @relation("ProductModified") 
-  CategoryCreateds Category[] @relation("CategoryCreated") @ignore
-  CategoryModifieds Category[] @relation("CategoryModified") @ignore
+  CategoryCreateds Category[] @relation("CategoryCreated") 
+  CategoryModifieds Category[] @relation("CategoryModified")
   // Attribute
-  AttributeCreateds Attribute[] @relation("AttributeCreated") @ignore
-  AttributeModifieds Attribute[] @relation("AttributeModified") @ignore
+  AttributeCreateds Attribute[] @relation("AttributeCreated") 
+  AttributeModifieds Attribute[] @relation("AttributeModified") 
 
   // AttributeValue
-  AttributeValueCreateds AttributeValue[] @relation("AttrValCreated") @ignore
-  AttributeValueModifieds AttributeValue[] @relation("AttrValModified") @ignore
+  AttributeValueCreateds AttributeValue[] @relation("AttrValCreated") 
+  AttributeValueModifieds AttributeValue[] @relation("AttrValModified") 
 
   // ProductAttribute
-  ProductAttributeCreateds ProductAttribute[] @relation("ProdAttrCreated") @ignore
-  ProductAttributeModifieds ProductAttribute[] @relation("ProdAttrModified") @ignore
+  ProductAttributeCreateds ProductAttribute[] @relation("ProdAttrCreated") 
+  ProductAttributeModifieds ProductAttribute[] @relation("ProdAttrModified") 
 
   // ProductImage
-  ProductImageCreateds ProductImage[] @relation("ProdImgCreated") @ignore
-  ProductImageModifieds ProductImage[] @relation("ProdImgModified") @ignore
+  ProductImageCreateds ProductImage[] @relation("ProdImgCreated") 
+  ProductImageModifieds ProductImage[] @relation("ProdImgModified") 
 
   // Wholesale
-  WholesaleCreateds Wholesale[] @relation("WholesaleCreated") @ignore
-  WholesaleModifieds Wholesale[] @relation("WholesaleModified") @ignore
+  WholesaleCreateds Wholesale[] @relation("WholesaleCreated") 
+  WholesaleModifieds Wholesale[] @relation("WholesaleModified") 
 
   // WholesaleDetail
-  WholesaleDetailCreateds WholesaleDetail[] @relation("WhDetCreated") @ignore
-  WholesaleDetailModifieds WholesaleDetail[] @relation("WhDetModified") @ignore
+  WholesaleDetailCreateds WholesaleDetail[] @relation("WhDetCreated") 
+  WholesaleDetailModifieds WholesaleDetail[] @relation("WhDetModified") 
 
   // ProductHighlight
-  ProductHighlightCreateds ProductHighlight[] @relation("ProdHighCreated") @ignore
-  ProductHighlightModifieds ProductHighlight[] @relation("ProdHighModified") @ignore
+  ProductHighlightCreateds ProductHighlight[] @relation("ProdHighCreated") 
+  ProductHighlightModifieds ProductHighlight[] @relation("ProdHighModified") 
 
   // Account
-  AccountCreateds Account[] @relation("AccountCreated") @ignore
-  AccountModifieds Account[] @relation("AccountModified") @ignore
+  AccountCreateds Account[] @relation("AccountCreated") 
+  AccountModifieds Account[] @relation("AccountModified") 
 
   // User
-  UserCreateds User[] @relation("UserCreated") @ignore
-  UserModifieds User[] @relation("UserModified") @ignore
+  UserCreateds User[] @relation("UserCreated") 
+  UserModifieds User[] @relation("UserModified") 
 
   // Order
-  OrderCreateds Order[] @relation("OrderCreated") @ignore
-  OrderModifieds Order[] @relation("OrderModified") @ignore
+  OrderCreateds Order[] @relation("OrderCreated")
+  OrderModifieds Order[] @relation("OrderModified")
 
   // OrderDetail
-  OrderDetailCreateds OrderDetail[] @relation("OrdDetCreated") @ignore
-  OrderDetailModifieds OrderDetail[] @relation("OrdDetModified") @ignore
+  OrderDetailCreateds OrderDetail[] @relation("OrdDetCreated")
+  OrderDetailModifieds OrderDetail[] @relation("OrdDetModified")
 
   // OrderTimeline
-  OrderTimelineCreateds OrderTimeline[] @relation("OrdTimeCreated") @ignore
-  OrderTimelineModifieds OrderTimeline[] @relation("OrdTimeModified") @ignore
+  OrderTimelineCreateds OrderTimeline[] @relation("OrdTimeCreated")
+  OrderTimelineModifieds OrderTimeline[] @relation("OrdTimeModified")
 
   // Banner
-  BannerCreateds Banner[] @relation("BannerCreated") @ignore
-  BannerModifieds Banner[] @relation("BannerModified") @ignore
+  BannerCreateds Banner[] @relation("BannerCreated")
+  BannerModifieds Banner[] @relation("BannerModified")
 }
 
 model Address {

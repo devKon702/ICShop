@@ -25,7 +25,10 @@ export const createOrderSchema = z.object({
     products: z.array(
       z.object({
         productId: z.number(),
-        quantity: z.number().min(1, "Số lượng tối thiểu là 1"),
+        quantity: z
+          .number()
+          .int("Phải là kiểu số nguyên")
+          .min(1, "Số lượng tối thiểu là 1"),
       })
     ),
   }),

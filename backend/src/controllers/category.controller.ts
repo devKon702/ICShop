@@ -9,6 +9,7 @@ import {
   deleteCategorySchema,
   getCategoryByIdSchema,
   getCategoryBySlugSchema,
+  getProductFromRootCategorySchema,
   udpateCategorySchema,
 } from "../schemas/category.schema";
 import { AppError } from "../errors/app-error";
@@ -19,24 +20,24 @@ import storage from "../storage";
 import { successResponse } from "../utils/response";
 import { AddressResponseCode } from "../constants/codes/address.code";
 import { logger } from "../utils/logger";
+import { NotFoundError } from "../errors/not-found-error";
 
 class CategoryController {
   public getBySlug = async (req: Request, res: Response) => {
     const {
       params: { slug },
-      query: { vids, limit, page },
+      query: { vids, limit, page, order },
     } = getCategoryBySlugSchema.parse(req);
     const category = await categoryRepository.findBySlug(slug, {
       vids,
       limit,
       page,
+      order,
     });
     if (!category)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
+      throw new NotFoundError(
         CategoryResponseCode.NOT_FOUND,
-        "Không tìm thấy danh mục",
-        true
+        "Không tìm thấy danh mục"
       );
     res
       .status(HttpStatus.OK)
@@ -72,8 +73,21 @@ class CategoryController {
       );
   };
 
-  public getAll = async (req: Request, res: Response) => {
-    const categoryTree = await categoryRepository.getCategoryTree();
+  public getAll4User = async (req: Request, res: Response) => {
+    const categoryTree = await categoryRepository.getCategoryTree4User();
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          CategoryResponseCode.OK,
+          "Lấy cây danh mục thành công",
+          categoryTree
+        )
+      );
+  };
+
+  public getAll4Admin = async (req: Request, res: Response) => {
+    const categoryTree = await categoryRepository.getCategoryTree4Admin();
     res
       .status(HttpStatus.OK)
       .json(
@@ -103,15 +117,21 @@ class CategoryController {
     }
   };
 
-  getCategoryOverview = async (req: Request, res: Response) => {
-    try {
-      const categories = await categoryRepository.getCategoryOverview();
-      res.json(new ResponseObject(200, "success", categories));
-    } catch {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .json(new ResponseObject(StatusCode.BAD_REQUEST, "fail", null));
-    }
+  public getProductFromRootCategory = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+    } = getProductFromRootCategorySchema.parse(req);
+    const result = await categoryRepository.getProductFromRoot(id, 5);
+    if (!result) throw new NotFoundError(CategoryResponseCode.NOT_FOUND);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          CategoryResponseCode.OK,
+          "Lấy danh sách sản phẩm thành công",
+          result
+        )
+      );
   };
 
   public create = async (req: Request, res: Response) => {
@@ -281,8 +301,6 @@ class CategoryController {
       .status(HttpStatus.OK)
       .json(successResponse(CategoryResponseCode.OK, "Xóa thành công"));
   };
-  public findBySlug = async (req: Request, res: Response) => {};
-  public findAll = async (req: Request, res: Response) => {};
 }
 
 export default new CategoryController();

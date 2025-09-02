@@ -62,7 +62,17 @@ class WholesaleRepository {
       orderBy: {
         min: "desc",
       },
-      select: { price: true },
+      select: {
+        price: true,
+        wholesale: {
+          select: {
+            vat: true,
+            min_quantity: true,
+            max_quantity: true,
+            quanity_step: true,
+          },
+        },
+      },
     });
   };
 
