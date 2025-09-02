@@ -12,10 +12,11 @@ interface UserState {
   user: User | null;
   isAuthenticated: boolean;
   token: string | null;
-
   actions: {
     setUser: (user: User) => void;
     setToken: (token: string) => void;
+    login: (user: User, token: string) => void;
+    logout: () => void;
   };
 }
 
@@ -26,10 +27,15 @@ const useUserStore = create<UserState>()((set) => ({
   actions: {
     setUser: (user) => set({ user }),
     setToken: (token) => set({ token }),
+    login: (user, token) => {
+      set({ user, token, isAuthenticated: true });
+    },
+    logout: () => set({ user: null, token: null, isAuthenticated: false }),
   },
 }));
 
-export const useUser = () => useUserStore.getState().user;
-export const useToken = () => useUserStore.getState().token;
-export const useIsAuthenticated = () => useUserStore.getState().isAuthenticated;
-export const useUserActions = () => useUserStore.getState().actions;
+export const useUser = () => useUserStore((state) => state.user);
+export const useToken = () => useUserStore((state) => state.token);
+export const useIsAuthenticated = () =>
+  useUserStore((state) => state.isAuthenticated);
+export const useUserActions = () => useUserStore((state) => state.actions);

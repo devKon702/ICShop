@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { GlobalProvider } from "@/libs/contexts/GlobalContext";
+import ModalContainer from "@/components/modals/modal-container";
 // import { ENV_ROLE } from "@/constants/env-config";
 
 const geistSans = Geist({
@@ -37,6 +38,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <GlobalProvider>{children}</GlobalProvider>
+        <ModalContainer />
       </body>
     </html>
   );
