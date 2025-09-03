@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { GlobalProvider } from "@/libs/contexts/GlobalContext";
 import ModalContainer from "@/components/modals/modal-container";
-// import { ENV_ROLE } from "@/constants/env-config";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +37,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Toaster richColors />
         <GlobalProvider>{children}</GlobalProvider>
         <ModalContainer />
       </body>

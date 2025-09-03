@@ -9,6 +9,7 @@ export const ROUTE = {
   adminProduct: "/admin/product",
   adminCategory: "/admin/category",
   adminUser: "/admin/user",
+  adminLogin: "/admin/login",
   cart: "/cart",
   userAccount: "/account",
   userOrder: "/account/order",

@@ -1,0 +1,42 @@
+import { z } from "zod";
+import {
+  ID,
+  UnsignedInt,
+  Text,
+  Slug,
+  DateTimeSchema,
+  DecimalString,
+} from "../schemas/shared.schema";
+import { CategorySchema } from "./category.schema";
+import { WholesaleSchema } from "./wholesale.schema";
+import { ProductAttributeSchema } from "./product-attribute.schema";
+import { ProductImageSchema } from "./product-image.schema";
+import { ProductHighlightSchema } from "./product-highlight.schema";
+
+export const ProductBaseSchema = z.object({
+  id: ID,
+  name: Text,
+  posterUrl: z.string().url().nullable().optional(),
+  categoryId: UnsignedInt,
+  datasheetLink: z.string().url().nullable().optional(),
+  slug: Slug,
+  desc: z.string().nullable().optional(),
+  weight: UnsignedInt,
+  price: DecimalString,
+  version: z.number().int(),
+  creatorId: UnsignedInt,
+  modifierId: UnsignedInt,
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema,
+  isActive: z.boolean(),
+});
+
+export const ProductSchema = ProductBaseSchema.extend({
+  category: CategorySchema.optional(),
+  wholesale: WholesaleSchema.nullable().optional(),
+  attributes: z.array(ProductAttributeSchema).optional(),
+  images: z.array(ProductImageSchema).optional(),
+  highlights: z.array(ProductHighlightSchema).optional(),
+  // lược bỏ orderDetails/cartDetails để tránh payload lớn
+});
+export type Product = z.infer<typeof ProductSchema>;

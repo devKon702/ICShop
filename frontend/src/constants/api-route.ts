@@ -1,4 +1,4 @@
-import { ENV_API_ORIGIN } from "@/constants/env-config";
+import { ENV_API_ORIGIN } from "@/constants/env";
 
 const base = ENV_API_ORIGIN + "/api/v1";
 

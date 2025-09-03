@@ -19,7 +19,7 @@ app.use("/uploads", express.static(env.UPLOAD_DIR));
 // Cross-origin
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://admin.localhost:3000"],
     credentials: true,
   })
 );

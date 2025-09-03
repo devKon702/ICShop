@@ -3,7 +3,7 @@ import accountRepository from "../repositories/account.repository";
 import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response";
 import { AuthResponseCode } from "../constants/codes/auth.code";
-import { LoginIType, SignupIType } from "../schemas/auth.schema";
+import { LoginIType, loginSchema, SignupIType } from "../schemas/auth.schema";
 import { AppError } from "../errors/app-error";
 import {
   createAccessToken,
@@ -44,74 +44,68 @@ class AuthController {
     }
   };
 
-  public login = async (
-    req: Request<any, any, LoginIType["body"]>,
-    res: Response
-  ) => {
-    try {
-      const { email, password } = req.body;
-      const account = await accountRepository.findByEmail(email);
-      // Không tìm thấy
-      if (!account) {
-        throw new AppError(
-          HttpStatus.NOT_FOUND,
-          AuthResponseCode.NOT_FOUND,
-          "Không tìm thấy tài khoản",
-          true
-        );
-      }
-      // Sai mật khẩu, bao gồm trường hợp password null với google signup
-      if (
-        !account.password ||
-        !(await comparePassword(password, account.password))
-      ) {
-        Role;
-        throw new AppError(
-          HttpStatus.UNAUTHORIZED,
-          AuthResponseCode.WRONG_PASSWORD,
-          "Sai mật khẩu",
-          true
-        );
-      }
-      // Tài khoản bị khoá
-      else if (!account.isActive)
-        throw new AppError(
-          HttpStatus.FORBIDDEN,
-          AuthResponseCode.USER_BLOCKED,
-          "Tài khoản đã bị khóa",
-          true
-        );
-      // Thành công
-      else {
-        const {
-          password,
-          version,
-          createdAt,
-          updatedAt,
-          modifierId,
-          creatorId,
-          ...publicAccount
-        } = account;
-        const accessToken = createAccessToken({
-          sub: account.user!.id,
-          role: account.role as Role,
-        });
-        const refreshToken = createRefreshToken(
-          { sub: account.user!.id, role: account.role as Role },
-          account.role as Role
-        );
-        // Tạo nơi lưu trữ refresh token
-        this.createCookieToken(res, refreshToken, account.role as Role);
+  public login = (role: Role) => async (req: Request, res: Response) => {
+    const {
+      body: { email, password },
+    } = loginSchema.parse(req);
+    const account = await accountRepository.findByEmail(email, role);
+    // Không tìm thấy
+    if (!account) {
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        AuthResponseCode.NOT_FOUND,
+        "Không tìm thấy tài khoản",
+        true
+      );
+    }
+    // Sai mật khẩu, bao gồm trường hợp password null với google signup
+    if (
+      !account.password ||
+      !(await comparePassword(password, account.password))
+    ) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AuthResponseCode.WRONG_PASSWORD,
+        "Sai mật khẩu",
+        true
+      );
+    }
+    // Tài khoản bị khoá
+    else if (!account.isActive)
+      throw new AppError(
+        HttpStatus.FORBIDDEN,
+        AuthResponseCode.USER_BLOCKED,
+        "Tài khoản đã bị khóa",
+        true
+      );
+    // Thành công
+    else {
+      const {
+        password,
+        version,
+        createdAt,
+        updatedAt,
+        modifierId,
+        creatorId,
+        ...publicAccount
+      } = account;
+      const accessToken = createAccessToken({
+        sub: account.user!.id,
+        role,
+      });
+      const refreshToken = createRefreshToken(
+        { sub: account.user!.id, role },
+        role
+      );
+      // Tạo nơi lưu trữ refresh token
+      this.createCookieToken(res, refreshToken, role);
 
-        res.status(HttpStatus.OK).json(
-          successResponse(AuthResponseCode.OK, "Đăng nhập thành công", {
-            account: publicAccount,
-            token: accessToken,
-          })
-        );
-      }
-    } catch (err) {
-      throw err;
+      res.status(HttpStatus.OK).json(
+        successResponse(AuthResponseCode.OK, "Đăng nhập thành công", {
+          account: publicAccount,
+          token: accessToken,
+        })
+      );
     }
   };
 
@@ -120,7 +114,7 @@ class AuthController {
     res: Response
   ) => {
     try {
-      const { email, password, name } = req.body;
+      const { email, password, name, phone } = req.body;
 
       const existAccount = await accountRepository.findByEmail(email);
       // Nếu trùng
@@ -134,7 +128,7 @@ class AuthController {
       // Không trùng
       const hashedPassword = await hashPassword(password);
       const { password: passwordIgnored, ...newAccount } =
-        await accountRepository.create(email, hashedPassword, name);
+        await accountRepository.create(email, hashedPassword, name, phone);
       res
         .status(HttpStatus.CREATED)
         .json(

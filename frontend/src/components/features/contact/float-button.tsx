@@ -1,5 +1,5 @@
 "use client";
-import { ENV_ZALO_LINK } from "@/constants/env-config";
+import { ENV_ZALO_LINK } from "@/constants/env";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";

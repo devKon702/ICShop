@@ -273,6 +273,8 @@ model User {
   name        String    @db.TinyText
   /// Đường dẫn đến ảnh đại diện
   avatarUrl   String?   @db.VarChar(255)
+  /// Số điện thoại
+  phone       String?    @db.VarChar(20)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int?               @db.UnsignedInt

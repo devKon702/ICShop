@@ -6,9 +6,9 @@ class AccountRepository {
     return prisma.account.findFirst({ where: { role: "admin" } });
   };
 
-  public findByEmail = async (email: string) => {
+  public findByEmail = async (email: string, role: Role = Role.USER) => {
     return prisma.account.findUnique({
-      where: { email },
+      where: { email, role },
       include: { user: true },
     });
   };
@@ -47,6 +47,7 @@ class AccountRepository {
     email: string,
     password: string,
     name: string,
+    phone: string,
     role: Role = Role.USER
   ) => {
     const newAccount = await prisma.account.create({
@@ -54,7 +55,7 @@ class AccountRepository {
         email,
         password,
         user: {
-          create: { name },
+          create: { name, phone },
         },
         role,
       },

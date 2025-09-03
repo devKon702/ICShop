@@ -2,8 +2,9 @@
 
 import AdminSidebar from "@/components/layouts/admin-sidebar";
 import { ROUTE } from "@/constants/routes";
-import { usePathname } from "next/navigation";
-import React, { ReactNode } from "react";
+import { useUser } from "@/store/user-store";
+import { usePathname, useRouter } from "next/navigation";
+import React, { ReactNode, useEffect } from "react";
 
 const pageTitles = [
   { href: ROUTE.adminDashboard, title: "Dashboard" },
@@ -14,7 +15,15 @@ const pageTitles = [
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const user = useUser();
+  const router = useRouter();
   const pathname = usePathname();
+  useEffect(() => {
+    if (user?.role !== "admin") {
+      router.replace(ROUTE.adminLogin);
+    }
+  }, [user, router]);
+  if (user?.role !== "admin") return null;
   return (
     <div className="p-6 h-screen">
       <div className="flex bg-white rounded-md p-2 size-full shadow-lg">
