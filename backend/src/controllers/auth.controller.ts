@@ -3,7 +3,12 @@ import accountRepository from "../repositories/account.repository";
 import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response";
 import { AuthResponseCode } from "../constants/codes/auth.code";
-import { LoginIType, loginSchema, SignupIType } from "../schemas/auth.schema";
+import {
+  LoginIType,
+  loginSchema,
+  SignupIType,
+  signupSchema,
+} from "../schemas/auth.schema";
 import { AppError } from "../errors/app-error";
 import {
   createAccessToken,
@@ -109,38 +114,33 @@ class AuthController {
     }
   };
 
-  public signup = async (
-    req: Request<any, any, SignupIType["body"]>,
-    res: Response
-  ) => {
-    try {
-      const { email, password, name, phone } = req.body;
+  public signup = async (req: Request, res: Response) => {
+    const {
+      body: { email, name, password, phone },
+    } = signupSchema.parse(req);
 
-      const existAccount = await accountRepository.findByEmail(email);
-      // Nếu trùng
-      if (existAccount)
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          AuthResponseCode.EMAIL_EXIST,
-          "Email đã được sử dụng",
-          true
-        );
-      // Không trùng
-      const hashedPassword = await hashPassword(password);
-      const { password: passwordIgnored, ...newAccount } =
-        await accountRepository.create(email, hashedPassword, name, phone);
-      res
-        .status(HttpStatus.CREATED)
-        .json(
-          successResponse(
-            AuthResponseCode.OK,
-            "Tạo tài khoản thành công",
-            newAccount
-          )
-        );
-    } catch (err) {
-      throw err;
-    }
+    const existAccount = await accountRepository.findByEmail(email);
+    // Nếu trùng
+    if (existAccount)
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AuthResponseCode.EMAIL_EXIST,
+        "Email đã được sử dụng",
+        true
+      );
+    // Không trùng
+    const hashedPassword = await hashPassword(password);
+    const { password: passwordIgnored, ...newAccount } =
+      await accountRepository.create(email, hashedPassword, name, phone);
+    res
+      .status(HttpStatus.CREATED)
+      .json(
+        successResponse(
+          AuthResponseCode.OK,
+          "Tạo tài khoản thành công",
+          newAccount
+        )
+      );
   };
 
   public logout = (req: Request, res: Response) => {
@@ -204,11 +204,9 @@ class AuthController {
       res
         .status(HttpStatus.OK)
         .json(
-          successResponse(
-            AuthResponseCode.OK,
-            "Làm mới token thành công",
-            accessToken
-          )
+          successResponse(AuthResponseCode.OK, "Làm mới token thành công", {
+            token: accessToken,
+          })
         );
     } catch (err) {
       throw err;

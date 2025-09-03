@@ -5,14 +5,13 @@ import { RoleEnum } from "../schemas/shared.schema";
 export const AccountBaseSchema = z.object({
   id: ID,
   email: z.string().email(),
-  password: z.string().nullable().optional(),
   role: RoleEnum,
   isGoogleSigned: z.boolean(),
   isEmailAuth: z.boolean(),
   isActive: z.boolean(),
   version: z.number().int(),
-  creatorId: z.number().int().nonnegative().nullable().optional(),
-  modifierId: z.number().int().nonnegative().nullable().optional(),
+  creatorId: z.number().int().nonnegative().nullable(),
+  modifierId: z.number().int().nonnegative().nullable(),
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });

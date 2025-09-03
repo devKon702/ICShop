@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/form";
 import { ROUTE } from "@/constants/routes";
 import { authService } from "@/libs/services/auth.service";
+import { useTokenActions } from "@/store/token-store";
 import { useUser, useUserActions } from "@/store/user-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -24,7 +25,8 @@ const formSchema = z.object({
 });
 
 export default function AdminLoginForm() {
-  const { login } = useUserActions();
+  const { setUser } = useUserActions();
+  const { setToken } = useTokenActions();
   const user = useUser();
   const router = useRouter();
   useEffect(() => {
@@ -41,18 +43,16 @@ export default function AdminLoginForm() {
     authService
       .adminLogin(values.email, values.password)
       .then((res) => {
-        toast.success(res.data.message, { position: "bottom-right" });
-        const account = res.data.data.account;
-        login(
-          {
-            id: account.id,
-            avatarUrl: account.user.avatarUrl,
-            email: account.email,
-            name: account.user.name,
-            role: account.role,
-          },
-          res.data.data.token
-        );
+        toast.success(res.message, { position: "bottom-right" });
+        const account = res.data.account;
+        setUser({
+          id: account.id,
+          avatarUrl: account.user.avatarUrl || null,
+          email: account.email,
+          name: account.user.name,
+          role: account.role,
+        });
+        setToken(res.data.token);
       })
       .catch((e) => {
         toast.error(e.data.message, { position: "bottom-right" });

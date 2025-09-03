@@ -1,6 +1,7 @@
 import { JWT_CODE } from "@/constants/api-code";
 import env from "@/constants/env";
 import { authService } from "@/libs/services/auth.service";
+import { useTokenStore } from "@/store/token-store";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 let isRefreshing = false;
@@ -12,7 +13,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = useTokenStore.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -33,8 +34,9 @@ api.interceptors.response.use(
         authService
           .refresh()
           .then(({ data }) => {
-            // localStorage.setItem("token", data.data);
-            refreshSubscribers.forEach((cb) => cb(data.data));
+            localStorage.setItem("token", data.token);
+            useTokenStore.getState().actions.setToken(data.token);
+            refreshSubscribers.forEach((cb) => cb(data.token));
           })
           .catch(() => {
             window.dispatchEvent(new CustomEvent("needlogin"));
