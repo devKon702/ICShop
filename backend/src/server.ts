@@ -16,6 +16,9 @@ app.use(helmet());
 // Static route
 app.use("/uploads", express.static(env.UPLOAD_DIR));
 
+// Cookie
+app.use(cookieParser());
+
 // Cross-origin
 app.use(
   cors({
@@ -23,8 +26,6 @@ app.use(
     credentials: true,
   })
 );
-// Cookie
-app.use(cookieParser());
 
 // Log
 app.use(requestLogger);

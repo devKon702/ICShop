@@ -16,6 +16,18 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useModalActions } from "@/store/modal-store";
+import { useQuery } from "@tanstack/react-query";
+import categoryService from "@/libs/services/category.service";
+import { toast } from "sonner";
+import { z } from "zod";
+import { AdminCategorySchema } from "@/libs/schemas/category.schema";
+import { Pencil, Plus, Trash } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export type Category = {
   id: number;
@@ -24,158 +36,181 @@ export type Category = {
   children?: Category[];
 };
 
-const MOCK_CATEGORIES: Category[] = [
-  {
-    id: 1,
-    name: "Mạch tích hợp",
-    level: 1,
-    children: [
-      {
-        id: 11,
-        name: "IC-Vi điều khiển",
-        level: 2,
-        children: [
-          { id: 111, name: "Vi điều khiển", level: 3 },
-          { id: 112, name: "Vi xử lí", level: 3 },
-        ],
-      },
-      {
-        id: 12,
-        name: "IC Nguồn",
-        level: 2,
-        children: [
-          { id: 121, name: "IC Ổn áp", level: 3 },
-          { id: 122, name: "IC điều khiển cổng", level: 3 },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Linh kiện điện tử thụ động",
-    level: 1,
-    children: [],
-  },
-  {
-    id: 3,
-    name: "Cảm biến",
-    level: 1,
-    children: [],
-  },
-];
-
 export default function AdminCategoryPage() {
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
-
-  const [openAddCat, setOpenAddCat] = useState(false);
   const [openAddAttr, setOpenAddAttr] = useState(false);
-  const [currentParentId, setCurrentParentId] = useState<number | null>(null);
-  const [newName, setNewName] = useState("");
   const [newAttrName, setNewAttrName] = useState("");
   const [newAttrValues, setNewAttrValues] = useState("");
 
-  const handleAddCategory = () => {
-    if (currentParentId === null) return;
-    const addRecursively = (nodes: Category[]): Category[] => {
-      return nodes.map((cat) => {
-        if (cat.id === currentParentId) {
-          const newCat: Category = {
-            id: Date.now(),
-            name: newName,
-            level: cat.level + 1,
-          };
-          return {
-            ...cat,
-            children: [...(cat.children || []), newCat],
-          };
-        }
-        if (cat.children) {
-          return { ...cat, children: addRecursively(cat.children) };
-        }
-        return cat;
-      });
-    };
-    setCategories(addRecursively(categories));
-    setNewName("");
-    setOpenAddCat(false);
-  };
+  const { openModal, closeModal } = useModalActions();
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["categoryLeaf"],
+    queryFn: categoryService.getAllCategory4Admin,
+  });
 
-  const handleAddAttribute = () => {
-    console.log({
-      attr: newAttrName,
-      values: newAttrValues.split(",").map((v) => v.trim()),
-    });
-    setNewAttrName("");
-    setNewAttrValues("");
-    setOpenAddAttr(false);
-  };
+  if (isLoading) return <div>Loading Category....</div>;
+  if (isError) {
+    console.log(error);
+    toast.error(error.message);
+    return null;
+  }
 
-  const renderLevel = (nodes: Category[]) =>
-    nodes.map((cat) => (
-      <Collapsible key={cat.id} className="ml-4 border-l pl-4 space-y-2">
-        <div className="flex items-center justify-between group hover:bg-background p-2 rounded-md">
-          <CollapsibleTrigger className="text-left flex-1 font-medium">
-            {cat.name}
-          </CollapsibleTrigger>
-          <div className="space-x-2">
-            {cat.level < 3 ? (
-              <Button
-                className="group-hover:bg-white cursor-pointer hover:bg-white"
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setCurrentParentId(cat.id);
-                  setOpenAddCat(true);
-                }}
-              >
-                + Danh mục
-              </Button>
-            ) : (
-              <Button
-                className="group-hover:bg-white cursor-pointer hover:bg-white"
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setCurrentParentId(cat.id);
-                  setOpenAddAttr(true);
-                }}
-              >
-                + Thuộc tính
-              </Button>
-            )}
-          </div>
+  const render = (cat: z.infer<typeof AdminCategorySchema>) => (
+    <Collapsible key={cat.id} className="border-l-2 pl-4 space-y-2">
+      <div className="flex items-center justify-between group hover:bg-background p-2 rounded-md">
+        <CollapsibleTrigger className="text-left flex-1 font-medium cursor-pointer">
+          {cat.name} {cat.children ? `(${cat.children.length})` : null}
+        </CollapsibleTrigger>
+        <div className="space-x-2">
+          {cat.level < 3 ? (
+            <Button
+              className="group-hover:bg-white cursor-pointer hover:bg-white"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                openModal({
+                  type: "createCategory",
+                  props: {
+                    parentId: cat.id,
+                    onSuccess: () => {
+                      refetch();
+                      closeModal();
+                    },
+                  },
+                });
+              }}
+            >
+              <Plus /> Danh mục
+            </Button>
+          ) : (
+            <Button
+              className="group-hover:bg-white cursor-pointer hover:bg-white"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                openModal({
+                  type: "createAttribute",
+                  props: {
+                    categoryId: cat.id,
+                    onSuccess: () => {
+                      // cat.attributes?.push({ ...res, values: [] });
+                      refetch();
+                      closeModal();
+                    },
+                  },
+                });
+              }}
+            >
+              <Plus /> Thuộc tính
+            </Button>
+          )}
+          <Button
+            className="bg-red-400 text-white hover:bg-red-500 cursor-pointer"
+            onClick={() => {
+              if (confirm("Xác nhận xóa danh mục " + cat.name)) {
+                categoryService
+                  .delete(cat.id)
+                  .then(() => {
+                    refetch();
+                  })
+                  .catch(() => {
+                    toast.error("Không thể xóa danh mục này");
+                  });
+              }
+            }}
+          >
+            <Trash />
+            Xóa
+          </Button>
         </div>
+      </div>
 
-        <CollapsibleContent>
-          {cat.children && renderLevel(cat.children)}
-        </CollapsibleContent>
-      </Collapsible>
-    ));
+      <CollapsibleContent>
+        {cat.children && cat.children.map((child) => render(child))}
+        {cat.attributes &&
+          cat.attributes.map(
+            (attr) =>
+              attr && (
+                <div className="pl-4 border-l-2" key={attr.id}>
+                  <div className="flex items-center p-2 hover:bg-background rounded-lg">
+                    <div className="flex flex-1 flex-wrap justify-start items-center space-x-2 space-y-2">
+                      <span className="font-semibold mr-3">{attr.name}:</span>
+                      {attr.values.map((item) => (
+                        <Popover key={item.id}>
+                          <PopoverTrigger className="px-2 py-1 bg-primary-light rounded-lg mr-1 cursor-pointer flex space-x-4  items-center">
+                            {item.value}
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-fit space-y-2 p-2"
+                            side="right"
+                          >
+                            <div className="font-semibold flex items-center space-x-2 hover:bg-primary hover:text-white px-4 py-1 rounded-lg cursor-pointer">
+                              <Pencil className="size-4" />
+                              <span>Sửa</span>
+                            </div>
+                            <div className="font-semibold flex items-center space-x-2 hover:bg-red-400 hover:text-white px-4  py-1 rounded-lg cursor-pointer">
+                              <Trash className="size-4" />
+                              <span>Xóa</span>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ))}
+                    </div>
+                    <div className="space-x-2 flex flex-nowrap">
+                      <Button
+                        className="cursor-pointer"
+                        onClick={() => {
+                          openModal({
+                            type: "createValue",
+                            props: {
+                              attributeId: attr.id,
+                              onSuccess: () => {
+                                closeModal();
+                                refetch();
+                              },
+                            },
+                          });
+                        }}
+                      >
+                        <Plus />
+                        Giá trị
+                      </Button>
+                      <Button className="bg-red-400 text-white hover:bg-red-500 cursor-pointer">
+                        <Trash />
+                        Xóa
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )
+          )}
+      </CollapsibleContent>
+    </Collapsible>
+  );
 
   return (
     <div className="space-y-4">
-      {renderLevel(categories)}
+      {data?.data.map((cat) => render(cat))}
+      <button
+        className="w-full space-x-2 border-2 border-dashed rounded-lg py-2 flex items-center justify-center cursor-pointer"
+        onClick={() =>
+          openModal({
+            type: "createCategory",
+            props: {
+              onSuccess: () => {
+                refetch();
+                closeModal();
+              },
+            },
+          })
+        }
+      >
+        <Plus /> <span>Thêm danh mục</span>
+      </button>
+    </div>
+  );
 
-      {/* Modal thêm danh mục */}
-      <Dialog open={openAddCat} onOpenChange={setOpenAddCat}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Thêm danh mục</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Label>Tên danh mục</Label>
-            <input
-              className="p-2 border w-full"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button onClick={handleAddCategory}>Thêm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+  return (
+    <div className="space-y-4">
       {/* Modal thêm thuộc tính */}
       <Dialog open={openAddAttr} onOpenChange={setOpenAddAttr}>
         <DialogContent>
@@ -200,7 +235,7 @@ export default function AdminCategoryPage() {
             />
           </div>
           <DialogFooter>
-            <Button onClick={handleAddAttribute}>Thêm thuộc tính</Button>
+            <Button>Thêm thuộc tính</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

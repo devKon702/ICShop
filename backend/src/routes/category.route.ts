@@ -42,6 +42,14 @@ categoryRouter.get(
   categoryController.getAll4Admin
 );
 
+// GET /admin/category/leaf
+categoryRouter.get(
+  adminPath + "/leaf",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  categoryController.getLeafCategory
+);
+
 // GET /admin/category/:id
 categoryRouter.get(
   adminPath + "/:id",
@@ -49,6 +57,7 @@ categoryRouter.get(
   authorize([Role.ADMIN]),
   categoryController.getById
 );
+
 categoryRouter.get(
   path + "/overview",
   categoryController.getProductFromRootCategory

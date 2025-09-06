@@ -4,6 +4,7 @@ import "./globals.css";
 import { GlobalProvider } from "@/libs/contexts/GlobalContext";
 import ModalContainer from "@/components/modals/modal-container";
 import { Toaster } from "@/components/ui/sonner";
+import QueryProvider from "@/libs/tanstack-query/query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,9 +38,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toaster richColors />
-        <GlobalProvider>{children}</GlobalProvider>
-        <ModalContainer />
+        <QueryProvider>
+          <Toaster richColors />
+          <GlobalProvider>{children}</GlobalProvider>
+          <ModalContainer />
+        </QueryProvider>
       </body>
     </html>
   );

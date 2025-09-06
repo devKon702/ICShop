@@ -1,10 +1,15 @@
 "use client";
 
+import ProtectedLayer from "@/components/features/auth/protected-layer";
 import AdminSidebar from "@/components/layouts/admin-sidebar";
 import { ROUTE } from "@/constants/routes";
-import { useUser } from "@/store/user-store";
+import accountService from "@/libs/services/account.service";
+import { useAuthActions } from "@/store/auth-store";
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { ReactNode, useEffect } from "react";
+import { toast } from "sonner";
 
 const pageTitles = [
   { href: ROUTE.adminDashboard, title: "Dashboard" },
@@ -15,28 +20,77 @@ const pageTitles = [
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const user = useUser();
   const router = useRouter();
+  const { setUser, clearAuth } = useAuthActions();
+  const [allowed, setAllowed] = React.useState(false);
   const pathname = usePathname();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["me"],
+    queryFn: accountService.getMe,
+    staleTime: 1000 * 60 * 5,
+  });
+
   useEffect(() => {
-    if (user?.role !== "admin") {
+    if (isLoading) return;
+    if (isError) {
+      clearAuth();
       router.replace(ROUTE.adminLogin);
+      return;
     }
-  }, [user, router]);
-  if (user?.role !== "admin") return null;
-  return (
-    <div className="p-6 h-screen">
-      <div className="flex bg-white rounded-md p-2 size-full shadow-lg">
-        <section className="w-1/6">
-          <AdminSidebar></AdminSidebar>
-        </section>
-        <section className="flex-1 overflow-auto app px-4 py-2">
-          <h1 className="font-bold text-2xl mb-6">
-            {pageTitles.find((item) => item.href == pathname)?.title}
-          </h1>
-          {children}
-        </section>
+    if (data) {
+      const user = data.data.user;
+      setUser({
+        id: user.id,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        email: data.data.email,
+        role: data.data.role,
+      });
+      setAllowed(true);
+    }
+  }, [isLoading, isError, data, clearAuth, router, setUser]);
+
+  if (!allowed)
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        Loading...
       </div>
-    </div>
+    );
+
+  return (
+    <ProtectedLayer
+      role="admin"
+      onUnauthorized={() => {
+        clearAuth();
+        router.replace(ROUTE.adminLogin);
+        toast.info("Vui lòng đăng nhập lại");
+      }}
+    >
+      <div className="p-6 h-screen">
+        <div className="flex bg-white rounded-md p-2 size-full shadow-lg">
+          <section className="w-1/6">
+            <AdminSidebar></AdminSidebar>
+          </section>
+          <section className="flex-1 overflow-auto app px-4 py-2">
+            <div className="flex items-center justify-between mb-4 rounded-lg">
+              <h1 className="font-bold text-2xl">
+                {pageTitles.find((item) => item.href == pathname)?.title}
+              </h1>
+              <div className="flex items-center space-x-2">
+                <span className="font-semibold">{data?.data.user.name}</span>
+                <Image
+                  src={data?.data.user.avatarUrl || ""}
+                  alt="Avatar"
+                  height={40}
+                  width={40}
+                  className="rounded-full"
+                />
+              </div>
+            </div>
+            {children}
+          </section>
+        </div>
+      </div>
+    </ProtectedLayer>
   );
 }

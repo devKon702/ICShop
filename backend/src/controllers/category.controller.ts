@@ -99,6 +99,19 @@ class CategoryController {
       );
   };
 
+  public getLeafCategory = async (req: Request, res: Response) => {
+    const categories = await categoryRepository.getLeafCategory();
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          CategoryResponseCode.OK,
+          "Lấy danh mục cấp 3 thành công",
+          categories
+        )
+      );
+  };
+
   getCategoryByName = async (
     req: TypedRequest<any, any, { name: string; limit: number }>,
     res: Response

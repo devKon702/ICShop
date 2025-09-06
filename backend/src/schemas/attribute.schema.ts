@@ -24,3 +24,7 @@ export const updateAttributeSchema = z.object({
 export const deleteAttributeSchema = z.object({
   params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
 });
+
+export const getAttributeByCategoryId = z.object({
+  params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
+});

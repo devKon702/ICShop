@@ -1,6 +1,6 @@
 "use client";
 import AddressItem from "@/components/features/address/address-item";
-import AddressForm from "@/components/forms/address-form";
+import AddressForm from "@/components/forms/address/address-form";
 import {
   Dialog,
   DialogContent,

@@ -1,6 +1,6 @@
 "use client";
-import LoginForm from "@/components/forms/login-form";
-import RegisterForm from "@/components/forms/register-form";
+import LoginForm from "@/components/forms/auth/login-form";
+import RegisterForm from "@/components/forms/auth/register-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGlobalContext } from "@/libs/contexts/GlobalContext";

@@ -1,24 +1,24 @@
 import { JWT_CODE } from "@/constants/api-code";
 import env from "@/constants/env";
 import { authService } from "@/libs/services/auth.service";
-import { useTokenStore } from "@/store/token-store";
+import { useAuthStore } from "@/store/auth-store";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 let isRefreshing = false;
 let refreshSubscribers: ((token: string | null) => void)[] = [];
 
-const api = axios.create({
+const apiClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-  const token = useTokenStore.getState().token;
+apiClient.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
   (res) => res,
   async (err: AxiosError<{ code: string }>) => {
     const response = err.response;
@@ -34,8 +34,7 @@ api.interceptors.response.use(
         authService
           .refresh()
           .then(({ data }) => {
-            localStorage.setItem("token", data.token);
-            useTokenStore.getState().actions.setToken(data.token);
+            useAuthStore.getState().actions.setToken(data.token);
             refreshSubscribers.forEach((cb) => cb(data.token));
           })
           .catch(() => {
@@ -52,7 +51,7 @@ api.interceptors.response.use(
           if (config && token) {
             // config?.headers?.Authorization = `Bearer ${token}`;
             config.headers!.Authorization = `Bearer ${token}`;
-            resolve(api(config));
+            resolve(apiClient(config));
           }
 
           reject(err.response);
@@ -63,4 +62,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default apiClient;

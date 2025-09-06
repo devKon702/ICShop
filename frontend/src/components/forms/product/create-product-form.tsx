@@ -1,0 +1,720 @@
+"use client";
+
+import Input from "@/components/common/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
+import { z } from "zod";
+import React, { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { CategoryBaseSchema } from "@/libs/schemas/category.schema";
+import SearchCombobox from "@/components/common/search-combobox";
+import { Button } from "@/components/ui/button";
+import {
+  Blocks,
+  ImagePlus,
+  Images,
+  Plus,
+  Tag,
+  Trash,
+  Wallet,
+} from "lucide-react";
+import Separator from "@/components/common/separator";
+import Image from "next/image";
+import { Span } from "next/dist/trace";
+
+// === Schema bạn đã định nghĩa ===
+const wholesaleSchema = z
+  .object({
+    min_quantity: z.coerce
+      .number()
+      .int("Phải là kiểu số nguyên")
+      .min(1, "Tối thiếu 1"),
+    max_quantity: z.coerce.number().int("Phải là kiểu số nguyên"),
+    unit: z.coerce.string().nonempty(),
+    quantity_step: z.coerce
+      .number()
+      .int("Phải là kiểu số nguyên")
+      .min(1, "Bội số tối thiểu là 1"),
+    vat: z.coerce.number().min(0, "Giá thuế tối thiểu là 0%"),
+    details: z
+      .array(
+        z
+          .object({
+            min: z.coerce
+              .number()
+              .int("Phải là kiểu số nguyên")
+              .min(1, "Tối thiểu là 0"),
+            max: z.coerce.number().int("Phải là kiểu số nguyên").optional(),
+            price: z.coerce.number().min(0, "Giá tối thiểu là 0"),
+            desc: z.string().nonempty(),
+          })
+          .refine(
+            (val) => val.max == null || val.min <= val.max,
+            "Khoảng giá không hợp lệ"
+          )
+      )
+      .min(1, "Tối thiểu có một giá bán"),
+  })
+  .refine(
+    (data) => data.max_quantity >= data.min_quantity,
+    "Phạm vi số lượng mua không hợp lệ"
+  );
+
+const createProductSchema = z.object({
+  name: z.string().nonempty(),
+  categoryId: z.coerce.number(),
+  desc: z.string().optional(),
+  datasheetLink: z.string().max(250, "Tối đa 250 kí tự").optional(),
+  weight: z.coerce
+    .number()
+    .int("Phải là kiểu số nguyên")
+    .min(0, "Cân nặng tối thiểu 0 gram")
+    .max(1000 * 1000, "Cân nặng tối đa 1 tấn"),
+  wholesale: wholesaleSchema,
+  valueIds: z.array(
+    z.coerce.number().int("ID là kiểu số nguyên").min(1, "ID không hợp lệ")
+  ),
+});
+
+type FormValues = z.infer<typeof createProductSchema>;
+
+export default function CreateProductForm({
+  onSuccess,
+  categories,
+}: {
+  onSuccess: () => void;
+  categories: z.infer<typeof CategoryBaseSchema>[];
+}) {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(createProductSchema),
+    defaultValues: {
+      name: "",
+      categoryId: 0,
+      desc: "",
+      datasheetLink: "",
+      weight: 0,
+      wholesale: {
+        min_quantity: 1,
+        max_quantity: 999,
+        unit: "cái",
+        quantity_step: 1,
+        vat: 0,
+        details: [{ min: 1, max: undefined, price: 0, desc: "1+" }],
+      },
+      valueIds: [],
+    },
+    mode: "onSubmit",
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "wholesale.details",
+  });
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit((data) => {
+          console.log("Submit:", data);
+        })}
+      >
+        <div className="space-y-2 max-h-96 overflow-y-scroll app px-4 mt-2">
+          {/* Basics */}
+          <BasicSection form={form} categories={categories}></BasicSection>
+          {/* Attributes */}
+          <AttributeSection
+            form={form}
+            categories={categories}
+          ></AttributeSection>
+
+          {/* Wholesale */}
+          <WholesaleSection
+            fields={fields}
+            form={form}
+            onAdd={append}
+            onRemove={remove}
+          ></WholesaleSection>
+          {form.formState.errors.wholesale && (
+            <p className="text-red-400">
+              {form.formState.errors.wholesale.message}
+            </p>
+          )}
+          {/* Ảnh */}
+          <MediaSection onAdd={() => {}} onChange={() => {}}></MediaSection>
+        </div>
+        <Separator />
+        <Button
+          type="submit"
+          className="flex ml-auto mr-4 my-4 px-4 py-2 text-white rounded-md font-semibold cursor-pointer opacity-80 hover:opacity-100"
+        >
+          Tạo sản phẩm
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+export function LocalFormLabel({ children }: { children: string }) {
+  return <FormLabel className="opacity-50  mt-2">{children}</FormLabel>;
+}
+
+export function BasicSection({
+  form,
+  categories,
+}: {
+  form: UseFormReturn<FormValues>;
+  categories: z.infer<typeof CategoryBaseSchema>[];
+}) {
+  return (
+    <section className="p-3 bg-white rounded-lg">
+      <p className="font-semibold flex space-x-1 mb-3">
+        <Blocks /> <span>Cơ bản</span>
+      </p>
+      <FormField
+        name="name"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FormItem>
+            <LocalFormLabel>Tên sản phẩm</LocalFormLabel>
+            <FormControl>
+              <Input {...field} isError={fieldState.invalid} type="text" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        name="desc"
+        control={form.control}
+        render={({ field }) => (
+          <FormItem>
+            <LocalFormLabel>Mô tả</LocalFormLabel>
+            <FormControl>
+              <Textarea
+                className="w-full border rounded-md p-2"
+                {...field}
+                value={field.value || undefined}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        name="datasheetLink"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FormItem>
+            <LocalFormLabel>Link datasheet</LocalFormLabel>
+            <FormControl>
+              <Input {...field} type="text" isError={fieldState.invalid} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <div className="w-full flex justify-start space-x-2">
+        <FormField
+          name="weight"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <LocalFormLabel>Trọng lượng</LocalFormLabel>
+              <FormControl>
+                <div className="flex space-x items-center space-x-2">
+                  <Input
+                    type="number"
+                    {...field}
+                    placeholder="Khối lượng"
+                    isError={fieldState.invalid}
+                    min="0"
+                    icon={<span className="px-4 border-l-2">gram</span>}
+                    iconAlign="end"
+                    onChange={(e) =>
+                      form.setValue("weight", Number(e.currentTarget.value))
+                    }
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          name="categoryId"
+          control={form.control}
+          render={({}) => (
+            <FormItem className="flex-1">
+              <LocalFormLabel>Danh mục</LocalFormLabel>
+              <FormControl>
+                <SearchCombobox
+                  searchPlaceholder="Chọn danh mục"
+                  list={categories.map((item) => ({
+                    value: item.id,
+                    label: item.name,
+                  }))}
+                  onItemSelect={(item) =>
+                    form.setValue("categoryId", item.value as number)
+                  }
+                  className="bg-white p-5 rounded-md w-full"
+                ></SearchCombobox>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </section>
+  );
+}
+
+export function AttributeSection({
+  form,
+  categories,
+}: {
+  form: UseFormReturn<FormValues>;
+  categories: z.infer<typeof CategoryBaseSchema>[];
+}) {
+  return (
+    <section className="p-3 bg-white rounded-lg">
+      <p className="font-semibold flex space-x-1 mb-3">
+        <Tag /> <span>Thông số</span>
+      </p>
+
+      <div className="flex space-x-2 items-center mb-2">
+        <SearchCombobox
+          searchPlaceholder="Chọn loại"
+          list={categories.map((item) => ({
+            value: item.id,
+            label: item.name,
+          }))}
+          onItemSelect={(item) =>
+            form.setValue("categoryId", item.value as number)
+          }
+          className="bg-white p-5 rounded-md w-full flex-1"
+        ></SearchCombobox>
+        <SearchCombobox
+          searchPlaceholder="Chọn giá trị"
+          list={categories.map((item) => ({
+            value: item.id,
+            label: item.name,
+          }))}
+          onItemSelect={(item) =>
+            form.setValue("categoryId", item.value as number)
+          }
+          className="bg-white p-5 rounded-md w-full flex-1"
+        ></SearchCombobox>
+        <div className="h-full bg-red-100 p-2 rounded-sm">
+          <Trash className="text-red-400 cursor-pointer hover:text-red-500" />
+        </div>
+      </div>
+      <div className="w-full p-2 flex space-x-2 bg-primary-light text-primary font-semibold round-sm cursor-pointer">
+        <Plus /> <span>Thông số</span>
+      </div>
+    </section>
+  );
+}
+
+export function WholesaleSection({
+  form,
+  fields,
+  onAdd,
+  onRemove,
+}: {
+  form: UseFormReturn<FormValues>;
+  fields: (z.infer<typeof wholesaleSchema>["details"][number] & {
+    id: string;
+  })[];
+  onAdd: (data: {
+    min: number;
+    max?: number;
+    desc: string;
+    price: number;
+  }) => void;
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <section className="p-3 bg-white rounded-lg">
+      <p className="font-semibold flex space-x-1 mb-3">
+        <Wallet /> <span>Bảng giá</span>
+      </p>
+      <div className="flex space-x-2">
+        <FormField
+          name="wholesale.min_quantity"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FormItem className="flex-1">
+              <LocalFormLabel>Mua tối thiểu</LocalFormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  isError={fieldState.invalid}
+                  {...field}
+                  min="1"
+                  onChange={(e) =>
+                    form.setValue(
+                      "wholesale.min_quantity",
+                      Number(e.currentTarget.value)
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          name="wholesale.max_quantity"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FormItem className="flex-1">
+              <LocalFormLabel>Mua tối đa</LocalFormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  isError={fieldState.invalid}
+                  min="1"
+                  onChange={(e) =>
+                    form.setValue(
+                      "wholesale.max_quantity",
+                      Number(e.currentTarget.value)
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          name="wholesale.unit"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FormItem className="flex-1">
+              <LocalFormLabel>Đơn vị</LocalFormLabel>
+              <FormControl>
+                <Input type="text" {...field} isError={fieldState.invalid} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="wholesale.quantity_step"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FormItem className="flex-1">
+              <LocalFormLabel>Bội số</LocalFormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  isError={fieldState.invalid}
+                  min="1"
+                  onChange={(e) =>
+                    form.setValue(
+                      "wholesale.quantity_step",
+                      Number(e.currentTarget.value)
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          name="wholesale.vat"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FormItem className="flex-1">
+              <LocalFormLabel>VAT (%)</LocalFormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  isError={fieldState.invalid}
+                  min="0"
+                  onChange={(e) =>
+                    form.setValue(
+                      "wholesale.vat",
+                      Number(e.currentTarget.value)
+                    )
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Details array */}
+      <Separator className="my-4" />
+      <div className="flex pr-10 mb-2">
+        <p className="flex-1 font-semibold opacity-50 text-sm ">Từ</p>
+        <p className="flex-1 font-semibold opacity-50 text-sm ">Giá</p>
+        <p className="flex-1 font-semibold opacity-50 text-sm ">Mô tả</p>
+      </div>
+      {fields.map((fieldItem, index: number) => (
+        <div key={fieldItem.id} className="flex space-x-2 items-center mb-2">
+          <FormField
+            control={form.control}
+            name={`wholesale.details.${index}.min`}
+            render={({ field, fieldState }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                  <Input
+                    type="number"
+                    isError={false}
+                    placeholder="Min"
+                    min="1"
+                    {...field}
+                    onChange={(e) => {
+                      form.setValue(
+                        `wholesale.details.${index}.min`,
+                        Number(e.currentTarget.value)
+                      );
+                      form.setValue(
+                        `wholesale.details.${index}.desc`,
+                        `${e.currentTarget.value}+`
+                      );
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`wholesale.details.${index}.price`}
+            render={({ field, fieldState }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                  <Input
+                    type="number"
+                    isError={false}
+                    placeholder="Giá"
+                    min="0"
+                    {...field}
+                    icon={<span className="px-4 border-l-2 shrink-0">VND</span>}
+                    iconAlign="end"
+                    onChange={(e) => {
+                      form.setValue(
+                        `wholesale.details.${index}.price`,
+                        Number(e.currentTarget.value)
+                      );
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`wholesale.details.${index}.desc`}
+            render={({ field, fieldState }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                  <Input
+                    type="text"
+                    isError={false}
+                    placeholder="Mô tả"
+                    {...field}
+                    disable
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="h-full bg-red-100 p-2 rounded-sm">
+            <Trash
+              className="text-red-400 cursor-pointer hover:text-red-500"
+              onClick={() => onRemove(index)}
+            />
+          </div>
+        </div>
+      ))}
+
+      <div
+        className="w-full p-2 flex space-x-2 bg-primary-light text-primary font-semibold round-sm cursor-pointer"
+        onClick={() => {
+          const last = form.getValues("wholesale.details").findLast(() => true);
+          const nextMin = last ? Number(last.min) + 1 : 1;
+          onAdd({ min: nextMin, desc: `${nextMin}+`, price: 0 });
+        }}
+      >
+        <Plus /> <span>Giá</span>
+      </div>
+    </section>
+  );
+}
+
+export function MediaSection({
+  onAdd,
+  onChange,
+}: {
+  onAdd: (files: FileList) => void;
+  onChange: (index: number, file: FileList | null) => void;
+}) {
+  return (
+    <section className="p-3 bg-white rounded-lg mb-2">
+      <p className="font-semibold flex space-x-1 mb-3">
+        <Images /> <span>Ảnh</span>
+      </p>
+      <div className="flex space-x-4">
+        <div>
+          <label
+            htmlFor="poster"
+            className="relative flex rounded-md border-1 size-44 cursor-pointer items-center justify-center space-x-2 bg-primary-light text-primary overflow-hidden"
+          >
+            {/* <Upload /> <span className="font-semibold">Tải ảnh</span> */}
+            <Image
+              src={"http://localhost:3001/uploads/1755703601581.jpeg"}
+              width={200}
+              height={200}
+              alt="Poster"
+              className="absolute rounded-md inset-0"
+            />
+          </label>
+          <input id="poster" type="file" accept="image/*" hidden />
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+          {[...Array(3)].map((item, index) => (
+            <div key={index}>
+              <label
+                htmlFor={`gallery-${index}`}
+                className="relative flex rounded-md border-1 size-20 cursor-pointer items-center justify-center space-x-2 bg-primary-light text-primary"
+              >
+                <ImagePlus />
+                <Image
+                  src={"http://localhost:3001/uploads/1755703601581.jpeg"}
+                  width={100}
+                  height={100}
+                  alt="Poster"
+                  className="absolute rounded-md inset-0"
+                />
+              </label>
+              <input
+                id={`gallery-${index}`}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => onChange(index, e.currentTarget.files)}
+              />
+            </div>
+          ))}
+          <div>
+            <label
+              htmlFor={`gallery`}
+              className="relative flex rounded-md border-1 size-20 cursor-pointer items-center justify-center space-x-2 bg-primary-light text-primary"
+            >
+              <ImagePlus />
+            </label>
+            <input
+              id={`gallery`}
+              type="file"
+              accept="image/*"
+              hidden
+              multiple={true}
+              onChange={(e) =>
+                !!e.currentTarget.files && onAdd(e.currentTarget.files)
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function CreateDetailSection({
+  onCreate,
+}: {
+  onCreate: (detail: {
+    min: number;
+    max: number | undefined;
+    price: number;
+    desc: string | undefined;
+  }) => void;
+}) {
+  const [min, setMin] = useState<number>(0);
+  const [max, setMax] = useState<number | undefined>(undefined);
+  const [price, setPrice] = useState<number>(0);
+  const [desc, setDesc] = useState<string>("");
+  return (
+    <div className="border rounded w-full space-y-2 flex-col">
+      <div className="flex w-full space-x-2">
+        <div className="flex-1">
+          <label className="block font-semibold text-sm">Min</label>
+          <input
+            type="number"
+            value={min}
+            onChange={(e) => setMin(Number(e.target.value))}
+            className="border-2 py-2 rounded-lg px-2 w-full"
+          />
+        </div>
+
+        <div className="flex-1">
+          <label className="block font-semibold text-sm">Max</label>
+          <input
+            type="number"
+            value={max ?? ""}
+            onChange={(e) =>
+              setMax(e.target.value === "" ? undefined : Number(e.target.value))
+            }
+            className="border-2 py-2 rounded-lg px-2 w-full"
+          />
+        </div>
+
+        <div className="flex-1">
+          <label className="block font-semibold text-sm">Giá</label>
+          <input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(Number(e.target.value))}
+            className="border-2 py-2 rounded-lg px-2 w-full"
+          />
+        </div>
+
+        <div className="flex-1">
+          <label className="block font-semibold text-sm">Mô tả</label>
+          <input
+            type="text"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            className="border-2 py-2 rounded-lg px-2 w-full"
+          />
+        </div>
+      </div>
+      <Button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          onCreate({ min, max, price, desc });
+        }}
+        className="bg-primary text-white px-4 rounded-lg ml-auto flex cursor-pointer"
+      >
+        <Plus /> Giá
+      </Button>
+    </div>
+  );
+}

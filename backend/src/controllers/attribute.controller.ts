@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { TokenPayload } from "../types/token-payload";
 import {
   createAttributeSchema,
+  getAttributeByCategoryId,
   updateAttributeSchema,
 } from "../schemas/attribute.schema";
 import attributeRepository from "../repositories/attribute.repository";
@@ -84,6 +85,22 @@ export class AttributeController {
       .status(HttpStatus.OK)
       .json(
         successResponse(AttributeResponseCode.OK, "Xóa thông số thành công")
+      );
+  };
+
+  public getByCategoryId = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+    } = getAttributeByCategoryId.parse(req);
+    const attributes = await attributeRepository.getByCategoryId(id);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AttributeResponseCode.OK,
+          "Lấy thông số thành công",
+          attributes
+        )
       );
   };
 }

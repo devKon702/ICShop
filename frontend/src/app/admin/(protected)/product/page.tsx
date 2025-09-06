@@ -8,22 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
   Pagination,
@@ -32,74 +18,46 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Textarea } from "@/components/ui/textarea";
-
-const categories = [
-  { id: 0, name: "Tất cả" },
-  { id: 1, name: "Vi mạch" },
-  { id: 2, name: "Cảm biến" },
-  { id: 3, name: "Nguồn điện" },
-];
-
-const mockProducts = [
-  {
-    id: 1,
-    name: "Vi mạch ATmega328",
-    categoryId: 1,
-    slug: "vi-mach-atmega328",
-    unit: "cái",
-    vat: 10,
-    minQuantity: 1,
-    maxQuantity: 100,
-    quantityStep: 1,
-    isActive: true,
-    wholesales: [
-      { min: 1, max: 9, price: 20000 },
-      { min: 10, max: 49, price: 18000 },
-      { min: 50, max: 100, price: 16000 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Cảm biến nhiệt độ DHT11",
-    categoryId: 2,
-    slug: "cam-bien-dht11",
-    unit: "cái",
-    vat: 10,
-    minQuantity: 1,
-    maxQuantity: 50,
-    quantityStep: 1,
-    isActive: true,
-    wholesales: [
-      { min: 1, max: 9, price: 15000 },
-      { min: 10, max: 29, price: 13000 },
-      { min: 30, max: 50, price: 12000 },
-    ],
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import productService from "@/libs/services/product.service";
+import { toast } from "sonner";
+import categoryService from "@/libs/services/category.service";
+import Image from "next/image";
+import { useModalActions } from "@/store/modal-store";
+import SearchCombobox from "@/components/common/search-combobox";
 
 export default function ProductManagementPage() {
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("0");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const { closeModal, openModal } = useModalActions();
 
-  const filteredProducts = mockProducts.filter((product) => {
-    const matchSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.slug.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCategory =
-      selectedCategory === "0" ||
-      product.categoryId === parseInt(selectedCategory);
-    return matchSearch && matchCategory;
+  const [name, cid, order, active, limit, page] = [
+    "",
+    undefined,
+    undefined,
+    undefined,
+    10,
+    1,
+  ];
+  const {
+    data: productData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["product", { name, cid, order, active, limit, page }],
+    queryFn: async () =>
+      productService.filter({ name, cid, order, active, limit, page }),
   });
 
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const { data: categoryData } = useQuery({
+    queryKey: ["category", { level: 3 }],
+    queryFn: categoryService.getLeafCagory,
+  });
+
+  if (isError) {
+    toast.error("Lỗi lọc sản phẩm");
+    return null;
+  }
 
   return (
     <div className="p-4 space-y-4">
@@ -112,83 +70,101 @@ export default function ProductManagementPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div>
-          <Label>Danh mục</Label>
-          <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id.toString()}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button onClick={() => setSelectedProduct({})}>Tạo sản phẩm</Button>
+        {categoryData && (
+          <div>
+            <SearchCombobox
+              list={categoryData.data.map((item) => ({
+                value: item.id.toString(),
+                label: item.name,
+              }))}
+              searchPlaceholder="Danh mục"
+            ></SearchCombobox>
+          </div>
+        )}
+
+        <Button
+          onClick={() => {
+            openModal({
+              type: "createProduct",
+              props: {
+                onSuccess: () => closeModal(),
+                categories: categoryData?.data || [],
+              },
+            });
+          }}
+        >
+          Tạo sản phẩm
+        </Button>
       </div>
 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Mã</TableHead>
+            <TableHead></TableHead>
             <TableHead>Tên sản phẩm</TableHead>
             <TableHead>Danh mục</TableHead>
-            <TableHead>VAT</TableHead>
-            <TableHead>Giá (1+)</TableHead>
+            <TableHead>Đơn giá</TableHead>
             <TableHead>Trạng thái</TableHead>
-            <TableHead>Hành động</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedProducts.map((product) => {
-            const category =
-              categories.find((c) => c.id === product.categoryId)?.name || "-";
-            const basePrice = product.wholesales?.[0]?.price || "-";
-            return (
-              <TableRow key={product.id}>
-                <TableCell>{product.slug}</TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{category}</TableCell>
-                <TableCell>{product.vat}%</TableCell>
-                <TableCell>{basePrice.toLocaleString()}đ</TableCell>
-                <TableCell>{product.isActive ? "Hoạt động" : "Ẩn"}</TableCell>
-                <TableCell>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setSelectedProduct(product)}
-                  >
-                    Chi tiết
-                  </Button>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          {isLoading && !productData ? null : (
+            <>
+              {productData?.data.result.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <Image
+                      src={product.posterUrl || ""}
+                      alt="product poster"
+                      width={40}
+                      height={40}
+                    />
+                  </TableCell>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell>{product.category.name}</TableCell>
+                  <TableCell>{product.price.toLocaleString()}đ</TableCell>
+                  <TableCell>{product.isActive ? "Hoạt động" : "Ẩn"}</TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="outline">
+                      Chi tiết
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </>
+          )}
         </TableBody>
       </Table>
+      {productData && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              Trang {currentPage} /{" "}
+              {Math.ceil(productData?.data.total / productData?.data.limit)}
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  setCurrentPage((p) =>
+                    Math.min(
+                      p + 1,
+                      Math.ceil(productData.data.total / productData.data.limit)
+                    )
+                  )
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
 
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            />
-          </PaginationItem>
-          <PaginationItem>
-            Trang {currentPage} / {totalPages}
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-
-      <Dialog
+      {/* <Dialog
         open={!!selectedProduct}
         onOpenChange={() => setSelectedProduct(null)}
       >
@@ -269,7 +245,7 @@ export default function ProductManagementPage() {
             <Button>Lưu</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

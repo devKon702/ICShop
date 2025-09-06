@@ -1,5 +1,4 @@
 "use client";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import SearchInput from "@/components/common/search-input";
 import React from "react";
 import Link from "next/link";
@@ -10,6 +9,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { useGlobalContext } from "@/libs/contexts/GlobalContext";
+import Image from "next/image";
 
 const accountMenu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -21,9 +21,13 @@ export default function Header() {
   return (
     <div className="flex justify-around items-center p-3 space-x-40 bg-primary">
       <Link href="/">
-        <Avatar className="size-10">
-          <AvatarImage src="/uploads/ic.jpg"></AvatarImage>
-        </Avatar>
+        <Image
+          className="size-10"
+          src="/uploads/ic.jpg"
+          alt="avatar"
+          width={40}
+          height={40}
+        ></Image>
       </Link>
       <SearchInput className="flex-1"></SearchInput>
       <div className="flex space-x-5">

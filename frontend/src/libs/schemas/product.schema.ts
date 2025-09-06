@@ -7,11 +7,12 @@ import {
   DateTimeSchema,
   DecimalString,
 } from "../schemas/shared.schema";
-import { CategorySchema } from "./category.schema";
+import { CategoryBaseSchema, CategorySchema } from "./category.schema";
 import { WholesaleSchema } from "./wholesale.schema";
 import { ProductAttributeSchema } from "./product-attribute.schema";
 import { ProductImageSchema } from "./product-image.schema";
 import { ProductHighlightSchema } from "./product-highlight.schema";
+import { UserBaseSchema } from "@/libs/schemas/user.schema";
 
 export const ProductBaseSchema = z.object({
   id: ID,
@@ -40,3 +41,9 @@ export const ProductSchema = ProductBaseSchema.extend({
   // lược bỏ orderDetails/cartDetails để tránh payload lớn
 });
 export type Product = z.infer<typeof ProductSchema>;
+
+export const FilterProductSchema = ProductBaseSchema.extend({
+  creator: UserBaseSchema,
+  modifier: UserBaseSchema,
+  category: CategoryBaseSchema,
+});

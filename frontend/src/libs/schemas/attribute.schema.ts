@@ -19,3 +19,5 @@ export const AttributeBaseSchema = z.object({
 
 export const AttributeSchema = AttributeBaseSchema;
 export type Attribute = z.infer<typeof AttributeSchema>;
+
+export const CreateAttributeSchema = AttributeBaseSchema;

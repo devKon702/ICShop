@@ -10,6 +10,7 @@ import {
   ApiResponseSchema,
 } from "@/libs/schemas/response.schema";
 import requestHandler from "@/utils/request-handler";
+import { z } from "zod";
 
 export const authService = {
   testToken: async () =>
@@ -20,7 +21,7 @@ export const authService = {
 
   refresh: async () =>
     requestHandler(
-      apiClient.post("/v1/auth/refresh", null, { withCredentials: true }),
+      apiClient.post("/v1/auth/refresh"),
       ApiResponseSchema(RefreshSchema)
     ),
 
@@ -52,4 +53,10 @@ export const authService = {
         const err = ApiErrorResponseSchema.parse(e.response.data.data);
         return err;
       }),
+
+  logout: async () =>
+    requestHandler(
+      apiClient.post("/v1/auth/logout"),
+      ApiResponseSchema(z.null())
+    ),
 };

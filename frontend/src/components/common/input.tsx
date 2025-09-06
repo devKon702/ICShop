@@ -1,13 +1,16 @@
 import { cn } from "@/utils/className";
-import React from "react";
+import React, { HtmlHTMLAttributes } from "react";
 
-interface InputProps {
+interface InputProps extends HtmlHTMLAttributes<HTMLInputElement> {
   className?: string;
-  type: string;
-  icon?: React.ReactElement;
+  type: HTMLInputElement["type"];
+  icon?: React.ReactNode;
   placeholder?: string;
   isError: boolean;
   disable?: boolean;
+  iconAlign?: "start" | "end";
+  min?: string;
+  max?: string;
 }
 
 export default function Input({
@@ -17,23 +20,29 @@ export default function Input({
   placeholder,
   isError,
   disable = false,
+  iconAlign = "start",
+  min,
+  max,
   ...otherProps
 }: InputProps) {
   return (
     <div
-      className={`w-full flex items-center space-x-2 border-2 rounded-sm overflow-hidden ${
+      className={`w-full flex items-center border-2 rounded-sm ${
         isError && "border-red-400"
       }`}
     >
-      {icon}
+      {iconAlign === "start" && icon}
       <input
         type={type}
-        className={cn("outline-none border-none flex-1 p-2", className)}
+        className={cn("outline-none border-none p-2", className)}
         placeholder={placeholder}
         disabled={disable}
+        min={min}
+        max={max}
         {...otherProps}
       />
-      {isError && <i className="bx bx-error-circle text-red-400 px-2"></i>}
+      {iconAlign === "end" && icon}
+      {isError && <i className="bx bx-error-circle text-red-400 ml-2 px-2"></i>}
     </div>
   );
 }

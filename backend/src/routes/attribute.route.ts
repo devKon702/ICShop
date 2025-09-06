@@ -6,12 +6,23 @@ import { validate } from "../middlewares/validate.middleware";
 import {
   createAttributeSchema,
   deleteAttributeSchema,
+  getAttributeByCategoryId,
+  updateAttributeSchema,
 } from "../schemas/attribute.schema";
 import attributeController from "../controllers/attribute.controller";
-import { updateAddressSchema } from "../schemas/address.schema";
 
 const attributeRouter = express.Router();
 const path = "/attribute";
+const adminPath = "/admin/attribute";
+
+// GET /admin/attribute/category/:id
+attributeRouter.get(
+  adminPath + "/category/:id",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(getAttributeByCategoryId),
+  attributeController.getByCategoryId
+);
 
 attributeRouter.post(
   path,
@@ -25,7 +36,7 @@ attributeRouter.put(
   path + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  validate(updateAddressSchema),
+  validate(updateAttributeSchema),
   attributeController.update
 );
 

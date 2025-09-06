@@ -1,5 +1,7 @@
 "use client";
 import { ROUTE } from "@/constants/routes";
+import { authService } from "@/libs/services/auth.service";
+import { useAuthActions } from "@/store/auth-store";
 import {
   CircleArrowLeft,
   LayoutDashboard,
@@ -9,8 +11,9 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
+import { toast } from "sonner";
 
 const sidebarMenu = [
   { href: ROUTE.adminDashboard, title: "Dashboard", icon: <LayoutDashboard /> },
@@ -22,6 +25,8 @@ const sidebarMenu = [
 
 export default function AdminSidebar({}) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { clearAuth } = useAuthActions();
   return (
     <ul className="flex flex-col size-full p-2 border-r-2">
       <p className="font-medium text-2xl px-4">Admin</p>
@@ -42,6 +47,19 @@ export default function AdminSidebar({}) {
       <button
         type="button"
         className="flex space-x-2 justify-start rounded-md p-3 cursor-pointer shadow-lg w-full"
+        onClick={() => {
+          if (confirm("Bạn có muốn đăng xuất không")) {
+            authService
+              .logout()
+              .then(() => {
+                clearAuth();
+                router.replace(ROUTE.adminLogin);
+              })
+              .catch(() => {
+                toast.error("Lỗi");
+              });
+          }
+        }}
       >
         <CircleArrowLeft />
         <span>Đăng xuất</span>

@@ -1,13 +1,14 @@
-import { API_ROUTE } from "@/constants/api-route";
-import { Account } from "@/libs/models/account";
+import apiClient from "@/libs/axios/api-client";
+import { GetMeSchema } from "@/libs/schemas/account.schema";
+import { ApiResponseSchema } from "@/libs/schemas/response.schema";
+import requestHandler from "@/utils/request-handler";
 
-const login = async (email: string, password: string): Promise<Account> => {
-  const res = await fetch(API_ROUTE.auth + "/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  }).then((res) => res.json());
-
-  return res as Account;
+const accountService = {
+  getMe: async () =>
+    requestHandler(
+      apiClient.get("/v1/account/me"),
+      ApiResponseSchema(GetMeSchema)
+    ),
 };
 
-export const accountService = { login };
+export default accountService;

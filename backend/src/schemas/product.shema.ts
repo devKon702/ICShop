@@ -39,7 +39,7 @@ const wholesaleSchema = z
             min: z
               .number()
               .int("Phải là kiểu số nguyên")
-              .min(0, "Tối thiểu là 0"),
+              .min(1, "Tối thiểu là 0"),
             max: z.number().int("Phải là kiểu số nguyên").nullable(),
             price: z.number().min(0, "Giá tối thiểu là 0"),
             desc: z.string().nonempty(),

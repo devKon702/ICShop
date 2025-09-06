@@ -10,7 +10,7 @@ async function requestHandler<T>(
     const res = await request;
     const parsed = schema.safeParse(res.data);
     if (!parsed.success) {
-      throw new Error("INVALID_RESPONSE_SCHEMA");
+      throw parsed.error;
     }
     return parsed.data;
   } catch (err) {

@@ -8,7 +8,7 @@ export const GetCategorySchema = z.object({
 
 export const createCategorySchema = z.object({
   body: z.object({
-    name: z.string().max(100, "Tối đa 100 kí tự"),
+    name: z.string().max(100, "Tối đa 100 kí tự").trim().nonempty(),
     parentId: z.coerce.number().min(1, "ID không hợp lệ").optional(),
   }),
 });

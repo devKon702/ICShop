@@ -30,11 +30,10 @@ class AuthController {
       case Role.USER:
         res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, token, {
           httpOnly: true,
-          sameSite: "strict",
           path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
-          expires: new Date(
-            Date.now() + JWTConfig.JWT_REFRESH_EXPIRE_USER * 1000
-          ),
+          sameSite: "none",
+          secure: false,
+          maxAge: JWTConfig.JWT_REFRESH_EXPIRE_USER * 1000,
         });
         break;
       case Role.ADMIN:
@@ -42,7 +41,9 @@ class AuthController {
         // Tạo session cookie
         res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, token, {
           httpOnly: true,
-          sameSite: "strict",
+          sameSite: "none",
+          secure: false,
+          domain: ".localhost",
           path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
         });
         break;
@@ -147,7 +148,8 @@ class AuthController {
     // Xóa cookie, truyền option giống với khi tạo cookie
     res.clearCookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, {
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "none",
+      secure: false,
       path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
     });
     // Xóa refresh token trong whitelist
@@ -167,6 +169,7 @@ class AuthController {
     try {
       // Lấy refresh token từ cookie
       const token = req.cookies[JWTConfig.JWT_REFRESH_COOKIE_NAME];
+      console.log(req.cookies);
       // Không có token
       if (!token)
         throw new JWTError(
@@ -201,13 +204,11 @@ class AuthController {
       // Tạo nơi lưu trữ refresh token
       this.createCookieToken(res, refreshToken, account.role as Role);
 
-      res
-        .status(HttpStatus.OK)
-        .json(
-          successResponse(AuthResponseCode.OK, "Làm mới token thành công", {
-            token: accessToken,
-          })
-        );
+      res.status(HttpStatus.OK).json(
+        successResponse(AuthResponseCode.OK, "Làm mới token thành công", {
+          token: accessToken,
+        })
+      );
     } catch (err) {
       throw err;
     }

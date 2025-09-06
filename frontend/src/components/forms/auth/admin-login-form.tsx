@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/form";
 import { ROUTE } from "@/constants/routes";
 import { authService } from "@/libs/services/auth.service";
-import { useTokenActions } from "@/store/token-store";
-import { useUser, useUserActions } from "@/store/user-store";
+import { useUser, useAuthActions } from "@/store/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
@@ -25,8 +24,7 @@ const formSchema = z.object({
 });
 
 export default function AdminLoginForm() {
-  const { setUser } = useUserActions();
-  const { setToken } = useTokenActions();
+  const { setUser, setToken } = useAuthActions();
   const user = useUser();
   const router = useRouter();
   useEffect(() => {

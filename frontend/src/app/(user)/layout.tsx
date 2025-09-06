@@ -15,12 +15,12 @@ export default async function UserLayout({
   children: React.ReactNode;
 }>) {
   const categories = await categoryService.getCategoryOverview();
-  if (!categories) notFound();
+  // if (!categories) notFound();
   return (
     <UserProvider>
       <>
         <Header></Header>
-        <CategoryBar categories={categories}></CategoryBar>
+        {/* <CategoryBar categories={categories}></CategoryBar> */}
         <TopBreadcrump></TopBreadcrump>
         <div className="mx-24 my-2">{children}</div>
         <Footer></Footer>

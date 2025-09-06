@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
 
   // Not allow to
   if (hostname === "localhost:3000" && url.pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/", req.url)); // hoặc 404
+    return NextResponse.redirect("localhost:3000"); // hoặc 404
   }
 
   // Nếu là admin subdomain nhưng không vào route admin thì chuyển hướng

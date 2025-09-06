@@ -89,12 +89,23 @@ class CategoryRepository {
       },
       include: {
         children: {
-          include: { children: true },
+          include: {
+            children: {
+              include: {
+                attributes: { include: { values: true } },
+              },
+            },
+          },
         },
       },
     });
   };
 
+  public getLeafCategory = async () => {
+    return prisma.category.findMany({
+      where: { level: 3 },
+    });
+  };
   // ?
   findByName = async (search: string, limit: number = 10) => {
     return prisma.category.findMany({
