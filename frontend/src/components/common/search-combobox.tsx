@@ -18,27 +18,30 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/utils/className";
 
-interface Props extends React.HTMLAttributes<HTMLButtonElement> {
+interface Props<T extends string | number>
+  extends React.HTMLAttributes<HTMLButtonElement> {
   list: {
-    value: string | number;
+    value: T;
     label: string;
   }[];
   searchPlaceholder: string;
-  onItemSelect?: (item: Props["list"][number]) => void;
-  defaultItemIndex?: number;
+  onItemSelect?: (item: Props<T>["list"][number]) => void;
+  initialValue?: T | null;
+  disableValues?: T[];
 }
 
-export default function SearchCombobox({
+export default function SearchCombobox<T extends string | number>({
   list,
   searchPlaceholder,
   onItemSelect,
-  defaultItemIndex,
+  initialValue = null,
   className,
-}: Props) {
+  disableValues = [],
+}: Props<T>) {
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<Props["list"][number] | null>(
-    defaultItemIndex != undefined ? list[defaultItemIndex] : null
-  );
+  const [selected, setSelected] = React.useState<
+    Props<T>["list"][number] | null
+  >(list.find((item) => item.value === initialValue) || null);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={false}>
@@ -63,6 +66,10 @@ export default function SearchCombobox({
                 <CommandItem
                   key={item.value}
                   value={item.label}
+                  disabled={
+                    disableValues.includes(item.value) ||
+                    item.value == selected?.value
+                  }
                   onSelect={() => {
                     setOpen(false);
                     setSelected(item);

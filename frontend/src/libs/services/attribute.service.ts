@@ -2,6 +2,7 @@ import apiClient from "@/libs/axios/api-client";
 import {
   AttributeBaseSchema,
   CreateAttributeSchema,
+  GetAttributeListWithValues,
 } from "@/libs/schemas/attribute.schema";
 import { ApiResponseSchema } from "@/libs/schemas/response.schema";
 import requestHandler from "@/utils/request-handler";
@@ -24,6 +25,12 @@ const attributeService = {
     requestHandler(
       apiClient.delete("/v1/attribute/" + id),
       ApiResponseSchema(z.null().optional())
+    ),
+
+  getByCategoryId: async (categoryId: number) =>
+    requestHandler(
+      apiClient.get("/v1/admin/attribute/category/" + categoryId),
+      ApiResponseSchema(GetAttributeListWithValues)
     ),
 };
 

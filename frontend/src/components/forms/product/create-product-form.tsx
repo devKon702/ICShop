@@ -9,10 +9,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { nanoid } from "nanoid";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { CategoryBaseSchema } from "@/libs/schemas/category.schema";
 import SearchCombobox from "@/components/common/search-combobox";
@@ -28,17 +29,21 @@ import {
 } from "lucide-react";
 import Separator from "@/components/common/separator";
 import Image from "next/image";
-import { Span } from "next/dist/trace";
+import { useQuery } from "@tanstack/react-query";
+import attributeService from "@/libs/services/attribute.service";
+import { GetAttributeListWithValues } from "@/libs/schemas/attribute.schema";
 
 // === Schema bạn đã định nghĩa ===
 const wholesaleSchema = z
   .object({
     min_quantity: z.coerce
-      .number()
+      .number({ message: "Không bỏ trống" })
       .int("Phải là kiểu số nguyên")
       .min(1, "Tối thiếu 1"),
     max_quantity: z.coerce.number().int("Phải là kiểu số nguyên"),
-    unit: z.coerce.string().nonempty(),
+    unit: z.coerce
+      .string({ message: "Không bỏ trống" })
+      .nonempty("Không bỏ trống"),
     quantity_step: z.coerce
       .number()
       .int("Phải là kiểu số nguyên")
@@ -69,12 +74,12 @@ const wholesaleSchema = z
   );
 
 const createProductSchema = z.object({
-  name: z.string().nonempty(),
-  categoryId: z.coerce.number(),
+  name: z.string({ message: "Không bỏ trống" }).nonempty("Không bỏ trống"),
+  categoryId: z.coerce.number({ message: "Chọn một danh mục" }),
   desc: z.string().optional(),
   datasheetLink: z.string().max(250, "Tối đa 250 kí tự").optional(),
   weight: z.coerce
-    .number()
+    .number({ message: "Không bỏ trống" })
     .int("Phải là kiểu số nguyên")
     .min(0, "Cân nặng tối thiểu 0 gram")
     .max(1000 * 1000, "Cân nặng tối đa 1 tấn"),
@@ -87,7 +92,6 @@ const createProductSchema = z.object({
 type FormValues = z.infer<typeof createProductSchema>;
 
 export default function CreateProductForm({
-  onSuccess,
   categories,
 }: {
   onSuccess: () => void;
@@ -96,10 +100,10 @@ export default function CreateProductForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(createProductSchema),
     defaultValues: {
-      name: "",
-      categoryId: 0,
-      desc: "",
-      datasheetLink: "",
+      // name: "",
+      // categoryId: 0,
+      // desc: "",
+      // datasheetLink: "",
       weight: 0,
       wholesale: {
         min_quantity: 1,
@@ -113,10 +117,21 @@ export default function CreateProductForm({
     },
     mode: "onSubmit",
   });
+  const categoryIdWatch = form.watch("categoryId");
 
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: details,
+    append: detailsAppend,
+    remove: detailsRemove,
+  } = useFieldArray({
     control: form.control,
     name: "wholesale.details",
+  });
+
+  const { data: attributes, isLoading: isAttributeLoading } = useQuery({
+    queryKey: ["attribute", { categoryId: categoryIdWatch }],
+    queryFn: () => attributeService.getByCategoryId(categoryIdWatch),
+    enabled: !!categoryIdWatch,
   });
 
   return (
@@ -132,15 +147,17 @@ export default function CreateProductForm({
           {/* Attributes */}
           <AttributeSection
             form={form}
-            categories={categories}
+            attributes={
+              isAttributeLoading || !attributes?.data ? [] : attributes.data
+            }
           ></AttributeSection>
 
           {/* Wholesale */}
           <WholesaleSection
-            fields={fields}
+            fields={details}
             form={form}
-            onAdd={append}
-            onRemove={remove}
+            onAdd={detailsAppend}
+            onRemove={detailsRemove}
           ></WholesaleSection>
           {form.formState.errors.wholesale && (
             <p className="text-red-400">
@@ -174,77 +191,19 @@ export function BasicSection({
   categories: z.infer<typeof CategoryBaseSchema>[];
 }) {
   return (
-    <section className="p-3 bg-white rounded-lg">
-      <p className="font-semibold flex space-x-1 mb-3">
-        <Blocks /> <span>Cơ bản</span>
-      </p>
-      <FormField
-        name="name"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <FormItem>
-            <LocalFormLabel>Tên sản phẩm</LocalFormLabel>
-            <FormControl>
-              <Input {...field} isError={fieldState.invalid} type="text" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        name="desc"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <LocalFormLabel>Mô tả</LocalFormLabel>
-            <FormControl>
-              <Textarea
-                className="w-full border rounded-md p-2"
-                {...field}
-                value={field.value || undefined}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        name="datasheetLink"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <FormItem>
-            <LocalFormLabel>Link datasheet</LocalFormLabel>
-            <FormControl>
-              <Input {...field} type="text" isError={fieldState.invalid} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <div className="w-full flex justify-start space-x-2">
+    <>
+      <section className="p-3 bg-white rounded-lg">
+        <p className="font-semibold flex space-x-1 mb-3">
+          <Blocks /> <span>Cơ bản</span>
+        </p>
         <FormField
-          name="weight"
+          name="name"
           control={form.control}
           render={({ field, fieldState }) => (
             <FormItem>
-              <LocalFormLabel>Trọng lượng</LocalFormLabel>
+              <LocalFormLabel>Tên sản phẩm</LocalFormLabel>
               <FormControl>
-                <div className="flex space-x items-center space-x-2">
-                  <Input
-                    type="number"
-                    {...field}
-                    placeholder="Khối lượng"
-                    isError={fieldState.invalid}
-                    min="0"
-                    icon={<span className="px-4 border-l-2">gram</span>}
-                    iconAlign="end"
-                    onChange={(e) =>
-                      form.setValue("weight", Number(e.currentTarget.value))
-                    }
-                  />
-                </div>
+                <Input {...field} isError={fieldState.invalid} type="text" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -252,76 +211,227 @@ export function BasicSection({
         />
 
         <FormField
-          name="categoryId"
+          name="desc"
           control={form.control}
-          render={({}) => (
-            <FormItem className="flex-1">
-              <LocalFormLabel>Danh mục</LocalFormLabel>
+          render={({ field }) => (
+            <FormItem>
+              <LocalFormLabel>Mô tả</LocalFormLabel>
               <FormControl>
-                <SearchCombobox
-                  searchPlaceholder="Chọn danh mục"
-                  list={categories.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                  }))}
-                  onItemSelect={(item) =>
-                    form.setValue("categoryId", item.value as number)
-                  }
-                  className="bg-white p-5 rounded-md w-full"
-                ></SearchCombobox>
+                <Textarea
+                  className="w-full border rounded-md p-2"
+                  {...field}
+                  value={field.value || undefined}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-      </div>
-    </section>
+
+        <FormField
+          name="datasheetLink"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <LocalFormLabel>Link datasheet</LocalFormLabel>
+              <FormControl>
+                <Input {...field} type="text" isError={fieldState.invalid} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="w-full flex justify-start item-start space-x-2">
+          <FormField
+            name="weight"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <LocalFormLabel>Trọng lượng</LocalFormLabel>
+                <FormControl>
+                  <div className="flex space-x items-center space-x-2">
+                    <Input
+                      type="number"
+                      {...field}
+                      placeholder="Khối lượng"
+                      isError={fieldState.invalid}
+                      min="0"
+                      icon={<span className="px-4 border-l-2">gram</span>}
+                      iconAlign="end"
+                      onChange={(e) =>
+                        form.setValue("weight", Number(e.currentTarget.value))
+                      }
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="categoryId"
+            control={form.control}
+            render={({ fieldState }) => (
+              <FormItem className="flex-1">
+                <LocalFormLabel>Danh mục</LocalFormLabel>
+                <FormControl>
+                  <SearchCombobox
+                    searchPlaceholder="Chọn danh mục"
+                    list={categories.map((item) => ({
+                      value: item.id,
+                      label: item.name,
+                    }))}
+                    onItemSelect={(item) =>
+                      form.setValue("categoryId", item.value as number)
+                    }
+                    className={`bg-white p-5 rounded-md w-full ${
+                      fieldState.error && "border-red-400 text-red-300"
+                    }`}
+                  ></SearchCombobox>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+      </section>
+    </>
   );
 }
 
 export function AttributeSection({
   form,
-  categories,
+  attributes,
 }: {
   form: UseFormReturn<FormValues>;
-  categories: z.infer<typeof CategoryBaseSchema>[];
+  attributes: z.infer<typeof GetAttributeListWithValues>;
 }) {
+  // Contain list of choosed attribute + unique id for rendering
+  const [rowDatas, setRowDatas] = useState<
+    { id: string; attribute: (typeof attributes)[number] | undefined }[]
+  >([{ id: nanoid(), attribute: undefined }]);
+
+  // Use for delete last valueId when change/delete
+  const [selectedPairs, setSelectedPairs] = useState<
+    { attributeId: number; valueId: number }[]
+  >([]);
+
+  useEffect(() => {
+    console.log(selectedPairs);
+    form.setValue(
+      "valueIds",
+      selectedPairs.map((item) => item.valueId)
+    );
+  }, [selectedPairs, form]);
+
   return (
     <section className="p-3 bg-white rounded-lg">
       <p className="font-semibold flex space-x-1 mb-3">
         <Tag /> <span>Thông số</span>
       </p>
 
-      <div className="flex space-x-2 items-center mb-2">
-        <SearchCombobox
-          searchPlaceholder="Chọn loại"
-          list={categories.map((item) => ({
-            value: item.id,
-            label: item.name,
-          }))}
-          onItemSelect={(item) =>
-            form.setValue("categoryId", item.value as number)
-          }
-          className="bg-white p-5 rounded-md w-full flex-1"
-        ></SearchCombobox>
-        <SearchCombobox
-          searchPlaceholder="Chọn giá trị"
-          list={categories.map((item) => ({
-            value: item.id,
-            label: item.name,
-          }))}
-          onItemSelect={(item) =>
-            form.setValue("categoryId", item.value as number)
-          }
-          className="bg-white p-5 rounded-md w-full flex-1"
-        ></SearchCombobox>
-        <div className="h-full bg-red-100 p-2 rounded-sm">
-          <Trash className="text-red-400 cursor-pointer hover:text-red-500" />
+      {rowDatas.map((row, index) => (
+        <div key={row.id}>
+          <div className="flex space-x-2 items-center mb-2">
+            {/* Combobox for choosing attribute */}
+            <SearchCombobox
+              searchPlaceholder="Chọn loại"
+              list={attributes
+                .filter(
+                  (attr) =>
+                    attr.id === row.attribute?.id ||
+                    !rowDatas.map((r) => r.attribute?.id || 0).includes(attr.id)
+                )
+                .map((attr) => ({
+                  value: attr.id,
+                  label: attr.name,
+                }))}
+              initialValue={row.attribute?.id}
+              onItemSelect={(item) => {
+                const lastAttribute = row.attribute;
+                const selectedAttribute = attributes.find(
+                  (attr) => attr.id === item.value
+                );
+                // Cập nhật lại attribute cho row này
+                setRowDatas([
+                  ...rowDatas.map((r) =>
+                    r.id === row.id
+                      ? { id: row.id, attribute: selectedAttribute }
+                      : r
+                  ),
+                ]);
+                // if this is attribute changing -> Remove the old selected pair attributeId - valueId
+                if (lastAttribute) {
+                  setSelectedPairs([
+                    ...selectedPairs.filter(
+                      (pair) => pair.attributeId !== lastAttribute.id
+                    ),
+                  ]);
+                }
+              }}
+              className="bg-white p-5 rounded-md w-full flex-1"
+            ></SearchCombobox>
+            <SearchCombobox
+              searchPlaceholder="Chọn giá trị"
+              list={
+                row.attribute?.values.map((item) => ({
+                  value: item.id,
+                  label: item.value,
+                })) || []
+              }
+              onItemSelect={(item) => {
+                if (
+                  selectedPairs.some(
+                    (pair) => pair.attributeId === row.attribute!.id
+                  )
+                ) {
+                  setSelectedPairs([
+                    ...selectedPairs.map((pair) =>
+                      pair.attributeId === row.attribute!.id
+                        ? {
+                            attributeId: row.attribute!.id,
+                            valueId: item.value,
+                          }
+                        : pair
+                    ),
+                  ]);
+                } else {
+                  selectedPairs.splice(index, 0, {
+                    attributeId: row.attribute!.id,
+                    valueId: item.value,
+                  });
+                  setSelectedPairs([...selectedPairs]);
+                }
+              }}
+              className="bg-white p-5 rounded-md w-full flex-1"
+            ></SearchCombobox>
+            <div
+              className="h-full bg-red-100 p-2 rounded-sm"
+              onClick={() => {
+                setRowDatas([...rowDatas.filter((r) => r.id !== row.id)]);
+                setSelectedPairs([
+                  ...selectedPairs.filter(
+                    (pair) => pair.attributeId !== row.attribute?.id
+                  ),
+                ]);
+              }}
+            >
+              <Trash className="text-red-400 cursor-pointer hover:text-red-500" />
+            </div>
+          </div>
         </div>
+      ))}
+      <div
+        className="w-full p-2 flex space-x-2 bg-primary-light text-primary font-semibold round-sm cursor-pointer"
+        onClick={() => {
+          if (rowDatas.some((row) => !row.attribute)) return;
+          setRowDatas([...rowDatas, { id: nanoid(), attribute: undefined }]);
+        }}
+      >
+        <Plus /> <span>Giá trị</span>
       </div>
-      <div className="w-full p-2 flex space-x-2 bg-primary-light text-primary font-semibold round-sm cursor-pointer">
-        <Plus /> <span>Thông số</span>
-      </div>
+      <p className="text-red-300">
+        {form.getFieldState("valueIds").error?.message}
+      </p>
     </section>
   );
 }
@@ -643,78 +753,5 @@ export function MediaSection({
         </div>
       </div>
     </section>
-  );
-}
-
-export function CreateDetailSection({
-  onCreate,
-}: {
-  onCreate: (detail: {
-    min: number;
-    max: number | undefined;
-    price: number;
-    desc: string | undefined;
-  }) => void;
-}) {
-  const [min, setMin] = useState<number>(0);
-  const [max, setMax] = useState<number | undefined>(undefined);
-  const [price, setPrice] = useState<number>(0);
-  const [desc, setDesc] = useState<string>("");
-  return (
-    <div className="border rounded w-full space-y-2 flex-col">
-      <div className="flex w-full space-x-2">
-        <div className="flex-1">
-          <label className="block font-semibold text-sm">Min</label>
-          <input
-            type="number"
-            value={min}
-            onChange={(e) => setMin(Number(e.target.value))}
-            className="border-2 py-2 rounded-lg px-2 w-full"
-          />
-        </div>
-
-        <div className="flex-1">
-          <label className="block font-semibold text-sm">Max</label>
-          <input
-            type="number"
-            value={max ?? ""}
-            onChange={(e) =>
-              setMax(e.target.value === "" ? undefined : Number(e.target.value))
-            }
-            className="border-2 py-2 rounded-lg px-2 w-full"
-          />
-        </div>
-
-        <div className="flex-1">
-          <label className="block font-semibold text-sm">Giá</label>
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
-            className="border-2 py-2 rounded-lg px-2 w-full"
-          />
-        </div>
-
-        <div className="flex-1">
-          <label className="block font-semibold text-sm">Mô tả</label>
-          <input
-            type="text"
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-            className="border-2 py-2 rounded-lg px-2 w-full"
-          />
-        </div>
-      </div>
-      <Button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          onCreate({ min, max, price, desc });
-        }}
-        className="bg-primary text-white px-4 rounded-lg ml-auto flex cursor-pointer"
-      >
-        <Plus /> Giá
-      </Button>
-    </div>
   );
 }

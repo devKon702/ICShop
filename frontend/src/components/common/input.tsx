@@ -34,7 +34,10 @@ export default function Input({
       {iconAlign === "start" && icon}
       <input
         type={type}
-        className={cn("outline-none border-none p-2", className)}
+        className={cn(
+          "inline-block outline-none border-none flex-1 p-2 w-full",
+          className
+        )}
         placeholder={placeholder}
         disabled={disable}
         min={min}

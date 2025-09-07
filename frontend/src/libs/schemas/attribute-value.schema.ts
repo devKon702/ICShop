@@ -5,7 +5,6 @@ import {
   Text,
   DateTimeSchema,
 } from "../schemas/shared.schema";
-import { AttributeSchema } from "./attribute.schema";
 
 export const AttributeValueBaseSchema = z.object({
   id: ID,
@@ -17,8 +16,3 @@ export const AttributeValueBaseSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
-
-export const AttributeValueSchema = AttributeValueBaseSchema.extend({
-  attribute: AttributeSchema.optional(),
-});
-export type AttributeValue = z.infer<typeof AttributeValueSchema>;
