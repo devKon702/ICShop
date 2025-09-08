@@ -11,7 +11,12 @@ import {
 } from "@/components/ui/form";
 import { nanoid } from "nanoid";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  UseFormGetValues,
+  UseFormReturn,
+} from "react-hook-form";
 import { z } from "zod";
 import React, { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,13 +30,16 @@ import {
   Plus,
   Tag,
   Trash,
+  Upload,
   Wallet,
 } from "lucide-react";
 import Separator from "@/components/common/separator";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import attributeService from "@/libs/services/attribute.service";
 import { GetAttributeListWithValues } from "@/libs/schemas/attribute.schema";
+import { useModalActions } from "@/store/modal-store";
+import productService from "@/libs/services/product.service";
 
 // === Schema bạn đã định nghĩa ===
 const wholesaleSchema = z
@@ -117,6 +125,9 @@ export default function CreateProductForm({
     },
     mode: "onSubmit",
   });
+
+  const [poster, setPoster] = useState<File | null>(null);
+  const [gallery, setGallery] = useState<File[]>([]);
   const categoryIdWatch = form.watch("categoryId");
 
   const {
@@ -134,11 +145,45 @@ export default function CreateProductForm({
     enabled: !!categoryIdWatch,
   });
 
+  const { mutate: createProductMutate } = useMutation({
+    mutationFn: (data: FormValues) => {
+      const {
+        name,
+        categoryId,
+        weight,
+        desc,
+        wholesale,
+        valueIds,
+        datasheetLink,
+      } = data;
+      return productService.create({
+        name,
+        desc: desc || null,
+        weight,
+        categoryId,
+        wholesale: {
+          ...wholesale,
+          details: wholesale.details.map((item) => ({
+            ...item,
+            max: item.max || null,
+          })),
+        },
+        valueIds,
+        datasheetLink: datasheetLink || null,
+      });
+    },
+    onSuccess: (response) => {
+      console.log(response);
+    },
+  });
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          console.log("Submit:", data);
+          if (confirm("Xác nhận tạo sản phẩm")) {
+            createProductMutate(data);
+          }
         })}
       >
         <div className="space-y-2 max-h-96 overflow-y-scroll app px-4 mt-2">
@@ -165,7 +210,10 @@ export default function CreateProductForm({
             </p>
           )}
           {/* Ảnh */}
-          <MediaSection onAdd={() => {}} onChange={() => {}}></MediaSection>
+          <MediaSection
+            onPosterChange={(file) => setPoster(file)}
+            onGalleryChange={(files) => setGallery(files)}
+          ></MediaSection>
         </div>
         <Separator />
         <Button
@@ -586,7 +634,7 @@ export function WholesaleSection({
           <FormField
             control={form.control}
             name={`wholesale.details.${index}.min`}
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
                   <Input
@@ -614,7 +662,7 @@ export function WholesaleSection({
           <FormField
             control={form.control}
             name={`wholesale.details.${index}.price`}
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
                   <Input
@@ -640,7 +688,7 @@ export function WholesaleSection({
           <FormField
             control={form.control}
             name={`wholesale.details.${index}.desc`}
-            render={({ field, fieldState }) => (
+            render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
                   <Input
@@ -679,12 +727,22 @@ export function WholesaleSection({
 }
 
 export function MediaSection({
-  onAdd,
-  onChange,
+  onPosterChange,
+  onGalleryChange,
 }: {
-  onAdd: (files: FileList) => void;
-  onChange: (index: number, file: FileList | null) => void;
+  onPosterChange: (file: File) => void;
+  onGalleryChange: (files: File[]) => void;
 }) {
+  const { openModal, closeModal } = useModalActions();
+  const [poster, setPoster] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<string[]>([]);
+
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+
+  useEffect(() => {
+    onGalleryChange(galleryFiles);
+  }, [galleryFiles, onGalleryChange]);
+
   return (
     <section className="p-3 bg-white rounded-lg mb-2">
       <p className="font-semibold flex space-x-1 mb-3">
@@ -696,19 +754,44 @@ export function MediaSection({
             htmlFor="poster"
             className="relative flex rounded-md border-1 size-44 cursor-pointer items-center justify-center space-x-2 bg-primary-light text-primary overflow-hidden"
           >
-            {/* <Upload /> <span className="font-semibold">Tải ảnh</span> */}
-            <Image
-              src={"http://localhost:3001/uploads/1755703601581.jpeg"}
-              width={200}
-              height={200}
-              alt="Poster"
-              className="absolute rounded-md inset-0"
-            />
+            {poster ? (
+              <Image
+                src={poster}
+                width={200}
+                height={200}
+                alt="Poster"
+                className="absolute rounded-md inset-0"
+              />
+            ) : (
+              <>
+                <Upload /> <span className="font-semibold">Tải ảnh</span>
+              </>
+            )}
           </label>
-          <input id="poster" type="file" accept="image/*" hidden />
+          <input
+            id="poster"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              if (e.currentTarget.files) {
+                openModal({
+                  type: "imageCropper",
+                  props: {
+                    file: e.currentTarget.files[0],
+                    onImageComplete: (file, previewUrl) => {
+                      setPoster(previewUrl);
+                      onPosterChange(file);
+                      closeModal();
+                    },
+                  },
+                });
+              }
+            }}
+          />
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {[...Array(3)].map((item, index) => (
+          {gallery.map((item, index) => (
             <div key={index}>
               <label
                 htmlFor={`gallery-${index}`}
@@ -716,10 +799,10 @@ export function MediaSection({
               >
                 <ImagePlus />
                 <Image
-                  src={"http://localhost:3001/uploads/1755703601581.jpeg"}
+                  src={item}
                   width={100}
                   height={100}
-                  alt="Poster"
+                  alt="Gallery item"
                   className="absolute rounded-md inset-0"
                 />
               </label>
@@ -728,7 +811,23 @@ export function MediaSection({
                 type="file"
                 accept="image/*"
                 hidden
-                onChange={(e) => onChange(index, e.currentTarget.files)}
+                onChange={(e) => {
+                  if (e.currentTarget.files) {
+                    openModal({
+                      type: "imageCropper",
+                      props: {
+                        file: e.currentTarget.files[0],
+                        onImageComplete: (file, previewUrl) => {
+                          gallery.splice(index, 1, previewUrl);
+                          galleryFiles.splice(index, 1, file);
+                          setGallery([...gallery]);
+                          setGalleryFiles([...galleryFiles]);
+                          closeModal();
+                        },
+                      },
+                    });
+                  }
+                }}
               />
             </div>
           ))}
@@ -745,9 +844,21 @@ export function MediaSection({
               accept="image/*"
               hidden
               multiple={true}
-              onChange={(e) =>
-                !!e.currentTarget.files && onAdd(e.currentTarget.files)
-              }
+              onChange={(e) => {
+                if (e.currentTarget.files) {
+                  openModal({
+                    type: "imageCropper",
+                    props: {
+                      file: e.currentTarget.files[0],
+                      onImageComplete: (file, previewUrl) => {
+                        setGallery([...gallery, previewUrl]);
+                        setGalleryFiles([...galleryFiles, file]);
+                        closeModal();
+                      },
+                    },
+                  });
+                }
+              }}
             />
           </div>
         </div>

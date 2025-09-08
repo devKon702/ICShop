@@ -9,7 +9,6 @@ import {
 } from "../schemas/shared.schema";
 import { CategoryBaseSchema, CategorySchema } from "./category.schema";
 import { WholesaleSchema } from "./wholesale.schema";
-import { ProductAttributeSchema } from "./product-attribute.schema";
 import { ProductImageSchema } from "./product-image.schema";
 import { ProductHighlightSchema } from "./product-highlight.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
@@ -35,7 +34,6 @@ export const ProductBaseSchema = z.object({
 export const ProductSchema = ProductBaseSchema.extend({
   category: CategorySchema.optional(),
   wholesale: WholesaleSchema.nullable().optional(),
-  attributes: z.array(ProductAttributeSchema).optional(),
   images: z.array(ProductImageSchema).optional(),
   highlights: z.array(ProductHighlightSchema).optional(),
   // lược bỏ orderDetails/cartDetails để tránh payload lớn

@@ -1,4 +1,5 @@
 "use client";
+import ImageCropper from "@/components/common/image-dropper";
 import CreateAttributeForm from "@/components/forms/attribute/create-attribute-form";
 import CreateValueForm from "@/components/forms/attribute/create-value-form";
 import CreateCategoryForm from "@/components/forms/category/create-category-form";
@@ -9,32 +10,50 @@ import { useModal } from "@/store/modal-store";
 
 export default function ModalContainer() {
   const modal = useModal();
-  switch (modal?.type) {
-    case "alert":
-      return <AlertModal {...modal.props} />;
-    case "createCategory":
-      return (
-        <FormModal title="Tạo danh mục">
-          <CreateCategoryForm {...modal.props} />
-        </FormModal>
-      );
-    case "createAttribute":
-      return (
-        <FormModal title="Thêm thông số">
-          <CreateAttributeForm {...modal.props} />
-        </FormModal>
-      );
-    case "createValue":
-      return (
-        <FormModal title="Thêm giá trị thông số">
-          <CreateValueForm {...modal.props} />
-        </FormModal>
-      );
-    case "createProduct":
-      return (
-        <FormModal title="Tạo Sản Phẩm">
-          <CreateProductForm {...modal.props} />
-        </FormModal>
-      );
-  }
+  return (
+    <>
+      {modal.map((item, index) => (
+        <div key={index} className="fixed inset-0">
+          {(() => {
+            switch (item.type) {
+              case "alert":
+                return <AlertModal {...item.props} />;
+              case "createCategory":
+                return (
+                  <FormModal title="Tạo danh mục">
+                    <CreateCategoryForm {...item.props} />
+                  </FormModal>
+                );
+              case "createAttribute":
+                return (
+                  <FormModal title="Thêm thông số">
+                    <CreateAttributeForm {...item.props} />
+                  </FormModal>
+                );
+              case "createValue":
+                return (
+                  <FormModal title="Thêm giá trị thông số">
+                    <CreateValueForm {...item.props} />
+                  </FormModal>
+                );
+              case "createProduct":
+                return (
+                  <FormModal title="Tạo Sản Phẩm">
+                    <CreateProductForm {...item.props} />
+                  </FormModal>
+                );
+              case "imageCropper":
+                return (
+                  <FormModal title="Chỉnh sửa ảnh">
+                    <ImageCropper {...item.props} />
+                  </FormModal>
+                );
+              default:
+                return null;
+            }
+          })()}
+        </div>
+      ))}
+    </>
+  );
 }

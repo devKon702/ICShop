@@ -5,6 +5,7 @@ import {
 } from "@/libs/schemas/category.schema";
 import { z } from "zod";
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 type Modal<K extends string, P> = { type: K; props: P };
 
@@ -29,23 +30,29 @@ type ModalType =
         onSuccess: () => void;
         categories: z.infer<typeof CategoryBaseSchema>[];
       }
+    >
+  | Modal<
+      "imageCropper",
+      { file: File; onImageComplete: (file: File, previewUrl: string) => void }
     >;
 
 interface modalState {
-  modal: ModalType | null;
+  modal: ModalType[];
   actions: {
     openModal: (modal: ModalType) => void;
     closeModal: () => void;
   };
 }
 
-const useModalStore = create<modalState>()((set) => ({
-  modal: null,
-  actions: {
-    openModal: (modal) => set({ modal }),
-    closeModal: () => set({ modal: null }),
-  },
-}));
+const useModalStore = create<modalState>()(
+  devtools((set, get) => ({
+    modal: [],
+    actions: {
+      openModal: (modal) => set({ modal: [...get().modal, modal] }),
+      closeModal: () => set({ modal: [...get().modal.slice(0, -1)] }),
+    },
+  }))
+);
 
 export const useModal = () => useModalStore((state) => state.modal);
 export const useModalActions = () => useModalStore((state) => state.actions);

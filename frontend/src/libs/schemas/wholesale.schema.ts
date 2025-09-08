@@ -6,7 +6,7 @@ import {
   TinyText,
   DateTimeSchema,
 } from "../schemas/shared.schema";
-import { WholesaleDetailSchema } from "./wholesale-detail.schema";
+import { WholesaleDetailBaseSchema } from "./wholesale-detail.schema";
 
 export const WholesaleBaseSchema = z.object({
   id: ID,
@@ -24,6 +24,6 @@ export const WholesaleBaseSchema = z.object({
 });
 
 export const WholesaleSchema = WholesaleBaseSchema.extend({
-  details: z.array(WholesaleDetailSchema).optional(),
+  details: z.array(WholesaleDetailBaseSchema).optional(),
 });
 export type Wholesale = z.infer<typeof WholesaleSchema>;

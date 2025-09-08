@@ -7,7 +7,7 @@ import {
   DateTimeSchema,
 } from "../schemas/shared.schema";
 
-export const WholesaleDetailSchema = z.object({
+export const WholesaleDetailBaseSchema = z.object({
   id: ID,
   wholesaleId: UnsignedInt,
   desc: TinyText,
@@ -20,4 +20,4 @@ export const WholesaleDetailSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
-export type WholesaleDetail = z.infer<typeof WholesaleDetailSchema>;
+export type WholesaleDetail = z.infer<typeof WholesaleDetailBaseSchema>;

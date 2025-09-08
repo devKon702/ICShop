@@ -1,7 +1,42 @@
 import apiClient from "@/libs/axios/api-client";
-import { FilterProductSchema } from "@/libs/schemas/product.schema";
-import { PaginatedResponseSchema } from "@/libs/schemas/response.schema";
+import { AttributeBaseSchema } from "@/libs/schemas/attribute.schema";
+import {
+  FilterProductSchema,
+  ProductBaseSchema,
+} from "@/libs/schemas/product.schema";
+import {
+  ApiResponseSchema,
+  PaginatedResponseSchema,
+} from "@/libs/schemas/response.schema";
+import { UserBaseSchema } from "@/libs/schemas/user.schema";
+import { WholesaleDetailBaseSchema } from "@/libs/schemas/wholesale-detail.schema";
+import { WholesaleBaseSchema } from "@/libs/schemas/wholesale.schema";
 import requestHandler from "@/utils/request-handler";
+import { z } from "zod";
+
+type WholesaleType = {
+  min_quantity: number;
+  max_quantity: number;
+  unit: string;
+  quantity_step: number;
+  vat: number;
+  details: {
+    min: number;
+    max: number | null;
+    price: number;
+    desc: string;
+  }[];
+};
+
+type ProductType = {
+  name: string;
+  categoryId: number;
+  desc: string | null;
+  datasheetLink: string | null;
+  weight: number;
+  wholesale: WholesaleType;
+  valueIds: number[];
+};
 
 const productService = {
   filter: async (params: {
@@ -25,8 +60,34 @@ const productService = {
       PaginatedResponseSchema(FilterProductSchema)
     );
   },
+  create: async (data: ProductType) =>
+    requestHandler(
+      apiClient.post("/v1/admin/product", data),
+      ApiResponseSchema(
+        ProductBaseSchema.extend({
+          attributes: z.array(AttributeBaseSchema),
+          creator: UserBaseSchema,
+          wholesale: WholesaleBaseSchema.extend({
+            details: z.array(WholesaleDetailBaseSchema),
+          }),
+        })
+      )
+    ),
 };
 
+// name: z.string().nonempty(),
+//     categoryId: z.number(),
+//     desc: z.string().nullable(),
+//     datasheetLink: z.string().max(250, "Tối đa 250 kí tự").nullable(),
+//     weight: z
+//       .number()
+//       .int("Phải là kiểu số nguyên")
+//       .min(0, "Cân nặng tối thiểu 0 gram")
+//       .max(1000 * 1000, "Cân nặng tối đa 1 tấn"),
+//     wholesale: wholesaleSchema,
+//     valueIds: z.array(
+//       z.number().int("ID là kiểu số nguyên").min(1, "ID không hợp lệ")
+//     ),
 // const getProductBySlug = async (slug: string) => {
 //   try {
 //     const res = await fetch(API_ROUTE.product + "/" + slug).then((res) =>

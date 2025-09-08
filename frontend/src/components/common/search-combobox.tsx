@@ -65,6 +65,7 @@ export default function SearchCombobox<T extends string | number>({
               {list.map((item) => (
                 <CommandItem
                   key={item.value}
+                  // value = item.label for searching
                   value={item.label}
                   disabled={
                     disableValues.includes(item.value) ||
@@ -81,7 +82,7 @@ export default function SearchCombobox<T extends string | number>({
                   <Check
                     className={cn(
                       "ml-auto",
-                      selected?.label === item.label
+                      selected?.value === item.value
                         ? "opacity-100"
                         : "opacity-0"
                     )}
