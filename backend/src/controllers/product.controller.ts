@@ -20,13 +20,14 @@ import {
 import categoryRepository from "../repositories/category.repository";
 import { AppError } from "../errors/app-error";
 import attributeRepository from "../repositories/attribute.repository";
-import { validateFile } from "../utils/file";
+import { handleImagesUpload, validateFile } from "../utils/file";
 import { createSlug } from "../utils/slug";
 import storage from "../storage";
 import { sanitizeHtml } from "../utils/sanitize";
 import attributeValueRepository from "../repositories/attribute-value.repository";
 import wholesaleRepository from "../repositories/wholesale.repository";
 import { NotFoundError } from "../errors/not-found-error";
+import productImageRepository from "../repositories/product-image.repository";
 
 class ProductController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -224,18 +225,6 @@ class ProductController {
         "Không tìm thấy file",
         true
       );
-
-    // Validate file uploads
-    validateFile(poster, {
-      inputField: "poster",
-      maxSize: 1024 * 1024,
-      type: "image",
-    });
-
-    // Get early fil url
-    const posterFileName = String(Date.now());
-    const posterUrl = storage.getEarlyDir(posterFileName, poster.mimetype);
-
     const product = await productRepository.findById4Check(id);
     if (!product)
       throw new AppError(
@@ -244,11 +233,16 @@ class ProductController {
         "Không tìm thấy sản phẩm",
         true
       );
-
-    const newProduct = await productRepository.updatePoster(sub, id, posterUrl);
-    // Xóa ảnh cũ và lưu ảnh mới
-    product.posterUrl && (await storage.delete(product.posterUrl));
-    await storage.save(poster.buffer, posterFileName, poster.mimetype);
+    // Handle file change
+    const result = await handleImagesUpload(
+      [poster],
+      (newUrls) => productRepository.updatePoster(sub, id, newUrls[0]),
+      product.posterUrl ? [product.posterUrl] : [],
+      {
+        inputField: "poster",
+        maxSize: 512 * 1024,
+      }
+    );
 
     res
       .status(HttpStatus.OK)
@@ -256,7 +250,7 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Cập nhật poster thành công",
-          newProduct
+          result
         )
       );
   };
@@ -341,7 +335,7 @@ class ProductController {
         throw new AppError(
           HttpStatus.UNPROCESSABLE_ENTITY,
           ProductResponseCode.INVALID_ATTRIBUTE_VALUE,
-          "Thuộc tính không thuộc danh mục",
+          "Thông số không thuộc danh mục",
           true
         );
     }

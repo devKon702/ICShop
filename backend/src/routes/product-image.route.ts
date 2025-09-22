@@ -7,6 +7,7 @@ import { upload } from "../utils/multer";
 import {
   createProductImageSchema,
   deleteProductImageSchema,
+  updateProductImagePositionSchema,
   updateProductImageSchema,
 } from "../schemas/product-image.schema";
 import productImageController from "../controllers/product-image.controller";
@@ -33,13 +34,23 @@ productImageRouter.delete(
   productImageController.delete
 );
 
-// PATCH /gallery
+// PATCH /gallery/position
 productImageRouter.patch(
   path,
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  validate(updateProductImageSchema),
+  validate(updateProductImagePositionSchema),
   productImageController.updatePosition
+);
+
+// PATCH /gallery/:id
+productImageRouter.patch(
+  path,
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  upload.single("image"),
+  validate(updateProductImageSchema),
+  productImageController.updateImage
 );
 
 export default productImageRouter;

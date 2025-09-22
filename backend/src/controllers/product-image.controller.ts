@@ -4,12 +4,13 @@ import { TokenPayload } from "../types/token-payload";
 import {
   createProductImageSchema,
   deleteProductImageSchema,
+  updateProductImagePositionSchema,
   updateProductImageSchema,
 } from "../schemas/product-image.schema";
 import { AppError } from "../errors/app-error";
 import { HttpStatus } from "../constants/http-status";
 import { ProductImageResponseCode } from "../constants/codes/product-image.code";
-import { validateFile } from "../utils/file";
+import { handleImagesUpload, validateFile } from "../utils/file";
 import storage from "../storage";
 import { successResponse } from "../utils/response";
 
@@ -63,7 +64,7 @@ class ProductImageController {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
       body: { gallery },
-    } = updateProductImageSchema.parse(req);
+    } = updateProductImagePositionSchema.parse(req);
 
     const newGallery = await productImageRepository.updatePosition(
       sub,
@@ -76,6 +77,46 @@ class ProductImageController {
           ProductImageResponseCode.OK,
           "Thay đổi vị trí thành công",
           newGallery
+        )
+      );
+  };
+
+  public updateImage = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      params: { id },
+    } = updateProductImageSchema.parse(req);
+    const file = req.file;
+
+    if (!file)
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        ProductImageResponseCode.FILE_NOT_FOUND,
+        "Không tìm thấy file",
+        true
+      );
+
+    const productImage = await productImageRepository.findById(id);
+    if (!productImage)
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        ProductImageResponseCode.NOT_FOUND,
+        "Không tìm thấy",
+        true
+      );
+
+    const result = await handleImagesUpload(
+      [file],
+      (newUrls) => productImageRepository.updateImage(sub, id, newUrls[0]),
+      [productImage.imageUrl]
+    );
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductImageResponseCode.OK,
+          "Cập nhật thành công",
+          result
         )
       );
   };

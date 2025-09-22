@@ -1,5 +1,6 @@
 "use client";
 
+import LoadingIcon from "@/components/common/loading-icon";
 import ProtectedLayer from "@/components/features/auth/protected-layer";
 import AdminSidebar from "@/components/layouts/admin-sidebar";
 import { ROUTE } from "@/constants/routes";
@@ -53,7 +54,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (!allowed)
     return (
       <div className="fixed inset-0 flex items-center justify-center">
-        Loading...
+        <LoadingIcon />
       </div>
     );
 

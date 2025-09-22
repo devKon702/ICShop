@@ -1,6 +1,11 @@
 import { prisma } from "../prisma";
 
 class ProductImageRepository {
+  public findById = async (id: number) => {
+    return prisma.productImage.findUnique({
+      where: { id },
+    });
+  };
   public create = async (userId: number, productId: number, url: string) => {
     return prisma.productImage.create({
       data: { productId, creatorId: userId, modifierId: userId, imageUrl: url },
@@ -27,6 +32,12 @@ class ProductImageRepository {
         })
       )
     );
+  };
+  public updateImage = async (userId: number, id: number, url: string) => {
+    return prisma.productImage.update({
+      where: { id },
+      data: { imageUrl: url, modifierId: userId, version: { increment: 1 } },
+    });
   };
 }
 

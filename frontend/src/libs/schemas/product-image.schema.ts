@@ -6,7 +6,7 @@ import {
   DateTimeSchema,
 } from "../schemas/shared.schema";
 
-export const ProductImageSchema = z.object({
+export const ProductImageBaseSchema = z.object({
   id: ID,
   productId: UnsignedInt,
   imageUrl: UrlString,
@@ -17,4 +17,4 @@ export const ProductImageSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
-export type ProductImage = z.infer<typeof ProductImageSchema>;
+export type ProductImage = z.infer<typeof ProductImageBaseSchema>;

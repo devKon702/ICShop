@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(helmet());
 
 // Static route
-app.use("/uploads", express.static(env.UPLOAD_DIR));
+app.use("/uploads", express.static(env.STORAGE_PATH));
 
 // Cookie
 app.use(cookieParser());

@@ -24,3 +24,44 @@ export function sanitizeHtml(html: string): string {
     ALLOWED_ATTR: ["href", "target"],
   });
 }
+
+export function sanitizeData<T>(
+  data: T,
+  options: { useDefault?: boolean; fields: string[] } = {
+    useDefault: true,
+    fields: [],
+  }
+): Partial<T> {
+  const defaultFields = options.useDefault
+    ? [
+        "creator",
+        "creatorId",
+        "modifier",
+        "modifierId",
+        "version",
+        "createdAt",
+        "updatedAt",
+      ]
+    : [];
+
+  const sensitiveFields = [
+    ...new Set([...defaultFields, ...options.fields]),
+  ] as const;
+
+  function handle(value: any): any {
+    if (Array.isArray(value)) {
+      return value.map((item) => handle(item));
+    }
+    if (value && typeof value === "object") {
+      const result: any = {};
+      for (const [key, val] of Object.entries(value)) {
+        if (!sensitiveFields.includes(key)) {
+          result[key] = handle(val);
+        }
+      }
+      return result;
+    }
+    return value;
+  }
+  return handle(data);
+}

@@ -1,5 +1,5 @@
 "use client";
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
@@ -50,7 +50,7 @@ export default function RegisterForm() {
             <FormItem>
               <FormLabel>Tên</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   type="text"
                   icon={
                     <i className="bx bxs-user text-xl text-white bg-black p-3"></i>
@@ -71,7 +71,7 @@ export default function RegisterForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   type="email"
                   icon={
                     <i className="bx bxs-envelope text-xl text-white bg-black p-3"></i>
@@ -92,7 +92,7 @@ export default function RegisterForm() {
             <FormItem>
               <FormLabel>Mật khẩu</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   type="password"
                   icon={
                     <i className="bx bxs-lock text-xl text-white bg-black p-3"></i>
@@ -113,7 +113,7 @@ export default function RegisterForm() {
             <FormItem>
               <FormLabel>Nhập lại mật khẩu</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   type="password"
                   icon={
                     <i className="bx bx-check-double text-xl text-white bg-black p-3"></i>

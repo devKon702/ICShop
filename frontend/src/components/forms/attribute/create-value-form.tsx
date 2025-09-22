@@ -1,4 +1,4 @@
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
@@ -57,7 +57,7 @@ export default function CreateValueForm({ attributeId, onSuccess }: Props) {
           render={({ field, fieldState }) => (
             <FormItem>
               <FormControl>
-                <Input
+                <CustomInput
                   type="text"
                   placeholder="Giá trị thông số"
                   isError={fieldState.invalid}

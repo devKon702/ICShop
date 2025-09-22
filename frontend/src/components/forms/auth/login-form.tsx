@@ -11,7 +11,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import { useGlobalContext } from "@/libs/contexts/GlobalContext";
 import SendToEmailForm from "@/components/forms/send-to-email-form";
 import {
@@ -54,7 +54,7 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   icon={
                     <i className="bx bxs-envelope text-xl text-white bg-black p-3"></i>
                   }
@@ -62,7 +62,7 @@ export default function LoginForm() {
                   placeholder="example@gmail.com"
                   isError={!!fieldState.invalid}
                   {...field}
-                ></Input>
+                ></CustomInput>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -75,7 +75,7 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Mật khẩu</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   icon={
                     <i className="bx bxs-lock text-xl text-white bg-black p-3"></i>
                   }

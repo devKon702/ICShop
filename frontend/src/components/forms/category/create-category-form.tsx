@@ -1,6 +1,6 @@
 "use client";
 
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
@@ -58,7 +58,7 @@ export default function CreateCategoryForm({ parentId, onSuccess }: Props) {
           render={({ field, fieldState }) => (
             <FormItem>
               <FormControl>
-                <Input
+                <CustomInput
                   type="text"
                   placeholder="Tên danh mục"
                   isError={fieldState.invalid}

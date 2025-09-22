@@ -9,14 +9,14 @@ import {
 } from "../schemas/shared.schema";
 import { CategoryBaseSchema, CategorySchema } from "./category.schema";
 import { WholesaleSchema } from "./wholesale.schema";
-import { ProductImageSchema } from "./product-image.schema";
+import { ProductImageBaseSchema } from "./product-image.schema";
 import { ProductHighlightSchema } from "./product-highlight.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
 
 export const ProductBaseSchema = z.object({
   id: ID,
   name: Text,
-  posterUrl: z.string().url().nullable().optional(),
+  posterUrl: z.string().nullable().optional(),
   categoryId: UnsignedInt,
   datasheetLink: z.string().url().nullable().optional(),
   slug: Slug,
@@ -34,9 +34,8 @@ export const ProductBaseSchema = z.object({
 export const ProductSchema = ProductBaseSchema.extend({
   category: CategorySchema.optional(),
   wholesale: WholesaleSchema.nullable().optional(),
-  images: z.array(ProductImageSchema).optional(),
+  images: z.array(ProductImageBaseSchema).optional(),
   highlights: z.array(ProductHighlightSchema).optional(),
-  // lược bỏ orderDetails/cartDetails để tránh payload lớn
 });
 export type Product = z.infer<typeof ProductSchema>;
 

@@ -22,9 +22,10 @@ import { useQuery } from "@tanstack/react-query";
 import productService from "@/libs/services/product.service";
 import { toast } from "sonner";
 import categoryService from "@/libs/services/category.service";
-import Image from "next/image";
 import { useModalActions } from "@/store/modal-store";
 import SearchCombobox from "@/components/common/search-combobox";
+import env from "@/constants/env";
+import SafeImage from "@/components/common/safe-image";
 
 export default function ProductManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,7 +45,7 @@ export default function ProductManagementPage() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["product", { name, cid, order, active, limit, page }],
+    queryKey: ["products", { name, cid, order, active, limit, page }],
     queryFn: async () =>
       productService.filter({ name, cid, order, active, limit, page }),
   });
@@ -114,9 +115,9 @@ export default function ProductManagementPage() {
               {productData?.data.result.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <Image
-                      src={product.posterUrl || ""}
-                      alt="product poster"
+                    <SafeImage
+                      src={`${env.NEXT_PUBLIC_FILE_URL}/${product.posterUrl}`}
+                      alt="Poster"
                       width={40}
                       height={40}
                     />

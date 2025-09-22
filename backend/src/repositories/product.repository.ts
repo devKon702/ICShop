@@ -201,6 +201,7 @@ class ProductRepository {
         desc: data.desc,
         datasheetLink: data.datasheetLink,
         weight: data.weight,
+        price: data.price,
         creatorId: userId,
         modifierId: userId,
         wholesale: {

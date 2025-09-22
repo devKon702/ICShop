@@ -4,6 +4,6 @@ import { LocalStorage } from "./local-storage";
 
 let storage: IFileStorage;
 
-storage = new LocalStorage(env.UPLOAD_DIR);
+storage = new LocalStorage(env.STORAGE_PATH);
 
 export default storage;

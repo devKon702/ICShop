@@ -1,5 +1,5 @@
 "use client";
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
@@ -66,14 +66,14 @@ export default function AdminLoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   icon={
                     <i className="bx bxs-envelope text-xl text-white bg-black p-3"></i>
                   }
                   type="email"
                   isError={!!fieldState.invalid}
                   {...field}
-                ></Input>
+                ></CustomInput>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,7 +86,7 @@ export default function AdminLoginForm() {
             <FormItem>
               <FormLabel>Mật khẩu</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   icon={
                     <i className="bx bxs-lock text-xl text-white bg-black p-3"></i>
                   }

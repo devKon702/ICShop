@@ -1,4 +1,4 @@
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
@@ -32,7 +32,7 @@ export default function SendToEmailForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
+                <CustomInput
                   type="email"
                   icon={
                     <i className="bx bxs-envelope text-xl bg-black text-white p-3"></i>

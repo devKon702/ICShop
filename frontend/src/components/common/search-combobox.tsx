@@ -51,6 +51,7 @@ export default function SearchCombobox<T extends string | number>({
           role="combobox"
           aria-expanded={open}
           className={cn("w-[200px] justify-between cursor-pointer", className)}
+          tabIndex={0}
         >
           {selected ? selected.label : searchPlaceholder}
           <ChevronsUpDown className="opacity-50" />

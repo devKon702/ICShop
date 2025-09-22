@@ -1,5 +1,6 @@
 import apiClient from "@/libs/axios/api-client";
 import { AttributeBaseSchema } from "@/libs/schemas/attribute.schema";
+import { ProductImageBaseSchema } from "@/libs/schemas/product-image.schema";
 import {
   FilterProductSchema,
   ProductBaseSchema,
@@ -60,8 +61,8 @@ const productService = {
       PaginatedResponseSchema(FilterProductSchema)
     );
   },
-  create: async (data: ProductType) =>
-    requestHandler(
+  create: async (data: ProductType) => {
+    return requestHandler(
       apiClient.post("/v1/admin/product", data),
       ApiResponseSchema(
         ProductBaseSchema.extend({
@@ -72,7 +73,31 @@ const productService = {
           }),
         })
       )
-    ),
+    );
+  },
+
+  updatePoster: async (productId: number, poster: File) => {
+    const formData = new FormData();
+    formData.append("poster", poster);
+    return requestHandler(
+      apiClient.patch(`/v1/admin/product/${productId}/poster`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      }),
+      ApiResponseSchema(ProductBaseSchema.extend({ modifier: UserBaseSchema }))
+    );
+  },
+
+  addImageGallery: async (productId: number, image: File) => {
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("productId", productId.toString());
+    return requestHandler(
+      apiClient.post("/v1/gallery", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      }),
+      ApiResponseSchema(ProductImageBaseSchema)
+    );
+  },
 };
 
 // name: z.string().nonempty(),

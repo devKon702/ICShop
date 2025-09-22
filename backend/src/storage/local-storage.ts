@@ -34,6 +34,6 @@ export class LocalStorage implements IFileStorage {
   }
 
   getEarlyDir(fileName: string, mimeType: string): string {
-    return `${env.SERVE_DIR}/${fileName}.${getFileTail(mimeType)}`;
+    return `${fileName}.${getFileTail(mimeType)}`;
   }
 }

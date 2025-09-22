@@ -1,6 +1,6 @@
 import AppPagination from "@/components/common/pagination";
 import ProductList from "@/components/features/product/product-list";
-import { productService } from "@/libs/services/product.service";
+import productService from "@/libs/services/product.service";
 import React from "react";
 
 interface ProductPaginationProps {

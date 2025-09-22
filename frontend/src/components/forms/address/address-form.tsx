@@ -1,5 +1,5 @@
 "use client";
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
@@ -52,7 +52,11 @@ export default function AddressForm() {
             <FormItem>
               <FormLabel>Tên địa chỉ</FormLabel>
               <FormControl>
-                <Input type="text" {...field} isError={!!fieldState.invalid} />
+                <CustomInput
+                  type="text"
+                  {...field}
+                  isError={!!fieldState.invalid}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -130,7 +134,11 @@ export default function AddressForm() {
             <FormItem>
               <FormLabel>Địa chỉ chi tiết</FormLabel>
               <FormControl>
-                <Input type="text" {...field} isError={!!fieldState.invalid} />
+                <CustomInput
+                  type="text"
+                  {...field}
+                  isError={!!fieldState.invalid}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -144,7 +152,7 @@ export default function AddressForm() {
             render={({ field, fieldState }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input
+                  <CustomInput
                     type="text"
                     icon={<User />}
                     {...field}
@@ -161,7 +169,7 @@ export default function AddressForm() {
             render={({ field, fieldState }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Input
+                  <CustomInput
                     icon={<Phone />}
                     type="text"
                     {...field}

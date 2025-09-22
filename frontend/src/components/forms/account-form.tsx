@@ -1,5 +1,5 @@
 "use client";
-import Input from "@/components/common/input";
+import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
@@ -84,12 +84,12 @@ export default function AccountForm() {
               <FormItem>
                 <FormLabel>Tên</FormLabel>
                 <FormControl>
-                  <Input
+                  <CustomInput
                     type="text"
                     isError={fieldState.invalid}
                     className="disabled:opacity-60"
                     {...field}
-                  ></Input>
+                  ></CustomInput>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -102,12 +102,12 @@ export default function AccountForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
+                  <CustomInput
                     type="text"
                     isError={fieldState.invalid}
                     className="disabled:opacity-60"
                     {...field}
-                  ></Input>
+                  ></CustomInput>
                 </FormControl>
                 <FormMessage />
               </FormItem>

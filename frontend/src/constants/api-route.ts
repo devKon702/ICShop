@@ -1,6 +1,6 @@
-import { ENV_API_ORIGIN } from "@/constants/env";
+import env from "@/constants/env";
 
-const base = ENV_API_ORIGIN + "/api/v1";
+const base = env.NEXT_PUBLIC_API_URL + "/api/v1";
 
 export const API_ROUTE = {
   auth: base + "/auth",

@@ -1,9 +1,9 @@
 "use client";
-import ImageCropper from "@/components/common/image-dropper";
+import ImageCropper from "@/components/common/image-cropper";
 import CreateAttributeForm from "@/components/forms/attribute/create-attribute-form";
 import CreateValueForm from "@/components/forms/attribute/create-value-form";
 import CreateCategoryForm from "@/components/forms/category/create-category-form";
-import CreateProductForm from "@/components/forms/product/create-product-form";
+import CreateProductForm from "@/components/features/product/forms/create/create-product-form";
 import AlertModal from "@/components/modals/alert-modal";
 import FormModal from "@/components/modals/form-modal";
 import { useModal } from "@/store/modal-store";

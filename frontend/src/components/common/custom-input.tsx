@@ -1,7 +1,7 @@
 import { cn } from "@/utils/className";
-import React, { HtmlHTMLAttributes } from "react";
+import React, { InputHTMLAttributes } from "react";
 
-interface InputProps extends HtmlHTMLAttributes<HTMLInputElement> {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   className?: string;
   type: HTMLInputElement["type"];
   icon?: React.ReactNode;
@@ -13,7 +13,7 @@ interface InputProps extends HtmlHTMLAttributes<HTMLInputElement> {
   max?: string;
 }
 
-export default function Input({
+export default function CustomInput({
   className,
   type,
   icon,
