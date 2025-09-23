@@ -158,12 +158,7 @@ class ProductController {
     ]);
     // Check category exist
     if (!category)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        ProductResponseCode.CATEGORY_NOT_FOUND,
-        "Không tìm thấy danh mục",
-        true
-      );
+      throw new NotFoundError(ProductResponseCode.CATEGORY_NOT_FOUND);
     // Check only reference category level 3
     if (category.level !== 3)
       throw new AppError(

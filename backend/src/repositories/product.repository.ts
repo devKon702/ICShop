@@ -112,7 +112,7 @@ class ProductRepository {
     name: string | undefined,
     page: number,
     limit: number,
-    order: "price_asc" | "price_desc" | "none",
+    order: "price_asc" | "price_desc" | "none" | "date_asc" | "date_desc",
     active: boolean | undefined
   ) => {
     const where: any = { isActive: active };
@@ -135,6 +135,12 @@ class ProductRepository {
         break;
       case "price_desc":
         orderBy = { price: "desc" };
+        break;
+      case "date_asc":
+        orderBy = { createdAt: "asc" };
+        break;
+      case "date_desc":
+        orderBy = { createdAt: "desc" };
         break;
       case "none":
         orderBy = undefined;

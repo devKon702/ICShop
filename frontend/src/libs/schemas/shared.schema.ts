@@ -8,7 +8,7 @@ export const TinyInt = z.number().int().min(-128).max(127);
 export const UrlString = z.string().url();
 export const NullableUrlString = UrlString.nullable().optional();
 
-export const DecimalString = z.string(); // có thể siết regex theo (10,3) nếu muốn
+export const DecimalString = z.string();
 export const DateTimeSchema = z.union([z.date(), z.string().datetime()]);
 
 export const Slug = z.string().min(1);

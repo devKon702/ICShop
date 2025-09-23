@@ -81,6 +81,7 @@ export function WholesaleSection({
                   {...field}
                   isError={fieldState.invalid}
                   min="1"
+                  max="999"
                   onChange={(e) =>
                     setValue(
                       "wholesale.max_quantity",

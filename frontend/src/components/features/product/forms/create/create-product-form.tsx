@@ -22,6 +22,7 @@ type FormValues = z.infer<typeof FormProductSchema>;
 
 export default function CreateProductForm({
   categories,
+  onSuccess,
 }: {
   onSuccess: () => void;
   categories: z.infer<typeof CategoryBaseSchema>[];
@@ -65,7 +66,7 @@ export default function CreateProductForm({
   });
 
   const { mutate: createProductMutate } = useMutation({
-    mutationFn: (data: FormValues) => {
+    mutationFn: async (data: FormValues) => {
       const {
         name,
         categoryId,
@@ -75,37 +76,38 @@ export default function CreateProductForm({
         valueIds,
         datasheetLink,
       } = data;
-      return productService
-        .create({
-          name,
-          desc: desc || null,
-          weight,
-          categoryId,
-          wholesale: {
-            ...wholesale,
-            details: wholesale.details.map((item) => ({
-              ...item,
-              max: item.max || null,
-            })),
-          },
-          valueIds,
-          datasheetLink: datasheetLink || null,
-        })
-        .then(async (res) => {
-          if (poster) {
-            const psChain = await Promise.all([
-              productService.updatePoster(res.data.id, poster),
-              ...gallery.map((item) =>
-                productService.addImageGallery(res.data.id, item)
-              ),
-            ]);
-            return psChain[0];
-          }
-        });
+      const newProductResponse = await productService.create({
+        name,
+        desc: desc || null,
+        weight,
+        categoryId,
+        wholesale: {
+          ...wholesale,
+          details: wholesale.details.map((item) => ({
+            ...item,
+            max: item.max || null,
+          })),
+        },
+        valueIds,
+        datasheetLink: datasheetLink || null,
+      });
+      if (poster) {
+        await Promise.all([
+          productService.updatePoster(newProductResponse.data.id, poster),
+          ...gallery.map((item) =>
+            productService.addImageGallery(newProductResponse.data.id, item)
+          ),
+        ]);
+      }
+      return newProductResponse;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Thêm thành công");
+      onSuccess();
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

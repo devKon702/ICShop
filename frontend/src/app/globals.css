@@ -184,18 +184,23 @@ input[type=number] {
 
 /* Animations */
 @keyframes scale-up {
-  30% {
+  0% {
+    opacity: 0.5;
+  }
+
+  20% {
     opacity: 1;
     transform: scaleY(1.5);
   }
 
-  60% {
+  40% {
+    opacity: 0.5;
     transform: scaleY(1);
   }
 }
 
 .animate-scale-up {
-  animation: scale-up 2s linear infinite;
+  animation: scale-up 3s linear infinite;
 }
 
 .animate-delay-500 {

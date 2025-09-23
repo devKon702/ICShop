@@ -20,7 +20,8 @@ export default function BasicSection({
 }: {
   categories: z.infer<typeof CategoryBaseSchema>[];
 }) {
-  const { control } = useFormContext<z.infer<typeof FormProductSchema>>();
+  const { control, setValue } =
+    useFormContext<z.infer<typeof FormProductSchema>>();
   return (
     <>
       <section className="p-3 bg-white rounded-lg shadow">
@@ -98,7 +99,7 @@ export default function BasicSection({
                       icon={<span className="px-4 border-l-2">gram</span>}
                       iconAlign="end"
                       onChange={(e) =>
-                        field.onChange(Number(e.currentTarget.value))
+                        setValue("weight", Number(e.currentTarget.value))
                       }
                     />
                   </div>

@@ -113,7 +113,9 @@ export const filterProductSchema = z.object({
       .number()
       .transform((val) => (val <= 0 ? 10 : val))
       .default(10),
-    order: z.enum(["price_asc", "price_desc", "none"]).default("none"),
+    order: z
+      .enum(["price_asc", "price_desc", "none", "date_asc", "date_desc"])
+      .default("date_desc"),
     active: z
       .enum(["0", "1"])
       .transform((val) => !!-val)
