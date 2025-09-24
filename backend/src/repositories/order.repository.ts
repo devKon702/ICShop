@@ -93,15 +93,14 @@ class OrderRepository {
         productId: number;
         quantity: number;
         unitPrice: Decimal;
-        vat: number;
+        vat: Decimal;
       }[];
     }
   ) => {
     const total = data.details
-      .map((item) => {
-        const rawPrice = item.unitPrice.mul(item.quantity);
-        return rawPrice.add(rawPrice.plus(item.vat / 100));
-      })
+      .map((item) =>
+        item.unitPrice.mul(item.quantity).mul(item.vat.div(100).add(1))
+      )
       .reduce((a, b) => a.add(b), Decimal(0))
       .add(data.deliveryFee);
     return prisma.order.create({

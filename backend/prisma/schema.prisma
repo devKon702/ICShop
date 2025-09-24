@@ -170,7 +170,7 @@ model Wholesale {
   /// Đơn vị mua (tiếng Việt)
   unit        String         @db.TinyText
   /// Thuế sản phẩm theo đơn vị phần trăm
-  vat         Int            @db.UnsignedTinyInt @default(0)
+  vat         Decimal            @db.Decimal(3,2) @default(0)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -426,7 +426,7 @@ model OrderDetail {
   /// Đơn giá
   unitPrice  Decimal  @db.Decimal(10,3)
   /// Phần trăm thuế áp dụng
-  vat        Int      @db.TinyInt
+  vat        Decimal      @db.Decimal(3,2) @default(0)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
