@@ -1,5 +1,5 @@
 "use client";
-import AdminLoginForm from "@/components/forms/auth/admin-login-form";
+import AdminLoginForm from "@/components/features/auth/admin-login-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
 

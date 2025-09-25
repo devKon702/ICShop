@@ -1,4 +1,4 @@
-import OrderConfirmationForm from "@/components/forms/order-confirmation-form";
+import OrderConfirmationForm from "@/components/features/order/order-confirmation-form";
 import {
   Dialog,
   DialogContent,

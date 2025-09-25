@@ -13,7 +13,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import CustomInput from "@/components/common/custom-input";
 import { useGlobalContext } from "@/libs/contexts/GlobalContext";
-import SendToEmailForm from "@/components/forms/send-to-email-form";
+import SendToEmailForm from "@/components/features/auth/send-to-email-form";
 import {
   Dialog,
   DialogContent,

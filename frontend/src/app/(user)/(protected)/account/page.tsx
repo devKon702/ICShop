@@ -1,4 +1,4 @@
-import AccountForm from "@/components/forms/account-form";
+import AccountForm from "@/components/features/account/account-form";
 import React from "react";
 
 export default function AccountPage() {

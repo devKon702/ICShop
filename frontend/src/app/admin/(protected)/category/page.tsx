@@ -28,13 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-export type Category = {
-  id: number;
-  name: string;
-  level: number;
-  children?: Category[];
-};
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminCategoryPage() {
   const [openAddAttr, setOpenAddAttr] = useState(false);
@@ -43,13 +37,19 @@ export default function AdminCategoryPage() {
 
   const { openModal, closeModal } = useModalActions();
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["categoryLeaf"],
+    queryKey: ["categoryTree"],
     queryFn: categoryService.getAllCategory4Admin,
   });
 
-  if (isLoading) return <div>Loading Category....</div>;
+  if (isLoading)
+    return (
+      <div className="space-y-2">
+        <Skeleton className="w-full h-10 shadow" />
+        <Skeleton className="w-full h-10 shadow" />
+        <Skeleton className="w-full h-10 shadow" />
+      </div>
+    );
   if (isError) {
-    console.log(error);
     toast.error(error.message);
     return null;
   }
