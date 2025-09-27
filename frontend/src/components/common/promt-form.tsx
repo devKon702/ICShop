@@ -1,6 +1,8 @@
 "use client";
-
 import CustomInput from "@/components/common/custom-input";
+import React from "react";
+import { useForm } from "react-hook-form";
+
 import {
   Form,
   FormControl,
@@ -8,59 +10,53 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { CreateCategoryType } from "@/libs/schemas/category.schema";
-import categoryService from "@/libs/services/category.service";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
-const schema = z.object({
-  name: z
+const FormSchema = z.object({
+  text: z
     .string()
     .max(100, "Tối đa 100 kí tự")
     .trim()
-    .nonempty("Không được bỏ trống tên"),
+    .nonempty("Không được bỏ trống"),
 });
 
 interface Props {
-  parentId?: number;
-  onSuccess: (result: CreateCategoryType) => void;
+  title: string;
+  placeholder?: string;
+  onSubmit: (text: string) => void | Promise<void>;
+  defaultValue?: string;
 }
 
-export default function CreateCategoryForm({ parentId, onSuccess }: Props) {
-  const form = useForm({
-    resolver: zodResolver(schema),
+export default function PromptForm({
+  title,
+  placeholder,
+  onSubmit,
+  defaultValue = "",
+}: Props) {
+  const form = useForm<{ text: string }>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: "",
+      text: defaultValue,
     },
-    mode: "all",
+    mode: "onSubmit",
   });
 
   return (
     <Form {...form}>
       <form
         className="w-full min-w-lg flex flex-col space-y-4 p-4"
-        onSubmit={form.handleSubmit((data: z.infer<typeof schema>) => {
-          categoryService
-            .create(data.name, parentId)
-            .then((res) => {
-              onSuccess(res.data);
-            })
-            .catch((e) => toast.error(e.message));
-        })}
+        onSubmit={form.handleSubmit((data) => onSubmit(data.text))}
       >
-        {/* Name */}
         <FormField
-          name="name"
+          name="text"
           control={form.control}
           render={({ field, fieldState }) => (
             <FormItem>
               <FormControl>
                 <CustomInput
                   type="text"
-                  placeholder="Tên danh mục"
+                  placeholder={placeholder}
                   isError={fieldState.invalid}
                   {...field}
                 />
@@ -74,7 +70,7 @@ export default function CreateCategoryForm({ parentId, onSuccess }: Props) {
           type="submit"
           className="px-4 py-2 bg-primary text-white rounded-md cursor-pointer"
         >
-          Lưu danh mục
+          {title}
         </button>
       </form>
     </Form>

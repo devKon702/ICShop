@@ -7,6 +7,7 @@ import AlertModal from "@/components/modals/alert-modal";
 import FormModal from "@/components/modals/form-modal";
 import { useModal } from "@/store/modal-store";
 import CreateCategoryForm from "@/components/features/category/forms/create-category-form";
+import PromptForm from "@/components/common/promt-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -18,6 +19,12 @@ export default function ModalContainer() {
             switch (item.type) {
               case "alert":
                 return <AlertModal {...item.props} />;
+              case "prompt":
+                return (
+                  <FormModal title={item.props.title}>
+                    <PromptForm {...item.props} />
+                  </FormModal>
+                );
               case "createCategory":
                 return (
                   <FormModal title="Tạo danh mục">

@@ -230,7 +230,6 @@ class CategoryController {
         "Không tìm thấy danh mục",
         true
       );
-    let newLevel = oldCategory.level;
     // Nếu có truyền parentId khác với parentId cũ
     if (parentId !== undefined && parentId !== oldCategory.parentId) {
       const newParent = await categoryRepository.findById(parentId);
@@ -242,21 +241,12 @@ class CategoryController {
           "Không tìm thấy thư mục cha",
           true
         );
-      // Parent là danh mục con nhỏ nhất
-      if (newParent.level === 3)
-        throw new AppError(
-          HttpStatus.NOT_FOUND,
-          CategoryResponseCode.INVALID_PARENT,
-          "Không thể thuộc danh mục con nhỏ nhất",
-          true
-        );
-      // Không cho phép chuyển từ bậc 3 -> 1,2
-      newLevel = newParent.level + 1;
-      if (oldCategory.level === 3 && newLevel !== 3)
+      // Chỉ thay đổi parent cùng bậc
+      if (newParent.level !== oldCategory.level - 1)
         throw new AppError(
           HttpStatus.UNPROCESSABLE_ENTITY,
-          CategoryResponseCode.INVALID_LEVEL_EXCHANGE,
-          "Không thể nâng bậc danh mục bậc 3",
+          CategoryResponseCode.INVALID_PARENT,
+          "Chỉ được chuyển danh mục trong cùng bậc",
           true
         );
     }
@@ -276,8 +266,7 @@ class CategoryController {
     const newCategory = await categoryRepository.update(sub, id, {
       name,
       imageUrl,
-      level: newLevel,
-      parentId: parentId ?? null,
+      parentId: parentId ?? oldCategory.parentId,
       slug: createSlug(name),
     });
 

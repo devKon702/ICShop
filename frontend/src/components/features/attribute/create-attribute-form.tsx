@@ -19,7 +19,7 @@ const schema = z.object({
   name: z
     .string()
     .trim()
-    .nonempty()
+    .nonempty("Không được bỏ trống tên")
     .regex(vietnameseRegex(false), "Tên chỉ bao gồm khoảng trắng và chữ cái"),
 });
 
@@ -40,7 +40,7 @@ export default function CreateAttributeForm({ categoryId, onSuccess }: Props) {
   return (
     <Form {...form}>
       <form
-        className="w-full flex flex-col space-y-4"
+        className="w-full min-w-lg flex flex-col space-y-4 p-4"
         onSubmit={form.handleSubmit((data: z.infer<typeof schema>) => {
           attributeService
             .create(categoryId, data.name)

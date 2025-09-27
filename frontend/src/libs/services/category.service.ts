@@ -15,6 +15,12 @@ const categoryService = {
       ApiResponseSchema(CreateCategorySchema)
     ),
 
+  update: async (id: number, name: string) =>
+    requestHandler(
+      apiClient.put("/v1/admin/category/" + id, { name }),
+      ApiResponseSchema(CategoryBaseSchema)
+    ),
+
   delete: async (id: number) =>
     requestHandler(
       apiClient.delete("/v1/admin/category/" + id),

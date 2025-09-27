@@ -13,7 +13,7 @@ const attributeValueService = {
 
   delete: async (id: number) =>
     requestHandler(
-      apiClient.post("/v1/attrval/" + id),
+      apiClient.delete("/v1/attrval/" + id),
       ApiResponseSchema(z.null().optional())
     ),
 

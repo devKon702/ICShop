@@ -25,8 +25,6 @@ export const CategoryBaseSchema = z.object({
 });
 
 export const CategorySchema = CategoryBaseSchema.extend({
-  // tránh embed Product[] để không nặng payload
-  // chỉ embed children basic (không đệ quy sâu để tránh mảng vô hạn)
   children: z
     .array(
       CategoryBaseSchema.pick({
@@ -50,19 +48,7 @@ export const AdminCategoryTreeSchema = z.array(
   CategoryBaseSchema.extend({
     children: z.array(
       CategoryBaseSchema.extend({
-        children: z
-          .array(
-            CategoryBaseSchema.extend({
-              attributes: z
-                .array(
-                  AttributeBaseSchema.extend({
-                    values: z.array(AttributeValueBaseSchema).optional(),
-                  })
-                )
-                .optional(),
-            })
-          )
-          .optional(),
+        children: z.array(CategoryBaseSchema),
       })
     ),
   })

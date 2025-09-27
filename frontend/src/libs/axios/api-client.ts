@@ -54,11 +54,11 @@ apiClient.interceptors.response.use(
             resolve(apiClient(config));
           }
 
-          reject(err.response);
+          reject(err);
         });
       });
     }
-    return Promise.reject(err.response);
+    return Promise.reject(err);
   }
 );
 

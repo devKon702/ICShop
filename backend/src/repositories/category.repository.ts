@@ -90,11 +90,7 @@ class CategoryRepository {
       include: {
         children: {
           include: {
-            children: {
-              include: {
-                attributes: { include: { values: true } },
-              },
-            },
+            children: true,
           },
         },
       },
@@ -187,7 +183,6 @@ class CategoryRepository {
       name: string;
       slug: string;
       imageUrl: string | null;
-      level: number;
       parentId: number | null;
     }
   ) => {
@@ -198,7 +193,6 @@ class CategoryRepository {
       data: {
         name: data.name,
         imageUrl: data.imageUrl,
-        level: data.level,
         slug: data.slug,
         parentId: data.parentId,
         version: { increment: 1 },

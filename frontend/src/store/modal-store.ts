@@ -11,6 +11,15 @@ type Modal<K extends string, P> = { type: K; props: P };
 
 type ModalType =
   | Modal<"alert", { title?: string; message: string; onClose: () => void }>
+  | Modal<
+      "prompt",
+      {
+        title: string;
+        onSubmit: (value: string) => void | Promise<void>;
+        placeholder?: string;
+        defaultValue?: string;
+      }
+    >
   | Modal<"auth", { onClose: () => void }>
   | Modal<
       "createCategory",

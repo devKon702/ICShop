@@ -18,6 +18,10 @@ export const AttributeBaseSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 
+export const AttributeWithValuesSchema = AttributeBaseSchema.extend({
+  values: z.array(AttributeValueBaseSchema),
+});
+
 export const AttributeSchema = AttributeBaseSchema;
 export type Attribute = z.infer<typeof AttributeSchema>;
 

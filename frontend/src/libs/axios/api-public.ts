@@ -10,7 +10,7 @@ const apiPublic = axios.create({
 
 apiPublic.interceptors.response.use(
   (res) => res,
-  (err) => Promise.reject(err.response)
+  (err) => Promise.reject(err)
 );
 
 export default apiPublic;
