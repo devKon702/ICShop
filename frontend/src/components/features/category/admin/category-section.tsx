@@ -45,6 +45,7 @@ export default function CategorySection({
   });
   return (
     <section className="border rounded-md h-fit">
+      {/* Header */}
       <div className="flex items-center border-b p-2">
         <Layers className="" />
         <h2 className="text-lg font-medium ml-2">{title}</h2>
@@ -66,7 +67,8 @@ export default function CategorySection({
           <Plus />
         </Button>
       </div>
-      <div>
+      {/* List */}
+      <div className="flex flex-col space-y-2 p-2 min-h-80">
         {categories.map((cat) => (
           <CategoryItem
             key={cat.id}

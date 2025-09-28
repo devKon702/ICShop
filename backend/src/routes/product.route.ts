@@ -17,6 +17,7 @@ import {
   updateWholesaleProductSchema,
 } from "../schemas/product.shema";
 import { upload } from "../utils/multer";
+import { findByIdSchema } from "../schemas/shared.schema";
 
 const productRouter = express.Router();
 const path = "/product";
@@ -107,5 +108,14 @@ productRouter.patch(
   authorize([Role.ADMIN]),
   validate(updateWholesaleProductSchema),
   productController.updateWholesale
+);
+
+// DELETE /admin/product/:id
+productRouter.delete(
+  adminPath + "/:id",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(findByIdSchema),
+  productController.delete
 );
 export default productRouter;

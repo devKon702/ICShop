@@ -13,29 +13,31 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-const FormSchema = z.object({
-  text: z
-    .string()
-    .max(100, "Tối đa 100 kí tự")
-    .trim()
-    .nonempty("Không được bỏ trống"),
-});
-
 interface Props {
-  title: string;
+  submitText?: string;
   placeholder?: string;
   onSubmit: (text: string) => void | Promise<void>;
   defaultValue?: string;
+  maxLength?: number;
 }
 
 export default function PromptForm({
-  title,
+  submitText = "Xác nhận",
   placeholder,
   onSubmit,
   defaultValue = "",
+  maxLength = 100,
 }: Props) {
   const form = useForm<{ text: string }>({
-    resolver: zodResolver(FormSchema),
+    resolver: zodResolver(
+      z.object({
+        text: z
+          .string()
+          .max(maxLength, `Tối đa ${maxLength} ký tự`)
+          .trim()
+          .nonempty("Không được bỏ trống"),
+      })
+    ),
     defaultValues: {
       text: defaultValue,
     },
@@ -45,7 +47,7 @@ export default function PromptForm({
   return (
     <Form {...form}>
       <form
-        className="w-full min-w-lg flex flex-col space-y-4 p-4"
+        className="w-full min-w-lg flex flex-col p-4"
         onSubmit={form.handleSubmit((data) => onSubmit(data.text))}
       >
         <FormField
@@ -58,6 +60,7 @@ export default function PromptForm({
                   type="text"
                   placeholder={placeholder}
                   isError={fieldState.invalid}
+                  maxLength={maxLength}
                   {...field}
                 />
               </FormControl>
@@ -65,12 +68,14 @@ export default function PromptForm({
             </FormItem>
           )}
         />
+        <p className="font-semibold opacity-50 text-sm px-2 ml-auto">{`Tối đa ${maxLength} kí tự`}</p>
 
         <button
           type="submit"
-          className="px-4 py-2 bg-primary text-white rounded-md cursor-pointer"
+          className="px-4 py-2 bg-primary text-white cursor-pointer rounded-md  mt-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!form.formState.isValid || form.formState.isSubmitting}
         >
-          {title}
+          {submitText}
         </button>
       </form>
     </Form>

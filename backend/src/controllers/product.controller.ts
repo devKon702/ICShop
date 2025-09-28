@@ -28,6 +28,7 @@ import attributeValueRepository from "../repositories/attribute-value.repository
 import wholesaleRepository from "../repositories/wholesale.repository";
 import { NotFoundError } from "../errors/not-found-error";
 import productImageRepository from "../repositories/product-image.repository";
+import { findByIdSchema } from "../schemas/shared.schema";
 
 class ProductController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -408,6 +409,19 @@ class ProductController {
           wholesale
         )
       );
+  };
+
+  public delete = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+    } = findByIdSchema.parse(req);
+    const product = await productRepository.delete(id);
+    if (!product) {
+      throw new NotFoundError(ProductResponseCode.NOT_FOUND);
+    }
+    res
+      .status(HttpStatus.OK)
+      .json(successResponse(ProductResponseCode.OK, "Xóa sản phẩm thành công"));
   };
 }
 

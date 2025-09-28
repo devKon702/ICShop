@@ -18,6 +18,8 @@ type ModalType =
         onSubmit: (value: string) => void | Promise<void>;
         placeholder?: string;
         defaultValue?: string;
+        maxLength?: number;
+        submitText?: string;
       }
     >
   | Modal<"auth", { onClose: () => void }>
