@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,9 +7,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  parseAsInteger,
+  parseAsNumberLiteral,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryStates,
+} from "nuqs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
@@ -26,32 +31,39 @@ import { useModalActions } from "@/store/modal-store";
 import SearchCombobox from "@/components/common/search-combobox";
 import env from "@/constants/env";
 import SafeImage from "@/components/common/safe-image";
+import { Check, Info, Pencil, Plus, Trash } from "lucide-react";
+import { formatPrice } from "@/utils/number";
+import ClampText from "@/components/common/clamp-text";
 
 export default function ProductManagementPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const { closeModal, openModal } = useModalActions();
 
-  const [name, cid, order, active, limit, page] = [
-    "",
-    undefined,
-    undefined,
-    undefined,
-    10,
-    1,
-  ];
+  const [query, setQuery] = useQueryStates({
+    name: parseAsString.withDefault(""),
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+    cid: parseAsInteger,
+    order: parseAsStringEnum([
+      "name_asc",
+      "name_desc",
+      "price_asc",
+      "price_desc",
+      "date_asc",
+      "date_desc",
+    ]).withDefault("date_desc"),
+    active: parseAsNumberLiteral([0, 1]),
+  });
   const {
     data: productData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["products", { name, cid, order, active, limit, page }],
-    queryFn: async () =>
-      productService.filter({ name, cid, order, active, limit, page }),
+    queryKey: ["products", { ...query }],
+    queryFn: async () => productService.filter({ ...query }),
   });
 
   const { data: categoryData } = useQuery({
-    queryKey: ["category", { level: 3 }],
+    queryKey: ["categories", { level: 3 }],
     queryFn: categoryService.getLeafCagory,
   });
 
@@ -64,21 +76,35 @@ export default function ProductManagementPage() {
     <div className="p-4 space-y-4">
       <div className="flex gap-4 items-end">
         <div className="flex-1">
-          <Label>Tìm kiếm sản phẩm</Label>
+          {/* <Label className="mb-2">Tìm kiếm sản phẩm</Label> */}
           <Input
-            placeholder="Tên, mã sản phẩm..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Tên sản phẩm..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setQuery({ ...query, name: e.currentTarget.value, page: 1 });
+              }
+            }}
           />
         </div>
         {categoryData && (
           <div>
             <SearchCombobox
-              list={categoryData.data.map((item) => ({
-                value: item.id.toString(),
-                label: item.name,
-              }))}
+              list={[
+                { value: "null", label: "Tất cả" },
+                ...categoryData.data.map((item) => ({
+                  value: item.id.toString(),
+                  label: item.name,
+                })),
+              ]}
+              initialValue={query.cid?.toString() || "null"}
               searchPlaceholder="Danh mục"
+              onItemSelect={(item) => {
+                setQuery({
+                  ...query,
+                  cid: item.value === "null" ? null : Number(item.value),
+                  page: 1,
+                });
+              }}
             ></SearchCombobox>
           </div>
         )}
@@ -94,7 +120,8 @@ export default function ProductManagementPage() {
             });
           }}
         >
-          Tạo sản phẩm
+          <Plus />
+          <span>Sản phẩm</span>
         </Button>
       </div>
 
@@ -122,14 +149,29 @@ export default function ProductManagementPage() {
                       height={40}
                     />
                   </TableCell>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.category.name}</TableCell>
-                  <TableCell>{product.price.toLocaleString()}đ</TableCell>
-                  <TableCell>{product.isActive ? "Hoạt động" : "Ẩn"}</TableCell>
                   <TableCell>
-                    <Button size="sm" variant="outline">
-                      Chi tiết
-                    </Button>
+                    <ClampText
+                      className="cursor-pointer hover:underline w-fit"
+                      lines={1}
+                      text={product.name}
+                    />
+                  </TableCell>
+                  <TableCell>{product.category.name}</TableCell>
+                  <TableCell>{formatPrice(Number(product.price))}đ</TableCell>
+                  <TableCell>
+                    {product.isActive ? (
+                      <Check className="p-1 rounded-full bg-primary text-white" />
+                    ) : (
+                      <Check className="p-1 rounded-full bg-gray-200 text-gray-400" />
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2 justify-center items-center">
+                      <Pencil className="cursor-pointer p-1" />
+                      {/* <Info className="cursor-pointer p-1" /> */}
+                      <Trash className="cursor-pointer p-1 text-red-400 hover:text-red-600" />
+                      <Info className="cursor-pointer p-1" />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -142,22 +184,25 @@ export default function ProductManagementPage() {
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                onClick={() =>
+                  setQuery((q) => ({ ...q, page: Math.max(q.page - 1, 1) }))
+                }
               />
             </PaginationItem>
             <PaginationItem>
-              Trang {currentPage} /{" "}
-              {Math.ceil(productData?.data.total / productData?.data.limit)}
+              Trang {query.page} /{" "}
+              {Math.ceil(productData.data.total / productData.data.limit)}
             </PaginationItem>
             <PaginationItem>
               <PaginationNext
                 onClick={() =>
-                  setCurrentPage((p) =>
-                    Math.min(
-                      p + 1,
+                  setQuery((q) => ({
+                    ...q,
+                    page: Math.min(
+                      q.page + 1,
                       Math.ceil(productData.data.total / productData.data.limit)
-                    )
-                  )
+                    ),
+                  }))
                 }
               />
             </PaginationItem>

@@ -5,6 +5,7 @@ import { GlobalProvider } from "@/libs/contexts/GlobalContext";
 import ModalContainer from "@/components/modals/modal-container";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/libs/tanstack-query/query-provider";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,9 @@ export default function RootLayout({
       >
         <QueryProvider>
           <Toaster richColors />
-          <GlobalProvider>{children}</GlobalProvider>
+          <GlobalProvider>
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </GlobalProvider>
           <ModalContainer />
         </QueryProvider>
       </body>

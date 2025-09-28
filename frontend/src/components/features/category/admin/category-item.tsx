@@ -39,9 +39,14 @@ export default function CategoryItem({
 
   const { mutate: updateCategoryMutate } = useMutation({
     mutationFn: (name: string) => categoryService.update(category.id, name),
-    onSuccess: () => {
+    onSuccess: ({ data }) => {
       toast.success("Cập nhật danh mục thành công");
       queryClient.invalidateQueries({ queryKey: ["categoryTree"] });
+      if (data.level === 3) {
+        queryClient.invalidateQueries({
+          queryKey: ["categories", { level: 3 }],
+        });
+      }
       closeModal();
     },
     onError: (error) => {
@@ -54,6 +59,11 @@ export default function CategoryItem({
     onSuccess: () => {
       toast.success("Xóa danh mục thành công");
       queryClient.invalidateQueries({ queryKey: ["categoryTree"] });
+      if (category.level === 3) {
+        queryClient.invalidateQueries({
+          queryKey: ["categories", { level: 3 }],
+        });
+      }
     },
     onError: (error) => {
       toast.error(error.message);

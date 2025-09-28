@@ -41,12 +41,18 @@ type ProductType = {
 
 const productService = {
   filter: async (params: {
-    name?: string;
-    cid?: number;
-    page?: number;
-    limit?: number;
-    order?: "price_asc" | "price_desc" | "none";
-    active?: 0 | 1;
+    name: string;
+    cid: number | null;
+    page: number;
+    limit: number;
+    order:
+      | "price_asc"
+      | "price_desc"
+      | "name_asc"
+      | "name_desc"
+      | "date_asc"
+      | "date_desc";
+    active: 0 | 1 | null;
   }) => {
     const { name, cid, order, active, limit, page } = params;
     const query = new URLSearchParams();
