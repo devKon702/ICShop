@@ -15,12 +15,14 @@ export default function ClampText({
 }: ClampTextProps) {
   return (
     <p
-      className={`line-clamp-${lines} ${className}`}
+      className={`line-clamp-${lines} ${className || ""}`}
       style={{
         display: "-webkit-box",
         WebkitLineClamp: lines,
         WebkitBoxOrient: "vertical",
         overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "normal",
       }}
       title={showTitle ? text : ""}
     >
