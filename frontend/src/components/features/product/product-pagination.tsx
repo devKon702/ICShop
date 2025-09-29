@@ -1,4 +1,4 @@
-import AppPagination from "@/components/common/pagination";
+import AppPagination from "@/components/common/app-pagination";
 import ProductList from "@/components/features/product/product-list";
 import productService from "@/libs/services/product.service";
 import React from "react";

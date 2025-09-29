@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import {
   Pagination,
   PaginationContent,
@@ -10,6 +9,7 @@ import {
   PaginationLink,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { parseAsInteger, useQueryStates } from "nuqs";
 
 interface Props {
   currentPage: number;
@@ -17,14 +17,9 @@ interface Props {
 }
 
 export default function AppPagination({ currentPage, totalPage }: Props) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const goToPage = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(page));
-    router.push(`?${params.toString()}`);
-  };
+  const [query, setQuery] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+  });
 
   const generatePages = () => {
     const pages: (number | "...")[] = [];
@@ -49,7 +44,10 @@ export default function AppPagination({ currentPage, totalPage }: Props) {
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => currentPage > 1 && goToPage(currentPage - 1)}
+            onClick={() =>
+              currentPage > 1 &&
+              setQuery({ ...query, page: Math.max(currentPage - 1, 1) })
+            }
           />
         </PaginationItem>
 
@@ -61,7 +59,11 @@ export default function AppPagination({ currentPage, totalPage }: Props) {
               <PaginationLink
                 className="cursor-pointer data-[active=true]:bg-white hover:bg-white"
                 isActive={item === currentPage}
-                onClick={() => (item !== currentPage ? goToPage(item) : null)}
+                onClick={() =>
+                  item !== currentPage
+                    ? setQuery({ ...query, page: item })
+                    : null
+                }
               >
                 {item}
               </PaginationLink>
@@ -72,7 +74,10 @@ export default function AppPagination({ currentPage, totalPage }: Props) {
         <PaginationItem>
           <PaginationNext
             className="cursor-pointer"
-            onClick={() => currentPage < totalPage && goToPage(currentPage + 1)}
+            onClick={() =>
+              currentPage < totalPage &&
+              setQuery({ ...query, page: currentPage + 1 })
+            }
           />
         </PaginationItem>
       </PaginationContent>
