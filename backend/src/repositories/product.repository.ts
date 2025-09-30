@@ -197,6 +197,7 @@ class ProductRepository {
         }[];
       };
       valueIds: number[];
+      isActive: boolean;
     }
   ) => {
     return prisma.product.create({
@@ -210,6 +211,7 @@ class ProductRepository {
         price: data.price,
         creatorId: userId,
         modifierId: userId,
+        isActive: data.isActive,
         wholesale: {
           create: {
             min_quantity: data.wholesale.min_quantity,

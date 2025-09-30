@@ -104,6 +104,12 @@ const productService = {
       ApiResponseSchema(ProductImageBaseSchema)
     );
   },
+
+  delete: async (productId: number) =>
+    requestHandler(
+      apiClient.delete("v1/admin/product/" + productId),
+      ApiResponseSchema(z.undefined())
+    ),
 };
 
 // name: z.string().nonempty(),

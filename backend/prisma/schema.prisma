@@ -140,7 +140,7 @@ model ProductImage {
   id         Int     @id @default(autoincrement()) @db.UnsignedInt
   /// ID của sản phẩm
   productId  Int     @db.UnsignedInt
-  product    Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   /// Đường dẫn đến ảnh
   imageUrl   String   @db.VarChar(255)
   /// Vị trí hiển thị trong danh sách ảnh

@@ -6,6 +6,16 @@ class ProductImageRepository {
       where: { id },
     });
   };
+  public findByProductId = async (productId: number) => {
+    return prisma.productImage.findMany({
+      where: { productId },
+    });
+  };
+  public deleteByProductId = async (productId: number) => {
+    return prisma.productImage.deleteMany({
+      where: {},
+    });
+  };
   public create = async (userId: number, productId: number, url: string) => {
     return prisma.productImage.create({
       data: { productId, creatorId: userId, modifierId: userId, imageUrl: url },

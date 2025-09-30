@@ -6,10 +6,10 @@ import { getFileTail } from "../utils/file";
 import { env } from "../constants/env";
 
 export class LocalStorage implements IFileStorage {
-  private uploadDir: string;
+  private storagePath: string;
 
   constructor(uploadDir: string) {
-    this.uploadDir = uploadDir;
+    this.storagePath = uploadDir;
   }
 
   async save(
@@ -18,10 +18,10 @@ export class LocalStorage implements IFileStorage {
     mimeType: string
   ): Promise<string> {
     const fileType = getFileTail(mimeType);
-    const filePath = path.join(this.uploadDir, `${fileName}.${fileType}`);
+    const filePath = path.join(this.storagePath, `${fileName}.${fileType}`);
 
     // Tạo nếu folder chưa tồn tại
-    await fs.mkdir(this.uploadDir, { recursive: true });
+    await fs.mkdir(this.storagePath, { recursive: true });
     await fs.writeFile(filePath, fileBuffer);
     // Trả về serve url để client gọi - http url nên không dùng path được
     // return `${env.SERVE_DIR}/${fileName}.${fileType}`;
@@ -29,7 +29,7 @@ export class LocalStorage implements IFileStorage {
   }
 
   async delete(fileUrl: string): Promise<void> {
-    const filePath = path.join(this.uploadDir, path.basename(fileUrl));
+    const filePath = path.join(this.storagePath, path.basename(fileUrl));
     await fs.unlink(filePath).catch(() => {}); // ignore nếu không tồn tại
   }
 

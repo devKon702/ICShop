@@ -194,6 +194,7 @@ class ProductController {
       datasheetLink,
       valueIds,
       wholesale,
+      isActive: false,
     });
 
     res
@@ -415,10 +416,16 @@ class ProductController {
     const {
       params: { id },
     } = findByIdSchema.parse(req);
+    const images = await productImageRepository.findByProductId(id);
     const product = await productRepository.delete(id);
     if (!product) {
       throw new NotFoundError(ProductResponseCode.NOT_FOUND);
     }
+    await Promise.all([
+      ...images.map((item) => storage.delete(item.imageUrl)),
+      product.posterUrl && storage.delete(product.posterUrl),
+    ]);
+    await productImageRepository.deleteByProductId(id);
     res
       .status(HttpStatus.OK)
       .json(successResponse(ProductResponseCode.OK, "Xóa sản phẩm thành công"));

@@ -1,13 +1,13 @@
 "use client";
 
 import LoadingIcon from "@/components/common/loading-icon";
+import SafeImage from "@/components/common/safe-image";
 import ProtectedLayer from "@/components/features/auth/protected-layer";
 import AdminSidebar from "@/components/layouts/admin-sidebar";
 import { ROUTE } from "@/constants/routes";
 import accountService from "@/libs/services/account.service";
 import { useAuthActions } from "@/store/auth-store";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { ReactNode, useEffect } from "react";
 import { toast } from "sonner";
@@ -79,7 +79,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </h1>
               <div className="flex items-center space-x-2">
                 <span className="font-semibold">{data?.data.user.name}</span>
-                <Image
+                <SafeImage
                   src={data?.data.user.avatarUrl || ""}
                   alt="Avatar"
                   height={40}

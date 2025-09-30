@@ -5,6 +5,7 @@ import {
   UnsignedTinyInt,
   TinyText,
   DateTimeSchema,
+  DecimalString,
 } from "../schemas/shared.schema";
 import { WholesaleDetailBaseSchema } from "./wholesale-detail.schema";
 
@@ -15,7 +16,7 @@ export const WholesaleBaseSchema = z.object({
   max_quantity: UnsignedInt,
   quanity_step: UnsignedTinyInt,
   unit: TinyText,
-  vat: UnsignedTinyInt,
+  vat: DecimalString,
   version: z.number().int(),
   creatorId: UnsignedInt,
   modifierId: UnsignedInt,
