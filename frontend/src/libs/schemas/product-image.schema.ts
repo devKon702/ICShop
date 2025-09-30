@@ -1,15 +1,10 @@
 import { z } from "zod";
-import {
-  ID,
-  UnsignedInt,
-  UrlString,
-  DateTimeSchema,
-} from "../schemas/shared.schema";
+import { ID, UnsignedInt, DateTimeSchema } from "../schemas/shared.schema";
 
 export const ProductImageBaseSchema = z.object({
   id: ID,
   productId: UnsignedInt,
-  imageUrl: UrlString,
+  imageUrl: z.string(),
   position: UnsignedInt,
   version: z.number().int(),
   creatorId: UnsignedInt,

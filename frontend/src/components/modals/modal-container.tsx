@@ -1,7 +1,7 @@
 "use client";
 import ImageCropper from "@/components/common/image-cropper";
-import CreateAttributeForm from "@/components/features/attribute/create-attribute-form";
-import CreateValueForm from "@/components/features/attribute/create-value-form";
+import CreateAttributeForm from "@/components/features/attribute/admin/create-attribute-form";
+import CreateValueForm from "@/components/features/attribute/admin/create-value-form";
 import CreateProductForm from "@/components/features/product/forms/create/create-product-form";
 import AlertModal from "@/components/modals/alert-modal";
 import FormModal from "@/components/modals/form-modal";

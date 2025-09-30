@@ -17,7 +17,7 @@ model Product {
   categoryId         Int               @db.UnsignedInt
   category           Category          @relation(fields: [categoryId], references: [id])
   /// Đường dẫn đến datasheet của sản phẩm
-  datasheetLink      String?           @db.VarChar(255)
+  datasheetLink      String?           @db.VarChar(500)
   /// Đuôi đường dẫn đến trang thông tin sản phẩm
   slug               String            @db.VarChar(200) @unique
   /// Mô tả của sản phẩm, chứa mã HTML
@@ -25,7 +25,7 @@ model Product {
   /// Cân nặng tính theo gram 
   weight             Int               @db.UnsignedInt
   /// Giá mặc định để hiển thị
-  price              Decimal           @db.Decimal(10,3) @default(0)
+  price              Decimal           @db.Decimal(15,3) @default(0)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -170,7 +170,7 @@ model Wholesale {
   /// Đơn vị mua (tiếng Việt)
   unit        String         @db.TinyText
   /// Thuế sản phẩm theo đơn vị phần trăm
-  vat         Decimal            @db.Decimal(3,2) @default(0)
+  vat         Decimal            @db.Decimal(5,2) @default(0)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -195,7 +195,7 @@ model WholesaleDetail {
   /// Giá trị trên để áp dụng giá
   max         Int?        @db.UnsignedInt
   /// Đơn giá
-  price       Decimal     @db.Decimal(10,3)
+  price       Decimal     @db.Decimal(15,3)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -394,13 +394,13 @@ model Order {
   /// Hình thức giao (1: Tại cửa hàng, 2: Bưu điện)
   deliveryType         Int            @db.TinyInt
   /// Phí giao hàng
-  deliveryFee          Decimal        @db.Decimal(10,3)
+  deliveryFee          Decimal        @db.Decimal(15,3)
   /// Thời gian nhận sớm nhất
   earliestReceiveTime  DateTime
   /// Thời gian nhận trễ nhất
   latestReceiveTime    DateTime
   /// Tổng tiền
-  total              Decimal           @db.Decimal(10,3)
+  total              Decimal           @db.Decimal(15,3)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt
@@ -424,9 +424,9 @@ model OrderDetail {
   /// Số lượng đặt
   quantity   Int     @db.UnsignedInt
   /// Đơn giá
-  unitPrice  Decimal  @db.Decimal(10,3)
+  unitPrice  Decimal  @db.Decimal(15,3)
   /// Phần trăm thuế áp dụng
-  vat        Decimal      @db.Decimal(3,2) @default(0)
+  vat        Decimal      @db.Decimal(5,2) @default(0)
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt

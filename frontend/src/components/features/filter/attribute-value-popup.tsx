@@ -1,11 +1,12 @@
 "use client";
-import { useFilterContext } from "@/libs/contexts/FilterContext";
+import { useAttributeFilterContext } from "@/libs/contexts/AttributeFilterContext";
 import { useFilter } from "@/libs/hooks/useFilter";
-import { AttributeValue } from "@/libs/models/attribute-value";
 import React from "react";
 
+type AttributeValueType = { id: number; value: string; attributeId: number };
+
 interface AttributeValueProps {
-  values: AttributeValue[];
+  values: AttributeValueType[];
 }
 
 export default function AttributeValuePopup({ values }: AttributeValueProps) {
@@ -13,12 +14,12 @@ export default function AttributeValuePopup({ values }: AttributeValueProps) {
   const {
     selectedAttributeValues: selectedAttributes,
     toggleAttributeValues: toggleAttribute,
-  } = useFilterContext();
+  } = useAttributeFilterContext();
   // const [selectedItems, toggle] = useToggleSelect<AttributeValue>(
   //   [],
   //   (a, b) => a.id == b.id
   // );
-  const filteredData = useFilter<AttributeValue, string>(
+  const filteredData = useFilter<AttributeValueType, string>(
     values,
     (item, query) =>
       item.value.toLowerCase().includes(query.trim().toLowerCase()),
@@ -47,7 +48,13 @@ export default function AttributeValuePopup({ values }: AttributeValueProps) {
                 ? "border-primary text-primary"
                 : ""
             } cursor-pointer`}
-            onClick={() => toggleAttribute(item)}
+            onClick={() =>
+              toggleAttribute({
+                id: item.id,
+                value: item.value,
+                attributeId: item.attributeId,
+              })
+            }
           >
             {item.value}
           </li>

@@ -1,6 +1,7 @@
 import ProductList from "@/components/features/product/product-list";
 import { ROUTE } from "@/constants/routes";
 import { Category } from "@/libs/models/category";
+import { SafeCategory } from "@/libs/schemas/category.schema";
 import {
   HoverCard,
   HoverCardContent,
@@ -8,9 +9,13 @@ import {
 } from "@radix-ui/react-hover-card";
 import Link from "next/link";
 import React from "react";
+import { z } from "zod";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const categorySchema = SafeCategory.extend({ children: z.array(SafeCategory) });
 
 interface ProductCatergoryGroupProps {
-  catergory: Category;
+  catergory: z.infer<typeof categorySchema>;
 }
 
 export default function ProductCategoryGroup({

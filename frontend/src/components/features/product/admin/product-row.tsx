@@ -27,10 +27,10 @@ interface Props {
 }
 
 export default function ProductRow({ product }: Props) {
-  const { openModal, closeModal } = useModalActions();
+  const { closeModal } = useModalActions();
   const queryClient = useQueryClient();
   const { mutate: deleteProductMutate } = useMutation({
-    mutationFn: () => productService.delete(product.id),
+    mutationFn: () => productService.admin.delete(product.id),
     onSuccess: () => {
       toast.success("Xóa thành công sản phẩm " + product.name);
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -38,6 +38,17 @@ export default function ProductRow({ product }: Props) {
     },
     onError: (err) => {
       toast.error(err.message);
+    },
+  });
+
+  const { mutate: updateProductActive } = useMutation({
+    mutationFn: (isActive: boolean) =>
+      productService.admin.updateActive(product.id, isActive),
+    onSuccess: ({ data }) => {
+      toast.success(
+        `${data.isActive ? "Kích hoạt" : "Ẩn"} sản phẩm thành công`
+      );
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
   return (
@@ -61,9 +72,23 @@ export default function ProductRow({ product }: Props) {
       <TableCell>{formatPrice(Number(product.price))}đ</TableCell>
       <TableCell>
         {product.isActive ? (
-          <Check className="p-1 rounded-full bg-primary text-white" />
+          <Check
+            className="p-1 rounded-full bg-primary text-white cursor-pointer mx-auto"
+            onClick={() => {
+              if (confirm("Xác nhận ẩn sản phẩm")) {
+                updateProductActive(false);
+              }
+            }}
+          />
         ) : (
-          <Check className="p-1 rounded-full bg-gray-200 text-gray-400" />
+          <Check
+            className="p-1 rounded-full bg-gray-200 text-gray-400 cursor-pointer mx-auto"
+            onClick={() => {
+              if (confirm("Xác nhận kích hoạt sản phẩm")) {
+                updateProductActive(true);
+              }
+            }}
+          />
         )}
       </TableCell>
       <TableCell>

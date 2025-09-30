@@ -56,7 +56,11 @@ export const FormProductSchema = z.object({
   name: z.string({ message: "Không bỏ trống" }).nonempty("Không bỏ trống"),
   categoryId: z.coerce.number({ message: "Chọn một danh mục" }),
   desc: z.string().optional(),
-  datasheetLink: z.string().max(250, "Tối đa 250 kí tự").optional(),
+  datasheetLink: z
+    .string()
+    .url("Link không hợp lệ")
+    .max(250, "Tối đa 250 kí tự")
+    .optional(),
   weight: z.coerce
     .number({ message: "Không bỏ trống" })
     .int("Phải là kiểu số nguyên")

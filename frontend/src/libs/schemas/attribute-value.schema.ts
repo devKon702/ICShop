@@ -16,3 +16,11 @@ export const AttributeValueBaseSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
+
+export const SafeAttributeValueSchema = AttributeValueBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+  version: true,
+});

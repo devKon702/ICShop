@@ -19,12 +19,12 @@ export default function TopBreadcrump() {
         <BreadcrumbList>
           {breadcrump.map((item, index) =>
             index != breadcrump.length - 1 ? (
-              <>
+              <div key={index} className="flex gap-2 items-center">
                 <BreadcrumbItem>
                   <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
-              </>
+              </div>
             ) : (
               <BreadcrumbItem key={index}>
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>

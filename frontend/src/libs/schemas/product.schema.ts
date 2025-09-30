@@ -18,7 +18,7 @@ export const ProductBaseSchema = z.object({
   name: Text,
   posterUrl: z.string().nullable().optional(),
   categoryId: UnsignedInt,
-  datasheetLink: z.string().url().nullable().optional(),
+  datasheetLink: z.string().nullable().optional(),
   slug: Slug,
   desc: z.string().nullable().optional(),
   weight: UnsignedInt,
@@ -43,4 +43,13 @@ export const FilterProductSchema = ProductBaseSchema.extend({
   creator: UserBaseSchema,
   modifier: UserBaseSchema,
   category: CategoryBaseSchema,
+});
+
+export const SafeProduct = ProductBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+  version: true,
+  isActive: true,
 });

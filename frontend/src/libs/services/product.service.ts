@@ -1,4 +1,5 @@
 import apiClient from "@/libs/axios/api-client";
+import apiPublic from "@/libs/axios/api-public";
 import { AttributeBaseSchema } from "@/libs/schemas/attribute.schema";
 import { ProductImageBaseSchema } from "@/libs/schemas/product-image.schema";
 import {
@@ -40,76 +41,92 @@ type ProductType = {
 };
 
 const productService = {
-  filter: async (params: {
-    name: string;
-    cid: number | null;
-    page: number;
-    limit: number;
-    order:
-      | "price_asc"
-      | "price_desc"
-      | "name_asc"
-      | "name_desc"
-      | "date_asc"
-      | "date_desc";
-    active: 0 | 1 | null;
-  }) => {
-    const { name, cid, order, active, limit, page } = params;
-    const query = new URLSearchParams();
-    if (name) query.set("name", name);
-    if (cid) query.set("cid", cid.toString());
-    if (order) query.set("order", order);
-    if (active) query.set("active", active.toString());
-    if (limit) query.set("limit", limit.toString());
-    if (page) query.set("page", page.toString());
-    return requestHandler(
-      apiClient.get("/v1/admin/product?" + query.toString()),
-      PaginatedResponseSchema(FilterProductSchema)
-    );
-  },
-  create: async (data: ProductType) => {
-    return requestHandler(
-      apiClient.post("/v1/admin/product", data),
-      ApiResponseSchema(
-        ProductBaseSchema.extend({
-          attributes: z.array(AttributeBaseSchema),
-          creator: UserBaseSchema,
-          wholesale: WholesaleBaseSchema.extend({
-            details: z.array(WholesaleDetailBaseSchema),
-          }),
-        })
-      )
-    );
+  admin: {
+    filter: async (params: {
+      name: string;
+      cid: number | null;
+      page: number;
+      limit: number;
+      order:
+        | "price_asc"
+        | "price_desc"
+        | "name_asc"
+        | "name_desc"
+        | "date_asc"
+        | "date_desc";
+      active: 0 | 1 | null;
+    }) => {
+      const { name, cid, order, active, limit, page } = params;
+      const query = new URLSearchParams();
+      if (name) query.set("name", name);
+      if (cid) query.set("cid", cid.toString());
+      if (order) query.set("order", order);
+      if (active) query.set("active", active.toString());
+      if (limit) query.set("limit", limit.toString());
+      if (page) query.set("page", page.toString());
+      return requestHandler(
+        apiClient.get("/v1/admin/product?" + query.toString()),
+        PaginatedResponseSchema(FilterProductSchema)
+      );
+    },
+    create: async (data: ProductType) => {
+      return requestHandler(
+        apiClient.post("/v1/admin/product", data),
+        ApiResponseSchema(
+          ProductBaseSchema.extend({
+            attributes: z.array(AttributeBaseSchema),
+            creator: UserBaseSchema,
+            wholesale: WholesaleBaseSchema.extend({
+              details: z.array(WholesaleDetailBaseSchema),
+            }),
+          })
+        )
+      );
+    },
+
+    updatePoster: async (productId: number, poster: File) => {
+      const formData = new FormData();
+      formData.append("poster", poster);
+      return requestHandler(
+        apiClient.patch(`/v1/admin/product/${productId}/poster`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        }),
+        ApiResponseSchema(
+          ProductBaseSchema.extend({ modifier: UserBaseSchema })
+        )
+      );
+    },
+
+    addImageGallery: async (productId: number, image: File) => {
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("productId", productId.toString());
+      return requestHandler(
+        apiClient.post("/v1/gallery", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        }),
+        ApiResponseSchema(ProductImageBaseSchema)
+      );
+    },
+
+    delete: async (productId: number) =>
+      requestHandler(
+        apiClient.delete("v1/admin/product/" + productId),
+        ApiResponseSchema(z.undefined())
+      ),
+
+    updateActive: async (productId: number, isActive: boolean) =>
+      requestHandler(
+        apiClient.patch("v1/admin/product/" + productId + "/lock", {
+          isActive,
+        }),
+        ApiResponseSchema(
+          ProductBaseSchema.extend({ modifier: UserBaseSchema })
+        )
+      ),
   },
 
-  updatePoster: async (productId: number, poster: File) => {
-    const formData = new FormData();
-    formData.append("poster", poster);
-    return requestHandler(
-      apiClient.patch(`/v1/admin/product/${productId}/poster`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      }),
-      ApiResponseSchema(ProductBaseSchema.extend({ modifier: UserBaseSchema }))
-    );
-  },
-
-  addImageGallery: async (productId: number, image: File) => {
-    const formData = new FormData();
-    formData.append("image", image);
-    formData.append("productId", productId.toString());
-    return requestHandler(
-      apiClient.post("/v1/gallery", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      }),
-      ApiResponseSchema(ProductImageBaseSchema)
-    );
-  },
-
-  delete: async (productId: number) =>
-    requestHandler(
-      apiClient.delete("v1/admin/product/" + productId),
-      ApiResponseSchema(z.undefined())
-    ),
+  user: {},
 };
 
 // name: z.string().nonempty(),

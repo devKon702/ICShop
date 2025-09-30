@@ -76,7 +76,7 @@ export default function CreateProductForm({
         valueIds,
         datasheetLink,
       } = data;
-      const newProductResponse = await productService.create({
+      const newProductResponse = await productService.admin.create({
         name,
         desc: desc || null,
         weight,
@@ -93,9 +93,12 @@ export default function CreateProductForm({
       });
       if (poster) {
         await Promise.all([
-          productService.updatePoster(newProductResponse.data.id, poster),
+          productService.admin.updatePoster(newProductResponse.data.id, poster),
           ...gallery.map((item) =>
-            productService.addImageGallery(newProductResponse.data.id, item)
+            productService.admin.addImageGallery(
+              newProductResponse.data.id,
+              item
+            )
           ),
         ]);
       }

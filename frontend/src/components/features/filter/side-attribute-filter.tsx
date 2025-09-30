@@ -5,19 +5,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useFilterContext } from "@/libs/contexts/FilterContext";
+import { useAttributeFilterContext } from "@/libs/contexts/AttributeFilterContext";
 
-import { Attribute } from "@/libs/models/attribute";
 import { getIdFromString } from "@/utils/string";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 
 interface SideAttributeFilterProps {
-  attributes: Attribute[];
+  data: {
+    id: number;
+    name: string;
+    values: { id: number; value: string }[];
+  }[];
 }
 
 export default function SideAttributeFilter({
-  attributes,
+  data,
 }: SideAttributeFilterProps) {
   return (
     <div className="rounded-sm overflow-hidden shadow-xl bg-white">
@@ -26,7 +29,7 @@ export default function SideAttributeFilter({
         <span>Lọc sản phẩm</span>
       </div>
       <div>
-        {attributes.map((item) => (
+        {data.map((item) => (
           <AttributeItem key={item.id} attribute={item}></AttributeItem>
         ))}
       </div>
@@ -35,19 +38,27 @@ export default function SideAttributeFilter({
 }
 
 interface AttributeItemProps {
-  attribute: Attribute;
+  attribute: {
+    id: number;
+    name: string;
+    values: { id: number; value: string }[];
+  };
 }
 
 function AttributeItem({ attribute }: AttributeItemProps) {
   const [highlight, setHighlight] = React.useState(false);
-  const { toggleAttributeValues } = useFilterContext();
+  const { toggleAttributeValues } = useAttributeFilterContext();
   const searchParams = useSearchParams();
   useEffect(() => {
     const attrids = new URLSearchParams(searchParams.toString()).get("attrids");
     const ids = getIdFromString(attrids);
     attribute.values?.forEach((item) => {
       if (ids.some((id) => id == Number(item.id))) {
-        toggleAttributeValues(item);
+        toggleAttributeValues({
+          id: item.id,
+          value: item.value,
+          attributeId: attribute.id,
+        });
       }
     });
   }, []);
@@ -69,7 +80,12 @@ function AttributeItem({ attribute }: AttributeItemProps) {
         className="shadow-2xl border-2"
       >
         <AttributeValuePopup
-          values={attribute.values || []}
+          values={
+            attribute.values.map((item) => ({
+              ...item,
+              attributeId: attribute.id,
+            })) || []
+          }
         ></AttributeValuePopup>
       </PopoverContent>
     </Popover>

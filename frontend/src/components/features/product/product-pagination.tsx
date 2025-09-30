@@ -1,38 +1,33 @@
 import AppPagination from "@/components/common/app-pagination";
 import ProductList from "@/components/features/product/product-list";
-import productService from "@/libs/services/product.service";
 import React from "react";
 
 interface ProductPaginationProps {
-  categorySlug: string;
-  attrids: string | undefined;
-  name: string | undefined;
-  page: string | undefined;
-  limit: string | undefined;
+  products: {
+    id: number;
+    name: string;
+    posterUrl: string;
+    price: number;
+    slug: string;
+  }[];
+  page: number;
+  total: number;
+  limit: number;
 }
 
 export default async function ProductPagination({
-  categorySlug,
-  attrids,
-  limit = "10",
-  name = "",
-  page = "1",
+  products,
+  page,
+  total,
+  limit,
 }: ProductPaginationProps) {
-  const response = await productService.filterProduct(
-    categorySlug,
-    attrids,
-    name,
-    Number(page),
-    Number(limit)
-  );
-  console.log(response);
-  if (!response?.data) return null;
   return (
     <div className="space-y-4">
-      <ProductList products={response.data} cols={4}></ProductList>
+      <ProductList products={products} cols={4}></ProductList>
       <AppPagination
-        currentPage={response.page}
-        totalPage={Math.ceil(response.total / response.limit)}
+        currentPage={page}
+        totalPage={Math.ceil(total / limit)}
+        isClientSide={false}
       ></AppPagination>
     </div>
   );

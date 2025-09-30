@@ -30,3 +30,11 @@ export const CreateAttributeSchema = AttributeBaseSchema;
 export const GetAttributeListWithValues = z.array(
   AttributeBaseSchema.extend({ values: z.array(AttributeValueBaseSchema) })
 );
+
+export const SafeAttributeSchema = AttributeBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+  version: true,
+});

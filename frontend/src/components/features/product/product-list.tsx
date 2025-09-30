@@ -1,9 +1,14 @@
 import ProductCard from "@/components/features/product/product-card";
-import { Product } from "@/libs/models/product";
 import React from "react";
 
 interface ProductListProps {
-  products?: Product[];
+  products: {
+    id: number;
+    name: string;
+    posterUrl: string;
+    price: number;
+    slug: string;
+  }[];
   cols?: number;
 }
 

@@ -52,7 +52,7 @@ export default function ProductManagementPage() {
     isError,
   } = useQuery({
     queryKey: ["products", { ...query }],
-    queryFn: async () => productService.filter({ ...query }),
+    queryFn: async () => productService.admin.filter({ ...query }),
   });
   const { data: categoryData } = useQuery({
     queryKey: ["categories", { level: 3 }],

@@ -14,6 +14,7 @@ async function requestHandler<T>(
     }
     return parsed.data;
   } catch (err) {
+    console.log(err);
     if (err instanceof AxiosError) {
       const parsedError = ApiErrorResponseSchema.safeParse(err.response?.data);
       if (parsedError.success) {

@@ -64,3 +64,22 @@ export const AdminCategorySchema = CategoryBaseSchema.extend({
     )
     .optional(),
 });
+
+export const SafeCategory = CategoryBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+  version: true,
+  isActive: true,
+});
+
+export const SafeCategoryTree = z.array(
+  SafeCategory.extend({
+    children: z.array(
+      SafeCategory.extend({
+        children: z.array(SafeCategory),
+      })
+    ),
+  })
+);

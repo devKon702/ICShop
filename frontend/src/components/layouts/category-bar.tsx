@@ -1,29 +1,24 @@
 import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { ROUTE } from "@/constants/routes";
-import { Category } from "@/libs/models/category";
+import categoryService from "@/libs/services/category.service";
 import { HoverCard } from "@radix-ui/react-hover-card";
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-interface CategoryBarProps {
-  categories: Category[];
-}
-
-export default function CategoryBar({
-  categories: catergories,
-}: CategoryBarProps) {
+export default async function CategoryBar() {
+  const { data } = await categoryService.getTree();
+  if (!data) return null;
   return (
     <ul className="flex flex-wrap justify-center space-x-1 py-2 bg-white">
-      {catergories.map((item) => (
+      {data.map((item) => (
         <HoverCard key={item.id} openDelay={0} closeDelay={20}>
           <HoverCardTrigger className="flex flex-col items-center justify-between border-b-2 border-transparent hover:border-b-primary cursor-pointer p-1 flex-1 min-w-36 m-0">
-            <Image
+            {/* <Image
               src={`/uploads/${item.imageUrl}`}
               width={20}
               height={20}
               alt={item.name}
-            ></Image>
+            ></Image> */}
             <p className="uppercase text-sm">{item.name}</p>
           </HoverCardTrigger>
           <HoverCardContent className="w-fit mx-3">

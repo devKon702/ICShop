@@ -1,5 +1,5 @@
 "use client";
-import { useFilterContext } from "@/libs/contexts/FilterContext";
+import { useAttributeFilterContext } from "@/libs/contexts/AttributeFilterContext";
 import { AttributeValue } from "@/libs/models/attribute-value";
 import { useRouter, usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -24,7 +24,8 @@ function groupAttribute(values: AttributeValue[]) {
 }
 
 export default function SelectedAttributeValueFilter() {
-  const { selectedAttributeValues, toggleAttributeValues } = useFilterContext();
+  const { selectedAttributeValues, toggleAttributeValues } =
+    useAttributeFilterContext();
   const [filteringAttributes, setFilteringAttributes] = useState<
     {
       attributeId: number;

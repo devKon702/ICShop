@@ -33,7 +33,7 @@ interface ProductPageProps {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = await productService.getProductBySlug(slug);
+  const product = await productService.user.getProductBySlug(slug);
   if (!product) notFound();
   return (
     <>

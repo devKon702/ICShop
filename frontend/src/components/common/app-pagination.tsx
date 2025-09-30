@@ -14,12 +14,22 @@ import { parseAsInteger, useQueryStates } from "nuqs";
 interface Props {
   currentPage: number;
   totalPage: number;
+  isClientSide?: boolean;
 }
 
-export default function AppPagination({ currentPage, totalPage }: Props) {
-  const [query, setQuery] = useQueryStates({
-    page: parseAsInteger.withDefault(1),
-  });
+export default function AppPagination({
+  currentPage,
+  totalPage,
+  isClientSide = true,
+}: Props) {
+  const [query, setQuery] = useQueryStates(
+    {
+      page: parseAsInteger.withDefault(1),
+    },
+    {
+      shallow: isClientSide,
+    }
+  );
 
   const generatePages = () => {
     const pages: (number | "...")[] = [];
