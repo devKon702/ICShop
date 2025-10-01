@@ -86,15 +86,7 @@ class AuthController {
       );
     // Thành công
     else {
-      const {
-        password,
-        version,
-        createdAt,
-        updatedAt,
-        modifierId,
-        creatorId,
-        ...publicAccount
-      } = account;
+      const { password, ...publicAccount } = account;
       const accessToken = createAccessToken({
         sub: account.user!.id,
         role,

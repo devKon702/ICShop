@@ -13,3 +13,11 @@ export const ProductImageBaseSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 export type ProductImage = z.infer<typeof ProductImageBaseSchema>;
+
+export const SafeProductImageSchema = ProductImageBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+  version: true,
+});

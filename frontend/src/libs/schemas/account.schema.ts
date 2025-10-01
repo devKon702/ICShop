@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { ID, DateTimeSchema } from "../schemas/shared.schema";
 import { RoleEnum } from "../schemas/shared.schema";
-import { UserBaseSchema } from "@/libs/schemas/user.schema";
 
 export const AccountBaseSchema = z.object({
   id: ID,
@@ -17,6 +16,4 @@ export const AccountBaseSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 
-export const AccountSchema = AccountBaseSchema; // không embed User để tránh vòng
-
-export const GetMeSchema = AccountBaseSchema.extend({ user: UserBaseSchema });
+export const AccountSchema = AccountBaseSchema;

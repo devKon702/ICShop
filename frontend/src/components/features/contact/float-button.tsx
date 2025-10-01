@@ -1,5 +1,4 @@
 "use client";
-import { ENV_ZALO_LINK } from "@/constants/env";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -16,7 +15,7 @@ export default function FloatButton() {
       </button>
 
       <Link
-        href={ENV_ZALO_LINK || ""}
+        href={"#"}
         target="_blank"
         className="size-10 rounded-full overflow-hidden bg-primary grid place-items-center cursor-pointer glow-hover"
         // onClick={() => {

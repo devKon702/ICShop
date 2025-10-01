@@ -7,24 +7,22 @@ interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   height: number;
   src: string;
   alt?: string;
+  ref?: React.Ref<HTMLImageElement>;
 }
 
-export default function SafeImage({
-  width,
-  height,
-  src = "",
-  alt,
-  ...props
-}: Props) {
+const SafeImage = ({ width, height, src = "", alt, ref, ...props }: Props) => {
   const [safeSrc, setSafeSrc] = useState(src);
   return (
     <Image
       width={width}
       height={height}
       alt={alt ? alt : "Ảnh"}
+      ref={ref}
       src={safeSrc}
       onError={() => setSafeSrc(`https://placehold.co/${width}x${height}.jpg`)}
       {...props}
     />
   );
-}
+};
+
+export default SafeImage;

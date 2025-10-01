@@ -1,13 +1,14 @@
-import apiClient from "@/libs/axios/api-client";
-import { GetMeSchema } from "@/libs/schemas/account.schema";
+import apiAxios from "@/libs/api/api-axios";
+import { AccountBaseSchema } from "@/libs/schemas/account.schema";
 import { ApiResponseSchema } from "@/libs/schemas/response.schema";
-import requestHandler from "@/utils/request-handler";
+import { UserBaseSchema } from "@/libs/schemas/user.schema";
+import { axiosHandler } from "@/utils/response-handler";
 
 const accountService = {
   getMe: async () =>
-    requestHandler(
-      apiClient.get("/v1/account/me"),
-      ApiResponseSchema(GetMeSchema)
+    axiosHandler(
+      apiAxios.get("/v1/account/me"),
+      ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema }))
     ),
 };
 

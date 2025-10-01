@@ -1,5 +1,5 @@
-import apiClient from "@/libs/axios/api-client";
-import apiPublic from "@/libs/axios/api-public";
+import apiAxios from "@/libs/api/api-axios";
+import { AccountBaseSchema } from "@/libs/schemas/account.schema";
 import {
   LoginSchema,
   RefreshSchema,
@@ -9,31 +9,37 @@ import {
   ApiErrorResponseSchema,
   ApiResponseSchema,
 } from "@/libs/schemas/response.schema";
-import requestHandler from "@/utils/request-handler";
+import { UserBaseSchema } from "@/libs/schemas/user.schema";
+import { axiosHandler } from "@/utils/response-handler";
 import { z } from "zod";
 
 export const authService = {
   testToken: async () =>
-    apiClient
+    apiAxios
       .get("/v1/auth/testToken")
       .then((response) => response)
       .catch((e) => e),
 
   refresh: async () =>
-    requestHandler(
-      apiClient.post("/v1/auth/refresh"),
+    axiosHandler(
+      apiAxios.post("/v1/auth/refresh"),
       ApiResponseSchema(RefreshSchema)
     ),
 
   login: async (email: string, password: string) =>
-    requestHandler(
-      apiPublic.post("/v1/auth/login", { email, password }),
-      ApiResponseSchema(LoginSchema)
+    axiosHandler(
+      apiAxios.post("/v1/auth/login", { email, password }),
+      ApiResponseSchema(
+        z.object({
+          account: AccountBaseSchema.extend({ user: UserBaseSchema }),
+          token: z.string(),
+        })
+      )
     ),
 
   adminLogin: async (email: string, password: string) =>
-    requestHandler(
-      apiPublic.post("/v1/admin/auth/login", { email, password }),
+    axiosHandler(
+      apiAxios.post("/v1/admin/auth/login", { email, password }),
       ApiResponseSchema(LoginSchema)
     ),
 
@@ -43,7 +49,7 @@ export const authService = {
     name: string;
     phone: string;
   }) =>
-    apiPublic
+    apiAxios
       .post("/v1/auth/signup", data)
       .then((res) => {
         const p = SignupSchema.parse(res.data.data);
@@ -55,8 +61,5 @@ export const authService = {
       }),
 
   logout: async () =>
-    requestHandler(
-      apiClient.post("/v1/auth/logout"),
-      ApiResponseSchema(z.null())
-    ),
+    axiosHandler(apiAxios.post("/v1/auth/logout"), ApiResponseSchema(z.null())),
 };

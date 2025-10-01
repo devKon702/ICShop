@@ -7,18 +7,18 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 let isRefreshing = false;
 let refreshSubscribers: ((token: string | null) => void)[] = [];
 
-const apiClient = axios.create({
+const apiAxios = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
 
-apiClient.interceptors.request.use((config) => {
+apiAxios.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-apiClient.interceptors.response.use(
+apiAxios.interceptors.response.use(
   (res) => res,
   async (err: AxiosError<{ code: string }>) => {
     const response = err.response;
@@ -51,15 +51,20 @@ apiClient.interceptors.response.use(
           if (config && token) {
             // config?.headers?.Authorization = `Bearer ${token}`;
             config.headers!.Authorization = `Bearer ${token}`;
-            resolve(apiClient(config));
+            resolve(apiAxios(config));
           }
 
           reject(err);
         });
       });
+    } else if (
+      response?.status === 401 &&
+      response.data.code === JWT_CODE.TOKEN_MISSING
+    ) {
+      window.dispatchEvent(new CustomEvent("needlogin"));
     }
     return Promise.reject(err);
   }
 );
 
-export default apiClient;
+export default apiAxios;

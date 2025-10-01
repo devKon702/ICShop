@@ -1,56 +1,57 @@
-import apiClient from "@/libs/axios/api-client";
-import apiPublic from "@/libs/axios/api-public";
+import apiAxios from "@/libs/api/api-axios";
+import { apiFetch } from "@/libs/api/api-fetch";
+
 import { SafeAttributeValueSchema } from "@/libs/schemas/attribute-value.schema";
 import { SafeAttributeSchema } from "@/libs/schemas/attribute.schema";
 import {
   AdminCategoryTreeSchema,
   CategoryBaseSchema,
   CreateCategorySchema,
-  SafeCategory,
-  SafeCategoryTree,
+  SafeCategoryBaseSchema,
+  SafeCategoryTreeSchema,
 } from "@/libs/schemas/category.schema";
-import { SafeProduct } from "@/libs/schemas/product.schema";
+import { SafeProductBaseSchema } from "@/libs/schemas/product.schema";
 import { ApiResponseSchema } from "@/libs/schemas/response.schema";
-import requestHandler from "@/utils/request-handler";
+import { axiosHandler, fetchHandler } from "@/utils/response-handler";
 import { z } from "zod";
 
 const categoryService = {
   // Admin
   create: async (name: string, parentId?: number) =>
-    requestHandler(
-      apiClient.post("/v1/admin/category", { name, parentId }),
+    axiosHandler(
+      apiAxios.post("/v1/admin/category", { name, parentId }),
       ApiResponseSchema(CreateCategorySchema)
     ),
 
   update: async (id: number, name: string) =>
-    requestHandler(
-      apiClient.put("/v1/admin/category/" + id, { name }),
+    axiosHandler(
+      apiAxios.put("/v1/admin/category/" + id, { name }),
       ApiResponseSchema(CategoryBaseSchema)
     ),
 
   delete: async (id: number) =>
-    requestHandler(
-      apiClient.delete("/v1/admin/category/" + id),
+    axiosHandler(
+      apiAxios.delete("/v1/admin/category/" + id),
       ApiResponseSchema(z.null().optional())
     ),
 
   getAllCategory4Admin: async () =>
-    requestHandler(
-      apiClient.get("/v1/admin/category"),
+    axiosHandler(
+      apiAxios.get("/v1/admin/category"),
       ApiResponseSchema(AdminCategoryTreeSchema)
     ),
 
   getLeafCagory: async () =>
-    requestHandler(
-      apiClient.get("/v1/admin/category/leaf"),
+    axiosHandler(
+      apiAxios.get("/v1/admin/category/leaf"),
       ApiResponseSchema(z.array(CategoryBaseSchema))
     ),
 
   // User
   getTree: async () =>
-    requestHandler(
-      apiPublic.get("/v1/category"),
-      ApiResponseSchema(SafeCategoryTree)
+    fetchHandler(
+      apiFetch("/v1/category"),
+      ApiResponseSchema(SafeCategoryTreeSchema)
     ),
   getBySlug: async (
     slug: string,
@@ -63,25 +64,25 @@ const categoryService = {
     query.set("limit", limit.toString());
     query.set("order", order);
 
-    return requestHandler(
-      apiPublic.get(`v1/category/${slug}?${query.toString()}`),
+    return fetchHandler(
+      apiFetch(`/v1/category/${slug}?${query.toString()}`),
       ApiResponseSchema(
-        SafeCategory.extend({
+        SafeCategoryBaseSchema.extend({
           _count: z.object({ products: z.number() }),
           products: z.array(
-            SafeProduct.omit({
+            SafeProductBaseSchema.omit({
               desc: true,
               weight: true,
               categoryId: true,
               datasheetLink: true,
             })
           ),
-          parent: SafeCategory.extend({
-            parent: SafeCategory.nullable(),
+          parent: SafeCategoryBaseSchema.extend({
+            parent: SafeCategoryBaseSchema.nullable(),
           }).nullable(),
           children: z.array(
-            SafeCategory.extend({
-              children: z.array(SafeCategory),
+            SafeCategoryBaseSchema.extend({
+              children: z.array(SafeCategoryBaseSchema),
             })
           ),
           attributes: z.array(

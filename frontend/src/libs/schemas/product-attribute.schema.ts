@@ -11,3 +11,11 @@ export const ProductAttributeBaseSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
+
+export const SafeProductAttributeSchema = ProductAttributeBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+  version: true,
+});

@@ -14,4 +14,4 @@ export const ROUTE = {
   userAccount: "/account",
   userOrder: "/account/order",
   userAddress: "/account/address",
-};
+} as const;

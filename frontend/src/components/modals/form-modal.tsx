@@ -12,18 +12,23 @@ export default function FormModal({
   title,
   children,
 }: {
-  title: string;
+  title?: string;
   children: React.ReactNode;
 }) {
   const { closeModal } = useModalActions();
   return (
     <Dialog open={true} onOpenChange={(o) => !o && closeModal()}>
       <DialogContent showCloseButton={false} className="p-0 gap-0">
+        <DialogTitle hidden>Form Modal</DialogTitle>
         <DialogHeader>
-          <DialogTitle className="font-bold text-2xl px-4 py-2">
-            {title}
-          </DialogTitle>
-          <Separator />
+          {title && (
+            <>
+              <DialogTitle className="font-bold text-2xl px-4 py-2">
+                {title}
+              </DialogTitle>
+              <Separator />
+            </>
+          )}
         </DialogHeader>
         {children}
       </DialogContent>

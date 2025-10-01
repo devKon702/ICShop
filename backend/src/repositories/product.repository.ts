@@ -13,6 +13,7 @@ class ProductRepository {
         desc: true,
         price: true,
         weight: true,
+        categoryId: true,
         wholesale: {
           select: {
             id: true,
@@ -21,6 +22,7 @@ class ProductRepository {
             quanity_step: true,
             unit: true,
             vat: true,
+            productId: true,
             details: {
               select: {
                 id: true,
@@ -28,6 +30,7 @@ class ProductRepository {
                 min: true,
                 max: true,
                 price: true,
+                wholesaleId: true,
               },
             },
           },
@@ -35,27 +38,46 @@ class ProductRepository {
         attributes: {
           select: {
             id: true,
+            attributeValueId: true,
+            productId: true,
             attributeValue: {
               select: {
                 id: true,
                 value: true,
-                attribute: { select: { name: true } },
+                attributeId: true,
+                attribute: {
+                  select: { name: true, id: true, categoryId: true },
+                },
               },
             },
           },
         },
-        images: { select: { id: true, imageUrl: true, position: true } },
+        images: {
+          select: { id: true, imageUrl: true, position: true, productId: true },
+        },
         category: {
           select: {
+            id: true,
+            imageUrl: true,
             name: true,
             slug: true,
             level: true,
             parent: {
               select: {
+                id: true,
+                imageUrl: true,
                 name: true,
                 slug: true,
                 level: true,
-                parent: { select: { name: true, slug: true, level: true } },
+                parent: {
+                  select: {
+                    id: true,
+                    imageUrl: true,
+                    name: true,
+                    slug: true,
+                    level: true,
+                  },
+                },
               },
             },
           },

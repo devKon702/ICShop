@@ -1,19 +1,35 @@
-import apiClient from "@/libs/axios/api-client";
-import apiPublic from "@/libs/axios/api-public";
-import { AttributeBaseSchema } from "@/libs/schemas/attribute.schema";
-import { ProductImageBaseSchema } from "@/libs/schemas/product-image.schema";
+import apiAxios from "@/libs/api/api-axios";
+import { apiFetch } from "@/libs/api/api-fetch";
+import { SafeAttributeValueSchema } from "@/libs/schemas/attribute-value.schema";
+import {
+  AttributeBaseSchema,
+  SafeAttributeSchema,
+} from "@/libs/schemas/attribute.schema";
+import { SafeCategoryBaseSchema } from "@/libs/schemas/category.schema";
+import { SafeProductAttributeSchema } from "@/libs/schemas/product-attribute.schema";
+import {
+  ProductImageBaseSchema,
+  SafeProductImageSchema,
+} from "@/libs/schemas/product-image.schema";
 import {
   FilterProductSchema,
   ProductBaseSchema,
+  SafeProductBaseSchema,
 } from "@/libs/schemas/product.schema";
 import {
   ApiResponseSchema,
   PaginatedResponseSchema,
 } from "@/libs/schemas/response.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
-import { WholesaleDetailBaseSchema } from "@/libs/schemas/wholesale-detail.schema";
-import { WholesaleBaseSchema } from "@/libs/schemas/wholesale.schema";
-import requestHandler from "@/utils/request-handler";
+import {
+  SafeWholesaleDetailSchema,
+  WholesaleDetailBaseSchema,
+} from "@/libs/schemas/wholesale-detail.schema";
+import {
+  SafeWholesaleBaseSchema,
+  WholesaleBaseSchema,
+} from "@/libs/schemas/wholesale.schema";
+import { axiosHandler, fetchHandler } from "@/utils/response-handler";
 import { z } from "zod";
 
 type WholesaleType = {
@@ -64,14 +80,14 @@ const productService = {
       if (active) query.set("active", active.toString());
       if (limit) query.set("limit", limit.toString());
       if (page) query.set("page", page.toString());
-      return requestHandler(
-        apiClient.get("/v1/admin/product?" + query.toString()),
+      return axiosHandler(
+        apiAxios.get("/v1/admin/product?" + query.toString()),
         PaginatedResponseSchema(FilterProductSchema)
       );
     },
     create: async (data: ProductType) => {
-      return requestHandler(
-        apiClient.post("/v1/admin/product", data),
+      return axiosHandler(
+        apiAxios.post("/v1/admin/product", data),
         ApiResponseSchema(
           ProductBaseSchema.extend({
             attributes: z.array(AttributeBaseSchema),
@@ -87,8 +103,8 @@ const productService = {
     updatePoster: async (productId: number, poster: File) => {
       const formData = new FormData();
       formData.append("poster", poster);
-      return requestHandler(
-        apiClient.patch(`/v1/admin/product/${productId}/poster`, formData, {
+      return axiosHandler(
+        apiAxios.patch(`/v1/admin/product/${productId}/poster`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         }),
         ApiResponseSchema(
@@ -101,8 +117,8 @@ const productService = {
       const formData = new FormData();
       formData.append("image", image);
       formData.append("productId", productId.toString());
-      return requestHandler(
-        apiClient.post("/v1/gallery", formData, {
+      return axiosHandler(
+        apiAxios.post("/v1/gallery", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         }),
         ApiResponseSchema(ProductImageBaseSchema)
@@ -110,14 +126,14 @@ const productService = {
     },
 
     delete: async (productId: number) =>
-      requestHandler(
-        apiClient.delete("v1/admin/product/" + productId),
+      axiosHandler(
+        apiAxios.delete("v1/admin/product/" + productId),
         ApiResponseSchema(z.undefined())
       ),
 
     updateActive: async (productId: number, isActive: boolean) =>
-      requestHandler(
-        apiClient.patch("v1/admin/product/" + productId + "/lock", {
+      axiosHandler(
+        apiAxios.patch("v1/admin/product/" + productId + "/lock", {
           isActive,
         }),
         ApiResponseSchema(
@@ -126,7 +142,32 @@ const productService = {
       ),
   },
 
-  user: {},
+  user: {
+    getBySlug: (slug: string) =>
+      fetchHandler(
+        apiFetch("/v1/product/" + slug),
+        ApiResponseSchema(
+          SafeProductBaseSchema.extend({
+            wholesale: SafeWholesaleBaseSchema.extend({
+              details: z.array(SafeWholesaleDetailSchema),
+            }),
+            attributes: z.array(
+              SafeProductAttributeSchema.extend({
+                attributeValue: SafeAttributeValueSchema.extend({
+                  attribute: SafeAttributeSchema,
+                }),
+              })
+            ),
+            images: z.array(SafeProductImageSchema),
+            category: SafeCategoryBaseSchema.extend({
+              parent: SafeCategoryBaseSchema.extend({
+                parent: SafeCategoryBaseSchema,
+              }),
+            }),
+          })
+        )
+      ),
+  },
 };
 
 // name: z.string().nonempty(),

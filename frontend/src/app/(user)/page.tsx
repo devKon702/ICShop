@@ -1,7 +1,7 @@
-import ProductCategoryGroup from "@/components/features/product/product-category-group";
-import ProductShowcase from "@/components/features/product/product-showcase";
+// import ProductCategoryGroup from "@/components/features/product/product-category-group";
+// import ProductShowcase from "@/components/features/product/product-showcase";
 import Banner from "@/components/layouts/banner";
-import categoryService from "@/libs/services/category.service";
+// import categoryService from "@/libs/services/category.service";
 
 export default async function Home() {
   return (

@@ -1,6 +1,6 @@
 "use client";
 import SearchInput from "@/components/common/search-input";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { ROUTE } from "@/constants/routes";
 import {
@@ -8,8 +8,13 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { useGlobalContext } from "@/libs/contexts/GlobalContext";
 import Image from "next/image";
+import { useAuthActions, useUser } from "@/store/auth-store";
+import { useModalActions } from "@/store/modal-store";
+import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import accountService from "@/libs/services/account.service";
+import { authService } from "@/libs/services/auth.service";
 
 const accountMenu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -17,7 +22,31 @@ const accountMenu = [
 ];
 
 export default function Header() {
-  const { setAuthMode, user } = useGlobalContext();
+  const user = useUser();
+  const { setUser, clearAuth } = useAuthActions();
+  const { openModal } = useModalActions();
+  const { data } = useQuery({
+    queryKey: ["me"],
+    queryFn: accountService.getMe,
+  });
+  const { mutate: logoutMutate } = useMutation({
+    mutationFn: authService.logout,
+    onSuccess: () => {
+      toast.success("Đăng xuất thành công");
+      clearAuth();
+    },
+  });
+  useEffect(() => {
+    if (data?.data) {
+      setUser({
+        email: data.data.email,
+        name: data.data.user.name,
+        avatarUrl: data.data.user.avatarUrl,
+        role: data.data.role,
+      });
+    }
+  }, [data, setUser]);
+
   return (
     <div className="flex justify-around items-center p-3 space-x-40 bg-primary">
       <Link href="/">
@@ -40,7 +69,7 @@ export default function Header() {
             <HoverCardTrigger>
               <div className="cursor-pointer text-center">
                 <i className="bx bxs-user-circle text-4xl"></i>
-                <p className="text-sm text-nowrap">{user}</p>
+                <p className="text-sm text-nowrap">{user.name}</p>
               </div>
             </HoverCardTrigger>
 
@@ -56,7 +85,12 @@ export default function Header() {
                     {item.title}
                   </Link>
                 ))}
-                <p className="hover:bg-primary-light hover:text-primary p-2 cursor-pointer flex items-center">
+                <p
+                  className="hover:bg-primary-light hover:text-primary p-2 cursor-pointer flex items-center"
+                  onClick={() => {
+                    if (confirm("Bạn có chắc muốn đăng xuất?")) logoutMutate();
+                  }}
+                >
                   <i className="bx bx-log-out me-2 text-xl"></i>
                   Đăng xuất
                 </p>
@@ -66,7 +100,16 @@ export default function Header() {
         ) : (
           <div
             className="cursor-pointer text-center"
-            onClick={() => setAuthMode("login")}
+            onClick={() =>
+              openModal({
+                type: "auth",
+                props: {
+                  onLoginSuccess: () => {
+                    toast.success("Đăng nhập thành công");
+                  },
+                },
+              })
+            }
           >
             <i className="bx bxs-user-circle text-4xl"></i>
             <p className="text-sm text-nowrap">Đăng nhập</p>

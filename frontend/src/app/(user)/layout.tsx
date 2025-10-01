@@ -1,4 +1,3 @@
-import AuthModal from "@/components/features/auth/auth-modal";
 import FloatButton from "@/components/features/contact/float-button";
 import TopBreadcrump from "@/components/layouts/top-breadcrumb";
 import CategoryBar from "@/components/layouts/category-bar";
@@ -21,7 +20,6 @@ export default async function UserLayout({
         <div className="mx-24 my-2">{children}</div>
         <Footer></Footer>
         <FloatButton></FloatButton>
-        <AuthModal></AuthModal>
       </>
     </UserProvider>
   );

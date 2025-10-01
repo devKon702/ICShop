@@ -22,7 +22,7 @@ type ModalType =
         submitText?: string;
       }
     >
-  | Modal<"auth", { onClose: () => void }>
+  | Modal<"auth", { onLoginSuccess: () => void }>
   | Modal<
       "createCategory",
       { parentId?: number; onSuccess: (res: CreateCategoryType) => void }

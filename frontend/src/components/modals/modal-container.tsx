@@ -8,6 +8,7 @@ import FormModal from "@/components/modals/form-modal";
 import { useModal } from "@/store/modal-store";
 import CreateCategoryForm from "@/components/features/category/forms/create-category-form";
 import PromptForm from "@/components/common/promt-form";
+import AuthTabs from "@/components/features/auth/auth-tabs";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -53,6 +54,12 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Chỉnh sửa ảnh">
                     <ImageCropper {...item.props} />
+                  </FormModal>
+                );
+              case "auth":
+                return (
+                  <FormModal>
+                    <AuthTabs />
                   </FormModal>
                 );
               default:

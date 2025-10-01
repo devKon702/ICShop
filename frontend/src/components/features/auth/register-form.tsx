@@ -31,7 +31,11 @@ const schema = z
     message: "Mật khẩu xác nhận không khớp",
   });
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+  onLoginClick: () => void;
+}
+
+export default function RegisterForm({ onLoginClick }: RegisterFormProps) {
   const form = useForm({
     resolver: zodResolver(schema),
     mode: "onBlur",
@@ -129,7 +133,10 @@ export default function RegisterForm() {
         />
         <p className="text-center">
           Bạn đã có tài khoản?{" "}
-          <span className="ms-1 text-primary cursor-pointer hover:underline">
+          <span
+            className="ms-1 text-primary cursor-pointer hover:underline"
+            onClick={onLoginClick}
+          >
             Đăng nhập
           </span>
         </p>

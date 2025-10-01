@@ -14,6 +14,7 @@ class CartRepository {
             price: true,
             wholesale: {
               select: {
+                productId: true,
                 id: true,
                 min_quantity: true,
                 max_quantity: true,
@@ -27,6 +28,7 @@ class CartRepository {
                     min: true,
                     max: true,
                     price: true,
+                    wholesaleId: true,
                   },
                 },
               },

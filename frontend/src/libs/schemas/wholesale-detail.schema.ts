@@ -21,3 +21,11 @@ export const WholesaleDetailBaseSchema = z.object({
   updatedAt: DateTimeSchema,
 });
 export type WholesaleDetail = z.infer<typeof WholesaleDetailBaseSchema>;
+
+export const SafeWholesaleDetailSchema = WholesaleDetailBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+  version: true,
+});

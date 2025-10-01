@@ -28,3 +28,11 @@ export const WholesaleSchema = WholesaleBaseSchema.extend({
   details: z.array(WholesaleDetailBaseSchema).optional(),
 });
 export type Wholesale = z.infer<typeof WholesaleSchema>;
+
+export const SafeWholesaleBaseSchema = WholesaleBaseSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  version: true,
+  createdAt: true,
+  updatedAt: true,
+});

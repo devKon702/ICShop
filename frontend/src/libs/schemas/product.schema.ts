@@ -45,7 +45,7 @@ export const FilterProductSchema = ProductBaseSchema.extend({
   category: CategoryBaseSchema,
 });
 
-export const SafeProduct = ProductBaseSchema.omit({
+export const SafeProductBaseSchema = ProductBaseSchema.omit({
   creatorId: true,
   modifierId: true,
   createdAt: true,

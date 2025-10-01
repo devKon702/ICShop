@@ -65,7 +65,7 @@ export const AdminCategorySchema = CategoryBaseSchema.extend({
     .optional(),
 });
 
-export const SafeCategory = CategoryBaseSchema.omit({
+export const SafeCategoryBaseSchema = CategoryBaseSchema.omit({
   creatorId: true,
   modifierId: true,
   createdAt: true,
@@ -74,11 +74,11 @@ export const SafeCategory = CategoryBaseSchema.omit({
   isActive: true,
 });
 
-export const SafeCategoryTree = z.array(
-  SafeCategory.extend({
+export const SafeCategoryTreeSchema = z.array(
+  SafeCategoryBaseSchema.extend({
     children: z.array(
-      SafeCategory.extend({
-        children: z.array(SafeCategory),
+      SafeCategoryBaseSchema.extend({
+        children: z.array(SafeCategoryBaseSchema),
       })
     ),
   })

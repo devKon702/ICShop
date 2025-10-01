@@ -61,7 +61,7 @@ export default async function CategoryPage({
 }: CategoryPageProps) {
   const { slug } = await params;
   await queryCache.parse(searchParams);
-  const { attrids, name, page, limit } = queryCache.all();
+  const { page, limit } = queryCache.all();
   const { data: category } = await categoryService.getBySlug(
     slug,
     Number(page),
