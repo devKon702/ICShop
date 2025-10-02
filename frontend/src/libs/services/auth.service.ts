@@ -1,14 +1,7 @@
 import apiAxios from "@/libs/api/api-axios";
 import { AccountBaseSchema } from "@/libs/schemas/account.schema";
-import {
-  LoginSchema,
-  RefreshSchema,
-  SignupSchema,
-} from "@/libs/schemas/auth.schema";
-import {
-  ApiErrorResponseSchema,
-  ApiResponseSchema,
-} from "@/libs/schemas/response.schema";
+import { LoginSchema, RefreshSchema } from "@/libs/schemas/auth.schema";
+import { ApiResponseSchema } from "@/libs/schemas/response.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
 import { axiosHandler } from "@/utils/response-handler";
 import { z } from "zod";
@@ -49,16 +42,10 @@ export const authService = {
     name: string;
     phone: string;
   }) =>
-    apiAxios
-      .post("/v1/auth/signup", data)
-      .then((res) => {
-        const p = SignupSchema.parse(res.data.data);
-        return p;
-      })
-      .catch((e) => {
-        const err = ApiErrorResponseSchema.parse(e.response.data.data);
-        return err;
-      }),
+    axiosHandler(
+      apiAxios.post("/v1/auth/signup", data),
+      ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema }))
+    ),
 
   logout: async () =>
     axiosHandler(apiAxios.post("/v1/auth/logout"), ApiResponseSchema(z.null())),

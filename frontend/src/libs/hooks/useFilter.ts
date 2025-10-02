@@ -12,6 +12,6 @@ export function useFilter<T, K>(
   useEffect(() => {
     const result = originalData.filter((item) => filterFn(item, query));
     setFilteredData(result);
-  }, [query, originalData, filterFn]);
+  }, [query, originalData]);
   return filteredData;
 }

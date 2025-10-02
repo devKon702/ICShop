@@ -34,7 +34,7 @@ export default function CreateProductForm({
       wholesale: {
         min_quantity: 1,
         max_quantity: 999,
-        unit: "cái",
+        unit: "con",
         quantity_step: 1,
         vat: 0,
         details: [{ min: 1, max: null, price: 0, desc: "1+" }],

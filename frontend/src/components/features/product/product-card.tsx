@@ -37,7 +37,7 @@ export default function ProductCard({
       <ClampText
         text={name}
         lines={2}
-        className="hover:text-primary"
+        className="hover:text-primary text-sm"
       ></ClampText>
       <p className="font-bold mt-auto">{formatPrice(price) + "đ"}</p>
     </Link>

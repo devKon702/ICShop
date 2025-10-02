@@ -41,7 +41,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     if (data) {
       const user = data.data.user;
       setUser({
-        id: user.id,
         name: user.name,
         avatarUrl: user.avatarUrl,
         email: data.data.email,

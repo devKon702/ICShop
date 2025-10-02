@@ -5,14 +5,16 @@ import { createContext, useContext, useState, ReactNode } from "react";
 type AttributeValueType = {
   id: number;
   value: string;
-  attributeId: number;
+  attribute: { id: number; name: string };
 };
 
 interface AttributeFilterContextType {
   selectedAttributeValues: AttributeValueType[];
-  setSelectedAttributeValues: (ids: AttributeValueType[]) => void;
+  setSelectedAttributeValues: (attributeValues: AttributeValueType[]) => void;
   toggleAttributeValues: (attributeValue: AttributeValueType) => void;
   resetAttributeValues: () => void;
+  changed: boolean;
+  setChanged: (changed: boolean) => void;
 }
 
 const AttributeFilterContext = createContext<
@@ -24,11 +26,13 @@ export const AttributeFilterProvider = ({
 }: {
   children: ReactNode;
 }) => {
+  const [changed, setChanged] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState<
     AttributeValueType[]
   >([]);
 
   const toggleAttribute = (attributeValue: AttributeValueType) => {
+    setChanged(true);
     setSelectedAttributes((prev) => {
       const index = prev.findIndex((value) => value.id == attributeValue.id);
       if (index == -1) return [...prev, attributeValue];
@@ -36,7 +40,10 @@ export const AttributeFilterProvider = ({
     });
   };
 
-  const resetAttributes = () => setSelectedAttributes([]);
+  const resetAttributes = () => {
+    setSelectedAttributes([]);
+    setChanged(true);
+  };
 
   return (
     <AttributeFilterContext.Provider
@@ -45,6 +52,8 @@ export const AttributeFilterProvider = ({
         setSelectedAttributeValues: setSelectedAttributes,
         toggleAttributeValues: toggleAttribute,
         resetAttributeValues: resetAttributes,
+        changed,
+        setChanged,
       }}
     >
       {children}

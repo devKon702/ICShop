@@ -23,12 +23,12 @@ export default async function ProductPagination({
 }: ProductPaginationProps) {
   return (
     <div className="space-y-4">
-      <ProductList products={products} cols={4}></ProductList>
+      <ProductList products={products} cols={4} />
       <AppPagination
         currentPage={page}
         totalPage={Math.ceil(total / limit)}
         isClientSide={false}
-      ></AppPagination>
+      />
     </div>
   );
 }

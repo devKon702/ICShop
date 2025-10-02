@@ -9,10 +9,11 @@ import { useAttributeFilterContext } from "@/libs/contexts/AttributeFilterContex
 
 import { getIdFromString } from "@/utils/string";
 import { useSearchParams } from "next/navigation";
+import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
 import React, { useEffect } from "react";
 
 interface SideAttributeFilterProps {
-  data: {
+  attributes: {
     id: number;
     name: string;
     values: { id: number; value: string }[];
@@ -20,8 +21,33 @@ interface SideAttributeFilterProps {
 }
 
 export default function SideAttributeFilter({
-  data,
+  attributes,
 }: SideAttributeFilterProps) {
+  const [vids] = useQueryState(
+    "vids",
+    parseAsArrayOf(parseAsInteger).withDefault([])
+  );
+  const { setSelectedAttributeValues } = useAttributeFilterContext();
+  useEffect(() => {
+    // Get initial selected attribute values from query
+    const selectedValues: {
+      id: number;
+      value: string;
+      attribute: { id: number; name: string };
+    }[] = [];
+    attributes.forEach((attr) => {
+      attr.values?.forEach((item) => {
+        if (vids.some((id) => id == Number(item.id))) {
+          selectedValues.push({
+            id: item.id,
+            value: item.value,
+            attribute: { id: attr.id, name: attr.name },
+          });
+        }
+      });
+    });
+    setSelectedAttributeValues(selectedValues);
+  }, [vids, attributes, setSelectedAttributeValues]);
   return (
     <div className="rounded-sm overflow-hidden shadow-xl bg-white">
       <div className="bg-primary text-white p-2 flex justify-start items-center space-x-2 font-bold">
@@ -29,7 +55,7 @@ export default function SideAttributeFilter({
         <span>Lọc sản phẩm</span>
       </div>
       <div>
-        {data.map((item) => (
+        {attributes.map((item) => (
           <AttributeItem key={item.id} attribute={item}></AttributeItem>
         ))}
       </div>
@@ -57,11 +83,11 @@ function AttributeItem({ attribute }: AttributeItemProps) {
         toggleAttributeValues({
           id: item.id,
           value: item.value,
-          attributeId: attribute.id,
+          attribute: { id: attribute.id, name: attribute.name },
         });
       }
     });
-  }, []);
+  }, [searchParams, attribute, toggleAttributeValues]);
   return (
     <Popover onOpenChange={(open) => setHighlight(open)}>
       <PopoverTrigger
@@ -83,7 +109,7 @@ function AttributeItem({ attribute }: AttributeItemProps) {
           values={
             attribute.values.map((item) => ({
               ...item,
-              attributeId: attribute.id,
+              attribute: { id: attribute.id, name: attribute.name },
             })) || []
           }
         ></AttributeValuePopup>

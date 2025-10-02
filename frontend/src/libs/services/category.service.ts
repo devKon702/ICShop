@@ -53,16 +53,24 @@ const categoryService = {
       apiFetch("/v1/category"),
       ApiResponseSchema(SafeCategoryTreeSchema)
     ),
-  getBySlug: async (
-    slug: string,
-    page: number,
-    limit: number,
-    order: "price_asc" | "price_desc" = "price_asc"
-  ) => {
+  getBySlug: async ({
+    slug,
+    vids = [],
+    page,
+    limit,
+    order = "price_asc",
+  }: {
+    slug: string;
+    vids: number[];
+    page: number;
+    limit: number;
+    order: "price_asc" | "price_desc";
+  }) => {
     const query = new URLSearchParams();
     query.set("page", page.toString());
     query.set("limit", limit.toString());
     query.set("order", order);
+    if (vids.length > 0) query.set("vids", vids.join(","));
 
     return fetchHandler(
       apiFetch(`/v1/category/${slug}?${query.toString()}`),

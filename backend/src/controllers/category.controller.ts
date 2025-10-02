@@ -21,6 +21,7 @@ import { successResponse } from "../utils/response";
 import { AddressResponseCode } from "../constants/codes/address.code";
 import { logger } from "../utils/logger";
 import { NotFoundError } from "../errors/not-found-error";
+import { set } from "zod";
 
 class CategoryController {
   public getBySlug = async (req: Request, res: Response) => {

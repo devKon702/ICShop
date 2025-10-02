@@ -1,7 +1,4 @@
-import {
-  AccountBaseSchema,
-  AccountSchema,
-} from "@/libs/schemas/account.schema";
+import { AccountSchema } from "@/libs/schemas/account.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
 import { z } from "zod";
 
@@ -15,10 +12,6 @@ export const LoginSchema = z.object({
     isEmailAuth: true,
   }).extend({ user: UserBaseSchema.omit({ accountId: true }) }),
   token: z.string(),
-});
-
-export const SignupSchema = AccountBaseSchema.extend({
-  user: UserBaseSchema,
 });
 
 export const RefreshSchema = z.object({

@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import accountService from "@/libs/services/account.service";
 import { authService } from "@/libs/services/auth.service";
+import SafeImage from "@/components/common/safe-image";
 
 const accountMenu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -48,7 +49,7 @@ export default function Header() {
   }, [data, setUser]);
 
   return (
-    <div className="flex justify-around items-center p-3 space-x-40 bg-primary">
+    <div className="flex justify-around items-center p-3 space-x-40 bg-primary shadow-lg">
       <Link href="/">
         <Image
           className="size-10"
@@ -67,8 +68,16 @@ export default function Header() {
         {user ? (
           <HoverCard openDelay={0} closeDelay={20}>
             <HoverCardTrigger>
-              <div className="cursor-pointer text-center">
-                <i className="bx bxs-user-circle text-4xl"></i>
+              <div className="cursor-pointer flex flex-col items-center">
+                <SafeImage
+                  src={
+                    user.avatarUrl ||
+                    `https://ui-avatars.com/api/?name=${user.name}`
+                  }
+                  width={40}
+                  height={40}
+                  className="rounded-full text-4xl"
+                ></SafeImage>
                 <p className="text-sm text-nowrap">{user.name}</p>
               </div>
             </HoverCardTrigger>

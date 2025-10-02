@@ -20,7 +20,12 @@ export const signupSchema = z.object({
       }),
     email: z.string().email(),
     password: z.string().min(6, "Mật khẩu tối thiểu 6 kí tự"),
-    phone: z.string().regex(phoneRegex(), "Số điện thoại không hợp lệ"),
+    phone: z
+      .string()
+      .regex(
+        phoneRegex(),
+        "Số điện thoại không hợp lệ theo định dạng Việt Nam."
+      ),
   }),
 });
 

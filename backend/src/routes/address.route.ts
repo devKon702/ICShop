@@ -13,7 +13,7 @@ import {
 const addressRouter = express.Router();
 const path = "/address";
 
-// GET /address
+// GET /address/me
 addressRouter.get(
   path,
   verifyAccessToken,

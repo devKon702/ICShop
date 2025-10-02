@@ -4,17 +4,14 @@ export function middleware(req: NextRequest) {
   const url = req.nextUrl;
   const hostname = req.headers.get("host") || "";
 
-  // Not allow to
+  // Redirect /admin on localhost:3000 to /
   if (hostname === "localhost:3000" && url.pathname.startsWith("/admin")) {
     return NextResponse.redirect("localhost:3000"); // hoặc 404
   }
 
-  // Nếu là admin subdomain nhưng không vào route admin thì chuyển hướng
-  if (
-    hostname === "admin.localhost:3000" &&
-    !url.pathname.startsWith("/admin")
-  ) {
-    return NextResponse.redirect(new URL("/admin", req.url));
+  // Rewrite to /admin
+  if (hostname === "admin.localhost:3000") {
+    return NextResponse.rewrite(new URL(`/admin${url.pathname}`, url.origin));
   }
   return NextResponse.next();
 }

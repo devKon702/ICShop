@@ -3,7 +3,11 @@ import { useAttributeFilterContext } from "@/libs/contexts/AttributeFilterContex
 import { useFilter } from "@/libs/hooks/useFilter";
 import React from "react";
 
-type AttributeValueType = { id: number; value: string; attributeId: number };
+type AttributeValueType = {
+  id: number;
+  value: string;
+  attribute: { id: number; name: string };
+};
 
 interface AttributeValueProps {
   values: AttributeValueType[];
@@ -15,10 +19,6 @@ export default function AttributeValuePopup({ values }: AttributeValueProps) {
     selectedAttributeValues: selectedAttributes,
     toggleAttributeValues: toggleAttribute,
   } = useAttributeFilterContext();
-  // const [selectedItems, toggle] = useToggleSelect<AttributeValue>(
-  //   [],
-  //   (a, b) => a.id == b.id
-  // );
   const filteredData = useFilter<AttributeValueType, string>(
     values,
     (item, query) =>
@@ -52,7 +52,7 @@ export default function AttributeValuePopup({ values }: AttributeValueProps) {
               toggleAttribute({
                 id: item.id,
                 value: item.value,
-                attributeId: item.attributeId,
+                attribute: { id: item.attribute.id, name: item.attribute.name },
               })
             }
           >

@@ -103,6 +103,7 @@ export default function LoginForm({
                   type="email"
                   placeholder="example@gmail.com"
                   isError={!!fieldState.invalid}
+                  autoFocus
                   {...field}
                 ></CustomInput>
               </FormControl>

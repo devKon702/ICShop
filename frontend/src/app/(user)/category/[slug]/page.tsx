@@ -1,3 +1,4 @@
+import OrderSelector from "@/components/common/order-selector";
 import SetBreadCrump from "@/components/common/set-breadcrump";
 import SelectedAttributeValueFilter from "@/components/features/filter/selected-attribute-filter";
 import SideAttributeFilter from "@/components/features/filter/side-attribute-filter";
@@ -6,11 +7,13 @@ import ProductPagination from "@/components/features/product/product-pagination"
 import { ROUTE } from "@/constants/routes";
 import { AttributeFilterProvider } from "@/libs/contexts/AttributeFilterContext";
 import categoryService from "@/libs/services/category.service";
+import { Search } from "lucide-react";
 import { notFound } from "next/navigation";
 import {
   createSearchParamsCache,
+  parseAsArrayOf,
   parseAsInteger,
-  parseAsString,
+  parseAsStringLiteral,
   SearchParams,
 } from "nuqs/server";
 import React from "react";
@@ -51,8 +54,10 @@ function generateBreadcrump(category: breadcrumpDataType) {
 const queryCache = createSearchParamsCache({
   page: parseAsInteger.withDefault(1),
   limit: parseAsInteger.withDefault(20),
-  name: parseAsString,
-  attrids: parseAsString,
+  vids: parseAsArrayOf(parseAsInteger).withDefault([]),
+  order: parseAsStringLiteral(["price_asc", "price_desc"]).withDefault(
+    "price_asc"
+  ),
 });
 
 export default async function CategoryPage({
@@ -61,13 +66,14 @@ export default async function CategoryPage({
 }: CategoryPageProps) {
   const { slug } = await params;
   await queryCache.parse(searchParams);
-  const { page, limit } = queryCache.all();
-  const { data: category } = await categoryService.getBySlug(
+  const { page, limit, vids, order } = queryCache.all();
+  const { data: category } = await categoryService.getBySlug({
     slug,
-    Number(page),
-    Number(limit),
-    "price_asc"
-  );
+    page,
+    limit,
+    order,
+    vids,
+  });
   if (!category) notFound();
   else {
     const breadcrumps = generateBreadcrump(category as breadcrumpDataType);
@@ -85,26 +91,45 @@ export default async function CategoryPage({
                 )
               ) : (
                 <SideAttributeFilter
-                  data={category.attributes || []}
+                  attributes={category.attributes || []}
                 ></SideAttributeFilter>
               )}
             </div>
             <div className="col-span-9 space-y-2">
               <SelectedAttributeValueFilter></SelectedAttributeValueFilter>
-              <ProductPagination
-                page={Number(page)}
-                limit={Number(limit)}
-                total={category._count.products}
-                products={
-                  category.products.map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    posterUrl: item.posterUrl || "",
-                    price: Number(item.price),
-                    slug: item.slug,
-                  })) || []
-                }
-              ></ProductPagination>
+              {category.products.length === 0 ? (
+                <div className="w-full h-40 flex flex-col items-center justify-center bg-white rounded-md space-y-2 shadow">
+                  <Search strokeWidth={4} className="opacity-50" />
+                  <span className="font-semibold opacity-50">
+                    Không tìm thấy sản phẩm nào
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <OrderSelector
+                    data={[
+                      { value: "price_asc", label: "Giá Thấp Đến Cao" },
+                      { value: "price_desc", label: "Giá Cao Đến Thấp" },
+                    ]}
+                    defaultValue={order}
+                    className="ms-auto"
+                  />
+                  <ProductPagination
+                    page={Number(page)}
+                    limit={Number(limit)}
+                    total={category._count.products}
+                    products={
+                      category.products.map((item) => ({
+                        id: item.id,
+                        name: item.name,
+                        posterUrl: item.posterUrl || "",
+                        price: Number(item.price),
+                        slug: item.slug,
+                      })) || []
+                    }
+                  ></ProductPagination>
+                </>
+              )}
             </div>
           </div>
         </div>

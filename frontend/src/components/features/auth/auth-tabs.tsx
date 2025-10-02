@@ -45,7 +45,7 @@ export default function AuthTabs({ onLoginSuccess }: AuthTabsProps) {
           value="register"
           className="bg-white p-3 rounded-md shadow-xl max-h-[80dvh] overflow-y-auto"
         >
-          <RegisterForm onLoginClick={() => setTab("login")} />
+          <RegisterForm redirectLogin={() => setTab("login")} />
         </TabsContent>
       </Tabs>
     </div>
