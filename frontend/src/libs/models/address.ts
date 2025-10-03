@@ -8,7 +8,7 @@ export type Address = {
   receiverPhone: string;
   province: string;
   district: string;
-  commune: string;
+  ward: string;
   detail: string;
   user?: User;
 };

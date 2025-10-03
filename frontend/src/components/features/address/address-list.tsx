@@ -12,9 +12,21 @@ export default function AddressList() {
   });
   return (
     <ul className="space-y-2 w-full shadow">
-      {!isLoading && <Skeleton className="w-full rounded-md h-20" />}
+      {isLoading && <Skeleton className="w-full rounded-md h-20" />}
       {addressResponse?.data?.map((item) => (
-        <AddressItem key={item.id} address={{ ...item }}></AddressItem>
+        <AddressItem
+          key={item.id}
+          address={{
+            id: item.id,
+            alias: item.alias,
+            receiverName: item.receiverName,
+            receiverPhone: item.receiverPhone,
+            province: item.province,
+            district: item.district,
+            ward: item.ward,
+            detail: item.detail,
+          }}
+        ></AddressItem>
       ))}
     </ul>
   );

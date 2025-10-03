@@ -11,6 +11,8 @@ import {
 } from "../schemas/address.schema";
 import { AppError } from "../errors/app-error";
 import { findByIdSchema } from "../schemas/shared.schema";
+import locationRepository from "../repositories/location.repository";
+import { LocationType } from "../constants/db";
 
 class AddressController {
   public getMyAddress = async (req: Request, res: Response) => {
@@ -33,16 +35,16 @@ class AddressController {
         receiverName,
         receiverPhone,
         alias,
-        provinceCode,
-        districtCode,
-        communeCode,
+        provinceId: provinceCode,
+        districtId: districtCode,
+        wardId: communeCode,
         detail,
       },
     } = createAddressSchema.parse(req);
     const [province, district, commune] = await Promise.all([
-      addressRepository.findProvinceByCode(provinceCode),
-      addressRepository.findDistrictByCode(districtCode),
-      addressRepository.findCommuneByCode(communeCode),
+      locationRepository.findLocationById(provinceCode, LocationType.PROVINCE),
+      locationRepository.findLocationById(districtCode, LocationType.DISTRICT),
+      locationRepository.findLocationById(communeCode, LocationType.WARD),
     ]);
     if (!province || !district || !commune) {
       throw new AppError(
@@ -58,12 +60,9 @@ class AddressController {
       receiverName,
       receiverPhone,
       alias,
-      provinceCode: province.code,
-      province: province.name,
-      districtCode: district.code,
-      district: district.name,
-      communeCode: commune.code,
-      commune: commune.name,
+      provinceId: province.id,
+      districtId: district.id,
+      wardId: commune.id,
       detail,
     });
     res
@@ -84,9 +83,9 @@ class AddressController {
         receiverName,
         receiverPhone,
         alias,
-        provinceCode,
-        districtCode,
-        communeCode,
+        provinceId,
+        districtId,
+        wardId,
         detail,
       },
     } = updateAddressSchema.parse(req);
@@ -109,12 +108,12 @@ class AddressController {
         true
       );
     // Kiểm tra thông tin địa lý
-    const [province, district, commune] = await Promise.all([
-      addressRepository.findProvinceByCode(provinceCode),
-      addressRepository.findDistrictByCode(districtCode),
-      addressRepository.findCommuneByCode(communeCode),
+    const [province, district, ward] = await Promise.all([
+      locationRepository.findLocationById(provinceId, LocationType.PROVINCE),
+      locationRepository.findLocationById(districtId, LocationType.DISTRICT),
+      locationRepository.findLocationById(wardId, LocationType.WARD),
     ]);
-    if (!province || !district || !commune) {
+    if (!province || !district || !ward) {
       throw new AppError(
         HttpStatus.NOT_FOUND,
         AddressResponseCode.NOT_FOUND,
@@ -128,12 +127,9 @@ class AddressController {
       receiverName,
       receiverPhone,
       alias,
-      provinceCode: province.code,
-      province: province.name,
-      districtCode: district.code,
-      district: district.name,
-      communeCode: commune.code,
-      commune: commune.name,
+      provinceId: province.id,
+      districtId: district.id,
+      wardId: ward.id,
       detail,
     });
     res
@@ -176,7 +172,7 @@ class AddressController {
   };
 
   public getProvinces = async (req: Request, res: Response) => {
-    const provinces = await addressRepository.findAllProvinces();
+    const provinces = await locationRepository.findAllProvinces();
     res
       .status(HttpStatus.OK)
       .json(
@@ -192,7 +188,7 @@ class AddressController {
     const {
       params: { id },
     } = findByIdSchema.parse(req);
-    const districts = await addressRepository.findDistrictsByProvinceCode(id);
+    const districts = await locationRepository.findDistrictsByProvinceId(id);
     res
       .status(HttpStatus.OK)
       .json(
@@ -204,18 +200,18 @@ class AddressController {
       );
   };
 
-  public getCommunesByDistrictCode = async (req: Request, res: Response) => {
+  public getWardsByDistrictCode = async (req: Request, res: Response) => {
     const {
       params: { id },
     } = findByIdSchema.parse(req);
-    const communes = await addressRepository.findCommunesByDistrictCode(id);
+    const wards = await locationRepository.findWardByDistrictId(id);
     res
       .status(HttpStatus.OK)
       .json(
         successResponse(
           AddressResponseCode.OK,
           "Lấy danh sách xã phường thành công",
-          communes
+          wards
         )
       );
   };

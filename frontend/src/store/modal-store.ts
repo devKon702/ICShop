@@ -55,9 +55,9 @@ type ModalType =
           alias: string;
           receiverName: string;
           receiverPhone: string;
-          provinceCode: number;
-          districtCode: number;
-          communeCode: number;
+          provinceId: number;
+          districtId: number;
+          wardId: number;
           detail: string;
         };
         onSuccess?: () => void;

@@ -13,7 +13,7 @@ export const OrderDetailSchema = z.object({
   productId: UnsignedInt,
   quantity: UnsignedInt,
   unitPrice: DecimalString,
-  vat: TinyInt, // 0-100, nếu muốn siết: .min(0).max(100)
+  vat: TinyInt,
   version: z.number().int(),
   creatorId: UnsignedInt,
   modifierId: UnsignedInt,

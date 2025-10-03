@@ -34,7 +34,7 @@ addressRouter.get(
 addressRouter.get(
   path + "/districts/:id/communes",
   validate(findByIdSchema),
-  addressController.getCommunesByDistrictCode
+  addressController.getWardsByDistrictCode
 );
 
 // POST /address

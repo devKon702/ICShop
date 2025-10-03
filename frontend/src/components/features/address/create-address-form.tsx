@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import addressService from "@/libs/services/address.service";
+import locationService from "@/libs/services/location.service";
 import { useModalActions } from "@/store/modal-store";
 import { phoneRegex, vietnameseRegex } from "@/utils/regex";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,9 +24,9 @@ import { z } from "zod";
 
 const schema = z.object({
   alias: z.string().max(10, "Tối đa 10 ký tự"),
-  provinceCode: z.number(),
-  districtCode: z.number(),
-  communeCode: z.number(),
+  provinceId: z.number(),
+  districtId: z.number(),
+  wardId: z.number(),
   detail: z.string().max(100, "Tối đa 100 ký tự"),
   receiverName: z.string().regex(vietnameseRegex(), "Tên không hợp lệ"),
   receiverPhone: z
@@ -46,7 +47,11 @@ export default function CreateAddressForm() {
 
   const { data: provincesResponse } = useQuery({
     queryKey: ["provinces"],
-    queryFn: () => addressService.getProvinceList(),
+    queryFn: () =>
+      locationService.getProvinces().then((res) => {
+        console.log(res);
+        return res;
+      }),
   });
   const watch = form.watch();
 
@@ -55,18 +60,18 @@ export default function CreateAddressForm() {
     isFetching: isFetchingDistricts,
     refetch: refetchDistricts,
   } = useQuery({
-    queryKey: ["districts", { provinceCode: watch.provinceCode }],
-    queryFn: () => addressService.getDistrictList(watch.provinceCode),
-    enabled: !!watch.provinceCode,
+    queryKey: ["districts", { provinceId: watch.provinceId }],
+    queryFn: () => locationService.getDistricts(watch.provinceId),
+    enabled: !!watch.provinceId,
   });
   const {
-    data: communesResponse,
-    isFetching: isFetchingCommunes,
-    refetch: refetchCommunes,
+    data: wardsResponse,
+    isFetching: isFetchingWards,
+    refetch: refetchWards,
   } = useQuery({
-    queryKey: ["communes", { districtCode: watch.districtCode }],
-    queryFn: () => addressService.getCommuneList(watch.districtCode),
-    enabled: !!watch.districtCode,
+    queryKey: ["wards", { districtId: watch.districtId }],
+    queryFn: () => locationService.getWards(watch.districtId),
+    enabled: !!watch.districtId,
   });
   const { mutate: createAddressMutate, isPending: isCreating } = useMutation({
     mutationFn: (data: Required<z.infer<typeof schema>>) =>
@@ -89,17 +94,17 @@ export default function CreateAddressForm() {
         onSubmit={form.handleSubmit((data) => {
           console.log(data);
           if (
-            data.provinceCode == 0 ||
-            data.districtCode == 0 ||
-            data.communeCode == 0
+            data.provinceId == 0 ||
+            data.districtId == 0 ||
+            data.wardId == 0
           ) {
-            form.setError("provinceCode", {
+            form.setError("provinceId", {
               message: "Vui lòng chọn tỉnh thành",
             });
-            form.setError("districtCode", {
+            form.setError("districtId", {
               message: "Vui lòng chọn quận huyện",
             });
-            form.setError("communeCode", {
+            form.setError("wardId", {
               message: "Vui lòng chọn phường xã",
             });
           } else {
@@ -127,7 +132,7 @@ export default function CreateAddressForm() {
           )}
         />
         <FormField
-          name="provinceCode"
+          name="provinceId"
           control={form.control}
           render={({ field }) => (
             <FormItem>
@@ -136,15 +141,15 @@ export default function CreateAddressForm() {
                 searchPlaceholder="Chọn tỉnh thành"
                 list={
                   provincesResponse?.data.map((item) => ({
-                    value: item.code,
+                    value: item.id,
                     label: item.name,
                   })) || []
                 }
                 className="w-full"
                 onItemSelect={(item) => {
                   field.onChange(item.value);
-                  form.setValue("districtCode", 0);
-                  form.setValue("communeCode", 0);
+                  form.setValue("districtId", 0);
+                  form.setValue("wardId", 0);
                   refetchDistricts();
                 }}
               />
@@ -152,7 +157,7 @@ export default function CreateAddressForm() {
           )}
         />
         <FormField
-          name="districtCode"
+          name="districtId"
           control={form.control}
           render={({ field }) => (
             <FormItem>
@@ -162,7 +167,7 @@ export default function CreateAddressForm() {
                 list={
                   (!isFetchingDistricts &&
                     districtsResponse?.data.map((item) => ({
-                      value: item.code,
+                      value: item.id,
                       label: item.name,
                     }))) ||
                   []
@@ -170,15 +175,15 @@ export default function CreateAddressForm() {
                 className="w-full"
                 onItemSelect={(item) => {
                   field.onChange(item.value);
-                  form.setValue("communeCode", 0);
-                  refetchCommunes();
+                  form.setValue("wardId", 0);
+                  refetchWards();
                 }}
               />
             </FormItem>
           )}
         />
         <FormField
-          name="communeCode"
+          name="wardId"
           control={form.control}
           render={({ field }) => (
             <FormItem>
@@ -186,9 +191,9 @@ export default function CreateAddressForm() {
               <SearchCombobox
                 searchPlaceholder="Chọn phường xã"
                 list={
-                  (!isFetchingCommunes &&
-                    communesResponse?.data.map((item) => ({
-                      value: item.code,
+                  (!isFetchingWards &&
+                    wardsResponse?.data.map((item) => ({
+                      value: item.id,
                       label: item.name,
                     }))) ||
                   []

@@ -360,9 +360,9 @@ model Location {
   parent    Location? @relation("LocationChildren", fields: [parentId], references: [id], onDelete: Restrict)
   children  Location[] @relation("LocationChildren")
 
-  addressProvinces Address[] @relation("Province") @ignore
-  addressDistricts Address[] @relation("District") @ignore
-  addressWards Address[] @relation("Ward") @ignore
+  addressProvinces Address[] @relation("Province") 
+  addressDistricts Address[] @relation("District") 
+  addressWards Address[] @relation("Ward")
 }
 
 model Address {

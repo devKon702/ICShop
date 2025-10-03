@@ -15,10 +15,10 @@ export const OrderBaseSchema = z.object({
   id: ID,
   code: z.string().min(1),
   userId: UnsignedInt,
-  status: TinyInt,
+  status: TinyInt, // 1: Pending, 2: Confirmed, 3: Shipping, 4: Delivered, 5: Cancelled
   province: TinyText,
   district: TinyText,
-  commune: TinyText,
+  ward: TinyText,
   detail: Text,
   receiverName: TinyText,
   receiverPhone: z.string().min(3).max(20),

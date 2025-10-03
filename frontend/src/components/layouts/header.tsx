@@ -16,6 +16,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import accountService from "@/libs/services/account.service";
 import { authService } from "@/libs/services/auth.service";
 import SafeImage from "@/components/common/safe-image";
+import { ShoppingCart } from "lucide-react";
+import Separator from "@/components/common/separator";
+import ClampText from "@/components/common/clamp-text";
 
 const accountMenu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -61,14 +64,16 @@ export default function Header() {
       </Link>
       <SearchInput className="flex-1"></SearchInput>
       <div className="flex space-x-5">
-        <Link href={ROUTE.cart} className="cursor-pointer text-center">
-          <i className="bx bxs-cart text-4xl"></i>
-          <p className="text-sm text-nowrap">Giỏ hàng</p>
+        <Link
+          href={ROUTE.cart}
+          className="cursor-pointer flex flex-col items-center"
+        >
+          <ShoppingCart className="size-10 p-2 hover:bg-black/10 rounded-full transition-all duration-500" />
         </Link>
         {user ? (
           <HoverCard openDelay={0} closeDelay={20}>
             <HoverCardTrigger>
-              <div className="cursor-pointer flex flex-col items-center">
+              <div className="size-10 cursor-pointer flex flex-col items-center">
                 <SafeImage
                   src={
                     user.avatarUrl ||
@@ -76,14 +81,20 @@ export default function Header() {
                   }
                   width={40}
                   height={40}
-                  className="rounded-full text-4xl"
+                  className="rounded-full aspect-square"
                 ></SafeImage>
-                <p className="text-sm text-nowrap">{user.name}</p>
               </div>
             </HoverCardTrigger>
 
             <HoverCardContent side="left" align="start" className="w-fit">
               <ul>
+                <ClampText
+                  className="px-2"
+                  text={user.name}
+                  lines={1}
+                  showTitle
+                />
+                <Separator className="my-2" />
                 {accountMenu.map((item, index) => (
                   <Link
                     key={index}

@@ -69,6 +69,12 @@ export default function ModalContainer() {
                     <CreateAddressForm />
                   </FormModal>
                 );
+              case "updateAddress":
+                return (
+                  <FormModal title="Cập nhật địa chỉ">
+                    <CreateAddressForm />
+                  </FormModal>
+                );
               default:
                 return null;
             }
