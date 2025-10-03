@@ -9,6 +9,7 @@ import { useModal } from "@/store/modal-store";
 import CreateCategoryForm from "@/components/features/category/forms/create-category-form";
 import PromptForm from "@/components/common/promt-form";
 import AuthTabs from "@/components/features/auth/auth-tabs";
+import CreateAddressForm from "@/components/features/address/create-address-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -60,6 +61,12 @@ export default function ModalContainer() {
                 return (
                   <FormModal>
                     <AuthTabs />
+                  </FormModal>
+                );
+              case "createAddress":
+                return (
+                  <FormModal title="Thêm địa chỉ">
+                    <CreateAddressForm />
                   </FormModal>
                 );
               default:

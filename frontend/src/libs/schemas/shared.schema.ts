@@ -12,8 +12,8 @@ export const DecimalString = z.string();
 export const DateTimeSchema = z.union([z.date(), z.string().datetime()]);
 
 export const Slug = z.string().min(1);
-export const TinyText = z.string().min(1);
-export const Text = z.string().min(1);
+export const TinyText = z.string();
+export const Text = z.string();
 
 export const RoleEnum = z.enum(["user", "admin"]);
 export type Role = z.infer<typeof RoleEnum>;

@@ -3,6 +3,11 @@ import accountRepository from "../src/repositories/account.repository";
 import { hashPassword } from "../src/utils/bcrypt";
 import { Role } from "../src/constants/db";
 import { logger } from "../src/utils/logger";
+import {
+  createLocationHierarchy,
+  fetchProvinceDetail,
+  fetchProvinces,
+} from "./address";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -16,8 +21,18 @@ async function main() {
       Role.ADMIN
     );
   }
-}
 
+  // Kiểm tra nếu chưa có location thì tạo mới
+  const locationCount = await prisma.location.count();
+  if (locationCount === 0) {
+    const provinces = await fetchProvinces();
+    for (const province of provinces) {
+      const detail = await fetchProvinceDetail(province.code);
+      await createLocationHierarchy(detail);
+      console.log(`Imported: ${detail.name}`);
+    }
+  }
+}
 main()
   .then(() => {
     logger.info("Seed data created");

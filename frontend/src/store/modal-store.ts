@@ -45,6 +45,23 @@ type ModalType =
   | Modal<
       "imageCropper",
       { file: File; onImageComplete: (file: File, previewUrl: string) => void }
+    >
+  | Modal<"createAddress", unknown>
+  | Modal<
+      "updateAddress",
+      {
+        data: {
+          id: number;
+          alias: string;
+          receiverName: string;
+          receiverPhone: string;
+          provinceCode: number;
+          districtCode: number;
+          communeCode: number;
+          detail: string;
+        };
+        onSuccess?: () => void;
+      }
     >;
 
 interface modalState {

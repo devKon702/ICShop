@@ -1,14 +1,25 @@
+"use client";
 import AddressList from "@/components/features/address/address-list";
-import AddressProvider from "@/libs/contexts/AddressContext";
+import { Button } from "@/components/ui/button";
+import { useModalActions } from "@/store/modal-store";
+import { Plus } from "lucide-react";
 import React from "react";
 
 export default function AddressPage() {
+  const { openModal } = useModalActions();
   return (
-    <AddressProvider>
-      <div>
+    <div>
+      <div className="flex items-center justify-between mb-4">
         <h1 className="font-medium text-2xl mb-4">Địa chỉ nhận hàng</h1>
-        <AddressList></AddressList>
+        <Button
+          onClick={() =>
+            openModal({ type: "createAddress", props: { onSuccess: () => {} } })
+          }
+        >
+          <Plus /> <span>Thêm địa chỉ</span>
+        </Button>
       </div>
-    </AddressProvider>
+      <AddressList></AddressList>
+    </div>
   );
 }

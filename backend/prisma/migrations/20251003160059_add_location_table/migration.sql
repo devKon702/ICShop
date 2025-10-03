@@ -1,0 +1,14 @@
+-- CreateTable
+CREATE TABLE `Location` (
+    `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` TINYTEXT NOT NULL,
+    `type` TINYINT UNSIGNED NOT NULL,
+    `parentId` INTEGER UNSIGNED NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Location` ADD CONSTRAINT `Location_parentId_fkey` FOREIGN KEY (`parentId`) REFERENCES `Location`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

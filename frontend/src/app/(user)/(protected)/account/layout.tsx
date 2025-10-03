@@ -2,7 +2,7 @@
 import { ROUTE } from "@/constants/routes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { Suspense } from "react";
+import React from "react";
 
 const menu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -37,7 +37,7 @@ export default function AccountLayout({
         ))}
       </div>
       <div className="flex-1 bg-white py-2 px-4 shadow-xl rounded-md min-h-96">
-        <Suspense fallback={<p>Loading</p>}>{children}</Suspense>
+        {children}
       </div>
     </div>
   );

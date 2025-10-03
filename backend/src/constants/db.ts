@@ -22,3 +22,9 @@ export enum HighlightType {
   HOT = "hot",
   BEST_SELL = "bestsell",
 }
+
+export enum LocationType {
+  PROVINCE = 1,
+  DISTRICT = 2,
+  WARD = 3,
+}

@@ -19,7 +19,7 @@ import {
 import { cn } from "@/utils/className";
 
 interface Props<T extends string | number>
-  extends React.HTMLAttributes<HTMLButtonElement> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   list: {
     value: T;
     label: string;
@@ -42,6 +42,15 @@ export default function SearchCombobox<T extends string | number>({
   const [selected, setSelected] = React.useState<
     Props<T>["list"][number] | null
   >(list.find((item) => item.value === initialValue) || null);
+
+  React.useEffect(() => {
+    if (selected != null) {
+      const exist = list.find((item) => item.value === selected.value);
+      if (!exist) {
+        setSelected(null);
+      }
+    }
+  }, [list, selected]);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={false}>

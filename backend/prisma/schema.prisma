@@ -346,6 +346,25 @@ model User {
   BannerModifieds Banner[] @relation("BannerModified")
 }
 
+model Location {
+  id        Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// Tên địa điểm (tiếng Việt)
+  name      String  @db.TinyText
+  /// Loại địa điểm (1: tỉnh, 2: quận/huyện, 3: xã/phường)
+  type      Int     @db.UnsignedTinyInt
+  /// ID địa điểm cha
+  parentId Int?   @db.UnsignedInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent    Location? @relation("LocationChildren", fields: [parentId], references: [id], onDelete: Restrict)
+  children  Location[] @relation("LocationChildren")
+
+  addressProvinces Address[] @relation("Province") @ignore
+  addressDistricts Address[] @relation("District") @ignore
+  addressWards Address[] @relation("Ward") @ignore
+}
+
 model Address {
   id            Int     @id @default(autoincrement()) @db.UnsignedInt
   /// ID người dùng
@@ -356,18 +375,18 @@ model Address {
   receiverName  String    @db.TinyText
   /// Số điện thoại người nhận
   receiverPhone String    @db.VarChar(15)
-  /// Tên tỉnh
-  province      String    @db.TinyText
   /// Code tỉnh
-  provinceCode  Int    @db.UnsignedInt
-  /// Tên quận, huyện
-  district      String    @db.TinyText
+  provinceId  Int    @db.UnsignedInt 
   /// Code quận, huyện
-  districtCode  Int    @db.UnsignedInt
-  /// Tên xã
-  commune       String    @db.TinyText
+  districtId  Int    @db.UnsignedInt
   /// Code xã
-  communeCode   Int    @db.UnsignedInt
+  wardId   Int    @db.UnsignedInt
+  /// Tỉnh
+  province      Location    @relation("Province", fields: [provinceId], references: [id])
+  /// Quận, huyện
+  district      Location    @relation("District", fields: [districtId], references: [id])
+  /// Xã
+  ward       Location    @relation("Ward", fields: [wardId], references: [id])
   /// Địa chỉ chi tiết
   detail        String    @db.Text
 

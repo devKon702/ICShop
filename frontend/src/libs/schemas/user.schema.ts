@@ -5,7 +5,7 @@ import {
   TinyText,
   DateTimeSchema,
 } from "../schemas/shared.schema";
-import { AddressSchema } from "./address.schema";
+import { AddressBaseSchema } from "./address.schema";
 
 export const UserBaseSchema = z.object({
   id: ID,
@@ -22,7 +22,7 @@ export const UserBaseSchema = z.object({
 
 export const UserSchema = UserBaseSchema.extend({
   // account: AccountSchema.optional(),
-  addresses: z.array(AddressSchema).optional(),
+  addresses: z.array(AddressBaseSchema).optional(),
   // lược bỏ các quan hệ "Createds/Modifieds" để tránh vòng import và dư thừa payload
 });
 export type User = z.infer<typeof UserSchema>;
