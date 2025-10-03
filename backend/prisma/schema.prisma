@@ -358,10 +358,16 @@ model Address {
   receiverPhone String    @db.VarChar(15)
   /// Tên tỉnh
   province      String    @db.TinyText
+  /// Code tỉnh
+  provinceCode  Int    @db.UnsignedInt
   /// Tên quận, huyện
   district      String    @db.TinyText
+  /// Code quận, huyện
+  districtCode  Int    @db.UnsignedInt
   /// Tên xã
   commune       String    @db.TinyText
+  /// Code xã
+  communeCode   Int    @db.UnsignedInt
   /// Địa chỉ chi tiết
   detail        String    @db.Text
 

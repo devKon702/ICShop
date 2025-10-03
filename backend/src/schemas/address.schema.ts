@@ -11,9 +11,9 @@ export const createAddressSchema = z.object({
       .string()
       .regex(vietnameseRegex(false), "Tên chỉ bao gồm chữ cái"),
     detail: z.string().nonempty(),
-    commune: z.string().nonempty(),
-    district: z.string(),
-    province: z.string().nonempty(),
+    communeCode: z.number().min(1, "Phường/Xã không được để trống"),
+    districtCode: z.number().min(1, "Quận/Huyện không được để trống"),
+    provinceCode: z.number().min(1, "Tỉnh/Thành phố không được để trống"),
   }),
 });
 
@@ -30,9 +30,9 @@ export const updateAddressSchema = z.object({
       .string()
       .regex(vietnameseRegex(false), "Tên chỉ bao gồm chữ cái"),
     detail: z.string().nonempty(),
-    commune: z.string().nonempty(),
-    district: z.string(),
-    province: z.string().nonempty(),
+    communeCode: z.number().min(1, "Phường/Xã không được để trống"),
+    districtCode: z.number().min(1, "Quận/Huyện không được để trống"),
+    provinceCode: z.number().min(1, "Tỉnh/Thành phố không được để trống"),
   }),
 });
 

@@ -9,6 +9,7 @@ import {
   deleteAddressSchema,
   updateAddressSchema,
 } from "../schemas/address.schema";
+import { findByIdSchema } from "../schemas/shared.schema";
 
 const addressRouter = express.Router();
 const path = "/address";
@@ -19,6 +20,21 @@ addressRouter.get(
   verifyAccessToken,
   authorize([Role.USER]),
   addressController.getMyAddress
+);
+
+// GET /address/provinces
+addressRouter.get(path + "/provinces", addressController.getProvinces);
+// GET /address/provinces/:id/districts
+addressRouter.get(
+  path + "/provinces/:id/districts",
+  validate(findByIdSchema),
+  addressController.getDistrictsByProvinceCode
+);
+// GET /address/districts/:id/communes
+addressRouter.get(
+  path + "/districts/:id/communes",
+  validate(findByIdSchema),
+  addressController.getCommunesByDistrictCode
 );
 
 // POST /address

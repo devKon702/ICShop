@@ -10,6 +10,7 @@ import {
   updateAddressSchema,
 } from "../schemas/address.schema";
 import { AppError } from "../errors/app-error";
+import { findByIdSchema } from "../schemas/shared.schema";
 
 class AddressController {
   public getMyAddress = async (req: Request, res: Response) => {
@@ -32,21 +33,37 @@ class AddressController {
         receiverName,
         receiverPhone,
         alias,
-        province,
-        district,
-        commune,
+        provinceCode,
+        districtCode,
+        communeCode,
         detail,
       },
     } = createAddressSchema.parse(req);
+    const [province, district, commune] = await Promise.all([
+      addressRepository.findProvinceByCode(provinceCode),
+      addressRepository.findDistrictByCode(districtCode),
+      addressRepository.findCommuneByCode(communeCode),
+    ]);
+    if (!province || !district || !commune) {
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        AddressResponseCode.NOT_FOUND,
+        "Không tìm thấy thông tin địa lý",
+        true
+      );
+    }
 
     const address = await addressRepository.create({
       userId: sub,
       receiverName,
       receiverPhone,
       alias,
-      province,
-      district,
-      commune,
+      provinceCode: province.code,
+      province: province.name,
+      districtCode: district.code,
+      district: district.name,
+      communeCode: commune.code,
+      commune: commune.name,
       detail,
     });
     res
@@ -67,12 +84,13 @@ class AddressController {
         receiverName,
         receiverPhone,
         alias,
-        province,
-        district,
-        commune,
+        provinceCode,
+        districtCode,
+        communeCode,
         detail,
       },
     } = updateAddressSchema.parse(req);
+
     const address = await addressRepository.findById(id);
     // Kiểm tra tồn tại
     if (!address)
@@ -90,15 +108,32 @@ class AddressController {
         "Không có thể cập nhật địa chỉ này",
         true
       );
+    // Kiểm tra thông tin địa lý
+    const [province, district, commune] = await Promise.all([
+      addressRepository.findProvinceByCode(provinceCode),
+      addressRepository.findDistrictByCode(districtCode),
+      addressRepository.findCommuneByCode(communeCode),
+    ]);
+    if (!province || !district || !commune) {
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        AddressResponseCode.NOT_FOUND,
+        "Không tìm thấy thông tin địa lý",
+        true
+      );
+    }
     // Hợp lệ
 
     const newAddress = await addressRepository.update(id, {
       receiverName,
       receiverPhone,
       alias,
-      province,
-      district,
-      commune,
+      provinceCode: province.code,
+      province: province.name,
+      districtCode: district.code,
+      district: district.name,
+      communeCode: commune.code,
+      commune: commune.name,
       detail,
     });
     res
@@ -138,6 +173,51 @@ class AddressController {
     res
       .status(HttpStatus.OK)
       .json(successResponse(AddressResponseCode.OK, "Xóa thành công"));
+  };
+
+  public getProvinces = async (req: Request, res: Response) => {
+    const provinces = await addressRepository.findAllProvinces();
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AddressResponseCode.OK,
+          "Lấy danh sách tỉnh thành công",
+          provinces
+        )
+      );
+  };
+
+  public getDistrictsByProvinceCode = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+    } = findByIdSchema.parse(req);
+    const districts = await addressRepository.findDistrictsByProvinceCode(id);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AddressResponseCode.OK,
+          "Lấy danh sách quận huyện thành công",
+          districts
+        )
+      );
+  };
+
+  public getCommunesByDistrictCode = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+    } = findByIdSchema.parse(req);
+    const communes = await addressRepository.findCommunesByDistrictCode(id);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AddressResponseCode.OK,
+          "Lấy danh sách xã phường thành công",
+          communes
+        )
+      );
   };
 }
 
