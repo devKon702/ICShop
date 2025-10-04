@@ -39,18 +39,13 @@ export default function SearchCombobox<T extends string | number>({
   disableValues = [],
 }: Props<T>) {
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<
-    Props<T>["list"][number] | null
-  >(list.find((item) => item.value === initialValue) || null);
+  const [selected, setSelected] = React.useState<(typeof list)[number] | null>(
+    null
+  );
 
   React.useEffect(() => {
-    if (selected != null) {
-      const exist = list.find((item) => item.value === selected.value);
-      if (!exist) {
-        setSelected(null);
-      }
-    }
-  }, [list, selected]);
+    setSelected(list.find((item) => item.value == initialValue) || null);
+  }, [list, initialValue]);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={false}>

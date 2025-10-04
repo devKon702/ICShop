@@ -1,6 +1,6 @@
 import env from "@/constants/env";
 
-const base = env.NEXT_PUBLIC_API_URL + "/api/v1";
+const base = env.NEXT_PUBLIC_API_URL + "/v1";
 
 export const API_ROUTE = {
   auth: base + "/auth",
@@ -10,4 +10,4 @@ export const API_ROUTE = {
   order: base + "/order",
   cart: base + "/cart",
   address: base + "/address",
-};
+} as const;

@@ -42,7 +42,7 @@ export default function AddressItem({ address }: AddressItemProps) {
         openModal({
           type: "updateAddress",
           props: {
-            data: {
+            address: {
               alias: address.alias,
               wardId: address.ward.id,
               districtId: address.district.id,

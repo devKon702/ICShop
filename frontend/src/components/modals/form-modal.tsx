@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useModalActions } from "@/store/modal-store";
+import { DialogDescription } from "@radix-ui/react-dialog";
 import React from "react";
 
 export default function FormModal({
@@ -19,7 +20,7 @@ export default function FormModal({
   return (
     <Dialog open={true} onOpenChange={(o) => !o && closeModal()}>
       <DialogContent showCloseButton={false} className="p-0 gap-0">
-        <DialogTitle hidden>Form Modal</DialogTitle>
+        <DialogDescription></DialogDescription>
         <DialogHeader>
           {title && (
             <>

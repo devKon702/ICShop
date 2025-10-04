@@ -45,7 +45,7 @@ const addressService = {
     }
   ) =>
     axiosHandler(
-      apiAxios.post("/v1/address", data),
+      apiAxios.put(`/v1/address/${id}`, data),
       ApiResponseSchema(AddressBaseSchema)
     ),
   delete: async (id: number) =>

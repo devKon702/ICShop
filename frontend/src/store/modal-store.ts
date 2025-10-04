@@ -50,7 +50,7 @@ type ModalType =
   | Modal<
       "updateAddress",
       {
-        data: {
+        address: {
           id: number;
           alias: string;
           receiverName: string;

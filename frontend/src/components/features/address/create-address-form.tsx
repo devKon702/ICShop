@@ -1,6 +1,6 @@
 "use client";
 import CustomInput from "@/components/common/custom-input";
-import SearchCombobox from "@/components/common/search-combobox";
+import LocationSelector from "@/components/features/address/location-selector";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,11 +11,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import addressService from "@/libs/services/address.service";
-import locationService from "@/libs/services/location.service";
 import { useModalActions } from "@/store/modal-store";
 import { phoneRegex, vietnameseRegex } from "@/utils/regex";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Phone, User } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -45,34 +44,6 @@ export default function CreateAddressForm() {
 
   const queryClient = useQueryClient();
 
-  const { data: provincesResponse } = useQuery({
-    queryKey: ["provinces"],
-    queryFn: () =>
-      locationService.getProvinces().then((res) => {
-        console.log(res);
-        return res;
-      }),
-  });
-  const watch = form.watch();
-
-  const {
-    data: districtsResponse,
-    isFetching: isFetchingDistricts,
-    refetch: refetchDistricts,
-  } = useQuery({
-    queryKey: ["districts", { provinceId: watch.provinceId }],
-    queryFn: () => locationService.getDistricts(watch.provinceId),
-    enabled: !!watch.provinceId,
-  });
-  const {
-    data: wardsResponse,
-    isFetching: isFetchingWards,
-    refetch: refetchWards,
-  } = useQuery({
-    queryKey: ["wards", { districtId: watch.districtId }],
-    queryFn: () => locationService.getWards(watch.districtId),
-    enabled: !!watch.districtId,
-  });
   const { mutate: createAddressMutate, isPending: isCreating } = useMutation({
     mutationFn: (data: Required<z.infer<typeof schema>>) =>
       addressService.create(data),
@@ -93,23 +64,27 @@ export default function CreateAddressForm() {
         className="space-y-4 rounded-md p-3 bg-white shadow-xl w-3xl max-h-[80dvh] overflow-y-auto"
         onSubmit={form.handleSubmit((data) => {
           console.log(data);
-          if (
-            data.provinceId == 0 ||
-            data.districtId == 0 ||
-            data.wardId == 0
-          ) {
+          let valid = true;
+          if (data.provinceId == 0) {
             form.setError("provinceId", {
               message: "Vui lòng chọn tỉnh thành",
             });
+            valid = false;
+          }
+          if (data.districtId == 0) {
             form.setError("districtId", {
               message: "Vui lòng chọn quận huyện",
             });
+            valid = false;
+          }
+          if (data.wardId == 0) {
             form.setError("wardId", {
               message: "Vui lòng chọn phường xã",
             });
-          } else {
-            createAddressMutate(data);
+            valid = false;
           }
+
+          if (valid) createAddressMutate(data);
         })}
       >
         <FormField
@@ -131,80 +106,16 @@ export default function CreateAddressForm() {
             </FormItem>
           )}
         />
-        <FormField
-          name="provinceId"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tỉnh / Thành phố (*)</FormLabel>
-              <SearchCombobox
-                searchPlaceholder="Chọn tỉnh thành"
-                list={
-                  provincesResponse?.data.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                  })) || []
-                }
-                className="w-full"
-                onItemSelect={(item) => {
-                  field.onChange(item.value);
-                  form.setValue("districtId", 0);
-                  form.setValue("wardId", 0);
-                  refetchDistricts();
-                }}
-              />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="districtId"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quận huyện (*)</FormLabel>
-              <SearchCombobox
-                searchPlaceholder="Chọn quận huyện"
-                list={
-                  (!isFetchingDistricts &&
-                    districtsResponse?.data.map((item) => ({
-                      value: item.id,
-                      label: item.name,
-                    }))) ||
-                  []
-                }
-                className="w-full"
-                onItemSelect={(item) => {
-                  field.onChange(item.value);
-                  form.setValue("wardId", 0);
-                  refetchWards();
-                }}
-              />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="wardId"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phường xã (*)</FormLabel>
-              <SearchCombobox
-                searchPlaceholder="Chọn phường xã"
-                list={
-                  (!isFetchingWards &&
-                    wardsResponse?.data.map((item) => ({
-                      value: item.id,
-                      label: item.name,
-                    }))) ||
-                  []
-                }
-                className="w-full"
-                onItemSelect={(item) => {
-                  field.onChange(item.value);
-                }}
-              />
-            </FormItem>
-          )}
+        <LocationSelector
+          onProvinceChange={(id) => {
+            form.setValue("provinceId", id || 0);
+          }}
+          onDistrictChange={(id) => {
+            form.setValue("districtId", id || 0);
+          }}
+          onWardChange={(id) => {
+            form.setValue("wardId", id || 0);
+          }}
         />
         <FormField
           name="detail"

@@ -10,6 +10,7 @@ import CreateCategoryForm from "@/components/features/category/forms/create-cate
 import PromptForm from "@/components/common/promt-form";
 import AuthTabs from "@/components/features/auth/auth-tabs";
 import CreateAddressForm from "@/components/features/address/create-address-form";
+import UpdateAddressForm from "@/components/features/address/update-address-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -72,7 +73,7 @@ export default function ModalContainer() {
               case "updateAddress":
                 return (
                   <FormModal title="Cập nhật địa chỉ">
-                    <CreateAddressForm />
+                    <UpdateAddressForm address={item.props.address} />
                   </FormModal>
                 );
               default:

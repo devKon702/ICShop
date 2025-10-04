@@ -20,7 +20,6 @@ export default function AccountLayout({
   children: React.ReactNode;
 }) {
   const pathName = usePathname();
-  console.log(pathName);
   return (
     <div className="flex space-x-2 w-full">
       <div className="w-1/4 bg-white p-2 shadow-xl rounded-md flex flex-col">
