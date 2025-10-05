@@ -11,6 +11,9 @@ import PromptForm from "@/components/common/promt-form";
 import AuthTabs from "@/components/features/auth/auth-tabs";
 import CreateAddressForm from "@/components/features/address/create-address-form";
 import UpdateAddressForm from "@/components/features/address/update-address-form";
+import SafeImage from "@/components/common/safe-image";
+import { bankAccount } from "@/constants/shop";
+import OrderConfirmationForm from "@/components/features/order/order-confirmation-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -74,6 +77,26 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Cập nhật địa chỉ">
                     <UpdateAddressForm address={item.props.address} />
+                  </FormModal>
+                );
+              case "orderConfirmation":
+                return (
+                  <FormModal title="Xác nhận đơn hàng">
+                    <OrderConfirmationForm />
+                  </FormModal>
+                );
+              case "qrCode":
+                return (
+                  <FormModal>
+                    <div className="p-4 aspect-square w-[80dvh]">
+                      <SafeImage
+                        src={`https://img.vietqr.io/image/${bankAccount.bankName}-${bankAccount.accountNumber}-print.png?amount=${item.props.amount}&addInfo=${item.props.qrString}&accountName=${bankAccount.accountHolder}`}
+                        alt="QR Code"
+                        width={300}
+                        height={300}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
                   </FormModal>
                 );
               default:

@@ -22,7 +22,7 @@ class WholesaleRepository {
       data: {
         min_quantity: data.min_quantity,
         max_quantity: data.max_quantity,
-        quanity_step: data.quantity_step,
+        quantity_step: data.quantity_step,
         unit: data.unit,
         modifierId: userId,
         version: { increment: 1 },
@@ -69,7 +69,7 @@ class WholesaleRepository {
             vat: true,
             min_quantity: true,
             max_quantity: true,
-            quanity_step: true,
+            quantity_step: true,
           },
         },
       },
@@ -83,7 +83,7 @@ class WholesaleRepository {
         id: true,
         min_quantity: true,
         max_quantity: true,
-        quanity_step: true,
+        quantity_step: true,
         unit: true,
         vat: true,
         details: {

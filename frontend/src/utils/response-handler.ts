@@ -14,14 +14,13 @@ export async function axiosHandler<T>(
     }
     return parsed.data;
   } catch (err) {
-    console.log(err);
-    console.log("Request failed");
     if (err instanceof AxiosError) {
       const parsedError = ApiErrorResponseSchema.safeParse(err.response?.data);
       if (parsedError.success) {
         throw parsedError.data;
       }
     }
+    console.log(err);
     throw err;
   }
 }

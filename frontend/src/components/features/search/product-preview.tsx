@@ -1,5 +1,5 @@
 import ClampText from "@/components/common/clamp-text";
-import { formatPrice } from "@/utils/number";
+import { formatPrice } from "@/utils/price";
 import Image from "next/image";
 import React from "react";
 

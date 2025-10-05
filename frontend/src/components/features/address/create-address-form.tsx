@@ -49,7 +49,7 @@ export default function CreateAddressForm() {
       addressService.create(data),
     onSuccess: () => {
       toast.success("Thêm địa chỉ thành công");
-      queryClient.invalidateQueries({ queryKey: ["address", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["address"] });
       closeModal();
     },
     onError: (error) => {

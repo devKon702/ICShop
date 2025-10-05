@@ -14,7 +14,7 @@ export const WholesaleBaseSchema = z.object({
   productId: UnsignedInt,
   min_quantity: UnsignedTinyInt,
   max_quantity: UnsignedInt,
-  quanity_step: UnsignedTinyInt,
+  quantity_step: UnsignedTinyInt,
   unit: TinyText,
   vat: DecimalString,
   version: z.number().int(),

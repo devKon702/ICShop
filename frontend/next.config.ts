@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/api/**",
       },
+      {
+        protocol: "https",
+        hostname: "img.vietqr.io",
+        port: "",
+        pathname: "/image/**",
+      },
     ],
   },
 };

@@ -8,21 +8,31 @@ import {
   DecimalString,
   DateTimeSchema,
 } from "../schemas/shared.schema";
-import { OrderDetailSchema } from "./order-detail.schema";
-import { OrderTimelineSchema } from "./order-timeline.schema";
+import { DeliveryType, OrderStatus } from "@/constants/enums";
 
 export const OrderBaseSchema = z.object({
   id: ID,
   code: z.string().min(1),
   userId: UnsignedInt,
-  status: TinyInt, // 1: Pending, 2: Confirmed, 3: Shipping, 4: Delivered, 5: Cancelled
+  status: TinyInt.refine((val) =>
+    [
+      OrderStatus.PENDING,
+      OrderStatus.PAID,
+      OrderStatus.PROCESSING,
+      OrderStatus.SHIPPING,
+      OrderStatus.DONE,
+      OrderStatus.CANCELED,
+    ].includes(val)
+  ), // 1: Pending, 2: Paid, 3: Processing, 4: Shipping, 5: Done, 0: Canceled
   province: TinyText,
   district: TinyText,
-  ward: TinyText,
+  commune: TinyText,
   detail: Text,
   receiverName: TinyText,
   receiverPhone: z.string().min(3).max(20),
-  deliveryType: TinyInt, // 1|2
+  deliveryType: TinyInt.refine((val) =>
+    [DeliveryType.SHOP, DeliveryType.POST].includes(val)
+  ), // 1: Shop, 2: Post
   deliveryFee: DecimalString,
   earliestReceiveTime: DateTimeSchema,
   latestReceiveTime: DateTimeSchema,
@@ -33,9 +43,3 @@ export const OrderBaseSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
-
-export const OrderSchema = OrderBaseSchema.extend({
-  details: z.array(OrderDetailSchema).optional(),
-  timelines: z.array(OrderTimelineSchema).optional(),
-});
-export type Order = z.infer<typeof OrderSchema>;

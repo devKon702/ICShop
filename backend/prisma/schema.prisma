@@ -166,7 +166,7 @@ model Wholesale {
   /// Số lượng mua tối đa
   max_quantity  Int         @db.UnsignedInt
   ///  Bội số mua
-  quanity_step  Int          @db.UnsignedTinyInt @default(1)
+  quantity_step  Int          @db.UnsignedTinyInt @default(1)
   /// Đơn vị mua (tiếng Việt)
   unit        String         @db.TinyText
   /// Thuế sản phẩm theo đơn vị phần trăm

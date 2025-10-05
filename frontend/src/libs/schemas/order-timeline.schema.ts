@@ -6,11 +6,21 @@ import {
   DateTimeSchema,
   Text,
 } from "../schemas/shared.schema";
+import { OrderStatus } from "@/constants/enums";
 
 export const OrderTimelineSchema = z.object({
   id: ID,
   orderId: UnsignedInt,
-  status: TinyInt, // 0..5 theo mô tả
+  status: TinyInt.refine((val) =>
+    [
+      OrderStatus.PENDING,
+      OrderStatus.PAID,
+      OrderStatus.PROCESSING,
+      OrderStatus.SHIPPING,
+      OrderStatus.DONE,
+      OrderStatus.CANCELED,
+    ].includes(val)
+  ), // 1: Pending, 2: Paid, 3: Processing, 4: Shipping, 5: Done, 0: Canceled
   isRead: z.boolean(),
   desc: Text,
   version: z.number().int(),

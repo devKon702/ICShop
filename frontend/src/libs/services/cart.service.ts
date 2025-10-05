@@ -12,19 +12,21 @@ const cartService = {
     axiosHandler(
       apiAxios.get("/v1/cart"),
       ApiResponseSchema(
-        CartDetailSchema.extend({
-          products: z.array(
-            SafeProductBaseSchema.extend({
+        z.array(
+          CartDetailSchema.extend({
+            product: SafeProductBaseSchema.pick({
+              id: true,
+              name: true,
+              price: true,
+              slug: true,
+              posterUrl: true,
+            }).extend({
               wholesale: SafeWholesaleBaseSchema.extend({
                 details: z.array(SafeWholesaleDetailSchema),
               }),
-            }).omit({
-              desc: true,
-              datasheetLink: true,
-              weight: true,
-            })
-          ),
-        })
+            }),
+          })
+        )
       )
     ),
   add: (productId: number) =>
@@ -35,7 +37,7 @@ const cartService = {
   deleteMulti: (ids: number[]) =>
     axiosHandler(
       apiAxios.delete(`/v1/cart`, { data: { cartIds: ids } }),
-      ApiResponseSchema(CartDetailSchema)
+      ApiResponseSchema(z.array(z.object({ id: z.number() })))
     ),
 };
 export default cartService;

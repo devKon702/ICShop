@@ -2,36 +2,46 @@ import { z } from "zod";
 import { phoneRegex, vietnameseRegex } from "../utils/regex";
 import { DeliveryType, OrderStatus } from "../constants/db";
 import { ppid } from "process";
+import { idStringSchema } from "./shared.schema";
+import orderController from "../controllers/order.controller";
 
 export const createOrderSchema = z.object({
-  body: z.object({
-    receiverName: z
-      .string()
-      .regex(
-        vietnameseRegex(false),
-        "Tên người nhận chỉ bao gồm chữ cái và khoảng trắng"
+  body: z
+    .object({
+      deliveryType: z
+        .number()
+        .refine(
+          (val) => [DeliveryType.SHOP, DeliveryType.POST].includes(val),
+          "Loại giao hàng không hợp lệ"
+        ),
+      addressId: idStringSchema.optional(),
+      receiverName: z
+        .string()
+        .regex(vietnameseRegex(), "Tên không hợp lệ")
+        .optional(),
+      receiverPhone: z
+        .string()
+        .regex(phoneRegex(), "Số điện thoại không hợp lệ")
+        .optional(),
+      products: z.array(
+        z.object({
+          productId: z.number(),
+          quantity: z
+            .number()
+            .int("Phải là kiểu số nguyên")
+            .min(1, "Số lượng tối thiểu là 1"),
+        })
       ),
-    receiverPhone: z.string().regex(phoneRegex(), "Số diện thoại không hợp lệ"),
-    deliveryType: z
-      .number()
-      .refine(
-        (val) => Object.values(DeliveryType).includes(val),
-        "Giá trị kiểu vận chuyển không hợp lệ"
-      ),
-    province: z.string(),
-    district: z.string(),
-    commune: z.string(),
-    detail: z.string(),
-    products: z.array(
-      z.object({
-        productId: z.number(),
-        quantity: z
-          .number()
-          .int("Phải là kiểu số nguyên")
-          .min(1, "Số lượng tối thiểu là 1"),
-      })
-    ),
-  }),
+    })
+    .refine((data) => {
+      if (data.deliveryType === DeliveryType.POST) return !!data.addressId;
+      return true;
+    }, "Địa chỉ giao hàng là bắt buộc")
+    .refine((data) => {
+      if (data.deliveryType === DeliveryType.SHOP)
+        return data.receiverName && data.receiverPhone;
+      return true;
+    }, "Tên và số điện thoại người nhận là bắt buộc"),
 });
 
 export const getMyOrderSchema = z.object({
@@ -45,8 +55,11 @@ export const getMyOrderSchema = z.object({
         "Trạng thái đơn hàng không hợp lệ"
       )
       .optional(),
-    from: z.string().default(""),
-    to: z.string().default(""),
+    from: z.string().optional(),
+    to: z.string().optional(),
+    order: z
+      .enum(["create_asc", "create_desc", "update_asc", "update_desc"])
+      .default("create_desc"),
   }),
 });
 

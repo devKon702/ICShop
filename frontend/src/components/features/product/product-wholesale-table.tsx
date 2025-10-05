@@ -1,4 +1,4 @@
-import { formatPrice } from "@/utils/number";
+import { formatPrice } from "@/utils/price";
 import React from "react";
 
 interface ProductWholesaleTableProps {

@@ -62,7 +62,9 @@ type ModalType =
         };
         onSuccess?: () => void;
       }
-    >;
+    >
+  | Modal<"orderConfirmation", { onOrderSuccess?: () => void }>
+  | Modal<"qrCode", { qrString: string; amount: number }>;
 
 interface modalState {
   modal: ModalType[];

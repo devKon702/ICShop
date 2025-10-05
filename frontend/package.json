@@ -32,6 +32,7 @@
     "cmdk": "^1.1.1",
     "command": "^1.1.1",
     "date-fns": "^4.1.0",
+    "decimal.js": "^10.6.0",
     "embla-carousel-react": "^8.6.0",
     "ic-shop": "file:",
     "lucide-react": "^0.503.0",

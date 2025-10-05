@@ -45,9 +45,9 @@ class AddressRepository {
     return prisma.address.delete({ where: { id } });
   };
 
-  public findById = async (id: number) => {
+  public findById = async (id: number, userId?: number) => {
     return prisma.address.findUnique({
-      where: { id },
+      where: { id, userId },
       include: {
         province: true,
         district: true,

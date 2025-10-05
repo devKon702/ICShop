@@ -2,7 +2,7 @@ import ClampText from "@/components/common/clamp-text";
 import SafeImage from "@/components/common/safe-image";
 import env from "@/constants/env";
 import { ROUTE } from "@/constants/routes";
-import { formatPrice } from "@/utils/number";
+import { formatPrice } from "@/utils/price";
 import Link from "next/link";
 import React from "react";
 

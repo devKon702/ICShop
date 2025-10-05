@@ -8,7 +8,7 @@ import productService from "@/libs/services/product.service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
-import { formatPrice } from "@/utils/number";
+import { formatPrice } from "@/utils/price";
 
 export async function generateMetadata({
   params,
@@ -91,7 +91,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <AddToCartForm
                 min={product.wholesale.min_quantity}
                 max={product.wholesale.max_quantity}
-                step={product.wholesale.quanity_step}
+                step={product.wholesale.quantity_step}
                 productId={product.id}
               ></AddToCartForm>
             </div>

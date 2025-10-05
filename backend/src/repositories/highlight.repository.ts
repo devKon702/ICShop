@@ -52,7 +52,7 @@ class HighlightRepository {
                 min_quantity: true,
                 max_quantity: true,
                 unit: true,
-                quanity_step: true,
+                quantity_step: true,
                 id: true,
               },
             },

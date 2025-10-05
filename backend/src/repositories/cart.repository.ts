@@ -18,7 +18,7 @@ class CartRepository {
                 id: true,
                 min_quantity: true,
                 max_quantity: true,
-                quanity_step: true,
+                quantity_step: true,
                 unit: true,
                 vat: true,
                 details: {
@@ -36,6 +36,20 @@ class CartRepository {
           },
         },
       },
+      orderBy: { updatedAt: "desc" },
+    });
+  };
+
+  public getCartDetailByProductId = (userId: number, productId: number) => {
+    return prisma.cartDetail.findFirst({
+      where: { userId, productId },
+    });
+  };
+
+  public updateCart = (id: number) => {
+    return prisma.cartDetail.update({
+      where: { id },
+      data: { updatedAt: new Date() },
     });
   };
 

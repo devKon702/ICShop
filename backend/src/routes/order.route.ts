@@ -17,6 +17,7 @@ import {
 
 const orderRouter = express.Router();
 const path = "/order";
+const adminPath = "/admin/order";
 
 // GET /order
 orderRouter.get(
@@ -29,7 +30,7 @@ orderRouter.get(
 
 // GET /order/filter
 orderRouter.get(
-  path + "/filter",
+  adminPath + "/filter",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(filterOrderSchema),
@@ -55,7 +56,7 @@ orderRouter.get(
 
 // GET /order/:id/detail
 orderRouter.get(
-  path + "/:id/detail",
+  adminPath + "/:id/detail",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(getOrderByIdSchema),
@@ -82,7 +83,7 @@ orderRouter.post(
 
 // POST /order/:id
 orderRouter.post(
-  path + "/:id",
+  adminPath + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(createOrderTimelineSchema),
@@ -100,7 +101,7 @@ orderRouter.patch(
 
 // PATCH /order/timeline/:id/desc
 orderRouter.patch(
-  path + "/timeline/:id/desc",
+  adminPath + "/timeline/:id/desc",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(updateTimelineDescSchema),

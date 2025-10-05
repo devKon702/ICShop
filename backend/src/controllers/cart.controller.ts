@@ -28,7 +28,13 @@ class CartController {
     const {
       body: { productId },
     } = createCartSchema.parse(req);
-    const cart = await cartRepository.createCart(sub, productId);
+    const existing = await cartDetailRepository.getCartDetailByProductId(
+      sub,
+      productId
+    );
+    let cart;
+    if (existing) cart = await cartRepository.updateCart(existing.id);
+    else cart = await cartRepository.createCart(sub, productId);
     res
       .status(HttpStatus.OK)
       .json(

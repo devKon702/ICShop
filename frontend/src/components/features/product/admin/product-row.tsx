@@ -8,7 +8,7 @@ import { ProductBaseSchema } from "@/libs/schemas/product.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
 import productService from "@/libs/services/product.service";
 import { useModalActions } from "@/store/modal-store";
-import { formatPrice } from "@/utils/number";
+import { formatPrice } from "@/utils/price";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Info, Pencil, Trash } from "lucide-react";
 import React from "react";

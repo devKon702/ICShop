@@ -1,5 +1,5 @@
-import { columns } from "@/components/features/order/colums";
-import { OrderTable } from "@/components/features/order/order-table";
+"use client";
+import OrderTable from "@/components/features/order/order-table";
 import {
   Select,
   SelectContent,
@@ -7,10 +7,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DeliveryType } from "@/constants/enums";
+import orderService from "@/libs/services/order.service";
+import { useQuery } from "@tanstack/react-query";
 import { SearchIcon } from "lucide-react";
+import {
+  parseAsInteger,
+  parseAsIsoDateTime,
+  parseAsStringLiteral,
+  useQueryStates,
+} from "nuqs";
 import React from "react";
 
 export default function OrderPage() {
+  const [query, setQuery] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(5),
+    status: parseAsInteger,
+    order: parseAsStringLiteral([
+      "create_asc",
+      "create_desc",
+      "update_asc",
+      "update_desc",
+    ]).withDefault("create_desc"),
+    from: parseAsIsoDateTime.withDefault(
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    ),
+    to: parseAsIsoDateTime.withDefault(new Date()),
+  });
+  const { data } = useQuery({
+    queryKey: ["orders", { ...query }],
+    queryFn: async () =>
+      orderService.user.filter({
+        page: query.page,
+        limit: query.limit,
+        order: "create_desc",
+        status: undefined,
+        from: query.from.toISOString(),
+        to: query.to.toISOString(),
+      }),
+  });
   return (
     <div>
       <h1 className="font-medium text-2xl mb-4">Đơn hàng</h1>
@@ -54,18 +90,29 @@ export default function OrderPage() {
         </li>
       </ul>
       <OrderTable
-        columns={columns}
-        data={[
-          {
-            id: "37472",
-            products: [],
-            time: { start: "20/5/2025", end: "25/5/2025" },
-            address: "Nhà",
-            price: 210000,
-            status: "pending",
-          },
-        ]}
-      ></OrderTable>
+        orders={
+          data?.data.result.map((order) => ({
+            id: order.id,
+            code: order.code,
+            createdAt: order.createdAt.toLocaleString(),
+            receiverAddress:
+              order.deliveryType === DeliveryType.POST
+                ? order.detail +
+                  ", " +
+                  order.commune +
+                  ", " +
+                  order.district +
+                  ", " +
+                  order.province
+                : "Nhận tại cửa hàng",
+            receiverName: order.receiverName,
+            receiverPhone: order.receiverPhone,
+            total: Number(order.total),
+            status: order.status,
+          })) || []
+        }
+        totalPage={data?.data ? Math.ceil(data.data.total / query.limit) : 1}
+      />
     </div>
   );
 }

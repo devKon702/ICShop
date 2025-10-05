@@ -3,7 +3,7 @@ import Counter from "@/components/common/counter";
 import cartService from "@/libs/services/cart.service";
 import useCartStore from "@/store/cart-store";
 import { cn } from "@/utils/className";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -26,11 +26,13 @@ export default function AddToCartForm({
   const {
     actions: { addItem },
   } = useCartStore();
+  const queryClient = useQueryClient();
   const { mutate: addToCartMutate } = useMutation({
     mutationFn: async () => cartService.add(productId),
     onSuccess: ({ data }) => {
       toast.success("Thêm vào giỏ hàng thành công");
       addItem(data.id, count);
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
     onError: () => {
       toast.error("Thêm vào giỏ hàng thất bại");

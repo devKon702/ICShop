@@ -19,6 +19,7 @@ import SafeImage from "@/components/common/safe-image";
 import { ShoppingCart } from "lucide-react";
 import Separator from "@/components/common/separator";
 import ClampText from "@/components/common/clamp-text";
+import cartService from "@/libs/services/cart.service";
 
 const accountMenu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -32,6 +33,10 @@ export default function Header() {
   const { data } = useQuery({
     queryKey: ["me"],
     queryFn: accountService.getMe,
+  });
+  const { data: cartData } = useQuery({
+    queryKey: ["cart"],
+    queryFn: () => cartService.getCart(),
   });
   const { mutate: logoutMutate } = useMutation({
     mutationFn: authService.logout,
@@ -66,9 +71,12 @@ export default function Header() {
       <div className="flex space-x-5">
         <Link
           href={ROUTE.cart}
-          className="cursor-pointer flex flex-col items-center"
+          className="relative cursor-pointer flex flex-col items-center"
         >
           <ShoppingCart className="size-10 p-2 hover:bg-black/10 rounded-full transition-all duration-500" />
+          <div className="absolute top-0 right-0 translate-x-1/5 -translate-y-1/5 text-xs bg-red-500 text-white font-bold px-1 rounded-full">
+            {cartData?.data.length || null}
+          </div>
         </Link>
         {user ? (
           <HoverCard openDelay={0} closeDelay={20}>

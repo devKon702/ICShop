@@ -17,44 +17,65 @@ import wholesaleRepository from "../repositories/wholesale.repository";
 import { AppError } from "../errors/app-error";
 import { HttpStatus } from "../constants/http-status";
 import { OrderResponseCode } from "../constants/codes/order.code";
-import { OrderStatus } from "../constants/db";
+import { DeliveryType, OrderStatus } from "../constants/db";
 import { successResponse } from "../utils/response";
 import { Decimal } from "@prisma/client/runtime/library";
 import { time } from "console";
+import addressRepository from "../repositories/address.repository";
+import { NotFoundError } from "../errors/not-found-error";
+import { add } from "winston";
+import userRepository from "../repositories/user.repository";
 
 class OrderController {
   public create = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
-      body: {
-        receiverName,
-        receiverPhone,
-        deliveryType,
-        province,
-        district,
-        commune,
-        detail,
-        products,
-      },
+      body: { addressId, deliveryType, products, receiverName, receiverPhone },
     } = createOrderSchema.parse(req);
+
+    // Grouping products
+    const productMap = new Map<number, number>();
+    products.forEach((item) => {
+      if (productMap.has(item.productId)) {
+        productMap.set(
+          item.productId,
+          productMap.get(item.productId)! + item.quantity
+        );
+      } else {
+        productMap.set(item.productId, item.quantity);
+      }
+    });
+    const groupedProducts = Array.from(productMap, ([productId, quantity]) => ({
+      productId,
+      quantity,
+    }));
+
+    // Check exist address
+    const address =
+      deliveryType === DeliveryType.POST && addressId
+        ? await addressRepository.findById(addressId, sub)
+        : null;
+    if (deliveryType === DeliveryType.POST && !address)
+      throw new NotFoundError("Địa chỉ không tồn tại");
+
     // Get unit price + vat for each product
     const productPrices = await Promise.all(
-      products.map((item) =>
+      groupedProducts.map((item) =>
         wholesaleRepository.findByQuantity(item.productId, item.quantity)
       )
     );
-    // Check if some productId not exist
+    // Check if some product price not exist ~ product not exist
     if (productPrices.some((item) => item === null))
       throw new AppError(
         HttpStatus.UNPROCESSABLE_ENTITY,
         OrderResponseCode.INVALID_PRICE,
-        "Không tìm được giá cho sản phẩm",
+        "Sản phẩm không tồn tại",
         true
       );
 
     // Check valid product quantity
-    products.forEach((item, index) => {
-      const { max_quantity, min_quantity, quanity_step } =
+    groupedProducts.forEach((item, index) => {
+      const { max_quantity, min_quantity, quantity_step } =
         productPrices[index]!.wholesale;
       if (item.quantity < min_quantity)
         throw new AppError(
@@ -70,16 +91,17 @@ class OrderController {
           `Tối đa mua ${max_quantity}`,
           true
         );
-      if (item.productId % quanity_step)
+      if (item.productId % quantity_step)
         throw new AppError(
           HttpStatus.UNPROCESSABLE_ENTITY,
           OrderResponseCode.INVALID_PRODUCT_QUANTITY,
-          `Bội số mua là ${quanity_step}`,
+          `Bội số mua là ${quantity_step}`,
           true
         );
     });
 
-    const details = products.map((item, index) => ({
+    // Prepare order details
+    const details = groupedProducts.map((item, index) => ({
       productId: item.productId,
       quantity: item.quantity,
       unitPrice: productPrices[index]!.price,
@@ -92,12 +114,20 @@ class OrderController {
     const latestReceiveTime = new Date(Date.now());
 
     const order = await orderRepository.create(sub, {
-      receiverName,
-      receiverPhone,
-      province,
-      district,
-      commune,
-      detail,
+      receiverName:
+        deliveryType === DeliveryType.POST
+          ? address!.receiverName
+          : receiverName!,
+      receiverPhone:
+        deliveryType === DeliveryType.POST
+          ? address!.receiverPhone
+          : receiverPhone!,
+      province:
+        deliveryType === DeliveryType.POST ? address!.province.name : "",
+      district:
+        deliveryType === DeliveryType.POST ? address!.district.name : "",
+      commune: deliveryType === DeliveryType.POST ? address!.ward.name : "",
+      detail: deliveryType === DeliveryType.POST ? address!.detail : "",
       deliveryFee,
       deliveryType,
       earliestReceiveTime,
@@ -117,11 +147,15 @@ class OrderController {
   public getMyOrder = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
-      query: { status, page, limit, from, to },
+      query: { status, page, limit, from, to, order },
     } = getMyOrderSchema.parse(req);
-    const [orders, total] = await orderRepository.findByUserId(sub, {
+    const [orders, total] = await orderRepository.filterByUserId(sub, {
       page,
       limit,
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+      status,
+      order,
     });
     res
       .status(HttpStatus.OK)

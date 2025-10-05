@@ -3,11 +3,12 @@ import { cn } from "@/utils/className";
 import React from "react";
 
 interface CounterProps {
-  onDownClick: () => void;
-  onUpClick: () => void;
+  onDownClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onUpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   min: number;
   max: number;
+  step?: number;
   value: number;
   buttonClassname?: string;
 }
@@ -15,6 +16,7 @@ export default function Counter({
   value,
   min,
   max,
+  step = 1,
   onDownClick,
   onUpClick,
   onInputChange,
@@ -32,6 +34,7 @@ export default function Counter({
         type="number"
         min={min}
         max={max}
+        step={step}
         className="flex-1 text-center bg-white"
         onChange={onInputChange}
       />
@@ -46,7 +49,7 @@ export default function Counter({
 
 interface CountButtonProps {
   type: "plus" | "minus";
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
 }
 function CountButton({ type, onClick, className }: CountButtonProps) {

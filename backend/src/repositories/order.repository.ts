@@ -3,9 +3,16 @@ import { DeliveryType, OrderStatus } from "../constants/db";
 import { prisma } from "../prisma";
 
 class OrderRepository {
-  public findByUserId = (
+  public filterByUserId = (
     userId: number,
-    filter: { page: number; limit: number; from?: Date; to?: Date }
+    filter: {
+      page: number;
+      limit: number;
+      from?: Date;
+      to?: Date;
+      order: "create_asc" | "create_desc" | "update_asc" | "update_desc";
+      status?: OrderStatus;
+    }
   ) => {
     const where: any = { userId };
 
@@ -18,6 +25,22 @@ class OrderRepository {
         where.createdAt.lte = filter.to;
       }
     }
+
+    const orderBy: any = {};
+    switch (filter.order) {
+      case "create_asc":
+        orderBy.createdAt = "asc";
+        break;
+      case "create_desc":
+        orderBy.createdAt = "desc";
+        break;
+      case "update_asc":
+        orderBy.updatedAt = "asc";
+        break;
+      case "update_desc":
+        orderBy.updatedAt = "desc";
+        break;
+    }
     return Promise.all([
       prisma.order.findMany({
         where,
@@ -26,6 +49,7 @@ class OrderRepository {
         },
         take: filter.limit,
         skip: (filter.page - 1) * filter.limit,
+        orderBy,
       }),
       prisma.order.count({ where }),
     ]);
@@ -144,6 +168,7 @@ class OrderRepository {
       },
       include: {
         details: true,
+        timelines: true,
       },
     });
   };
