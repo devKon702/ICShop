@@ -14,7 +14,7 @@ class OrderRepository {
       status?: OrderStatus;
     }
   ) => {
-    const where: any = { userId };
+    const where: any = { userId, status: filter.status };
 
     if (filter.from || filter.to) {
       where.createdAt = {};

@@ -1,16 +1,9 @@
 "use client";
+import AppSelector from "@/components/common/app-selector";
 import OrderTable from "@/components/features/order/order-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DeliveryType } from "@/constants/enums";
+import { DeliveryType, OrderStatus } from "@/constants/enums";
 import orderService from "@/libs/services/order.service";
 import { useQuery } from "@tanstack/react-query";
-import { SearchIcon } from "lucide-react";
 import {
   parseAsInteger,
   parseAsIsoDateTime,
@@ -19,17 +12,31 @@ import {
 } from "nuqs";
 import React from "react";
 
+const orderOptions = [
+  { value: "create_desc", label: "Mới nhất" },
+  { value: "create_asc", label: "Cũ nhất" },
+  { value: "update_desc", label: "Cập nhật mới nhất" },
+  { value: "update_asc", label: "Cập nhật cũ nhất" },
+] as const;
+
+const statusOptions = [
+  { value: "-1", label: "Tất cả" },
+  { value: OrderStatus.PENDING.toString(), label: "Chờ xác nhận" },
+  { value: OrderStatus.PAID.toString(), label: "Đã thanh toán" },
+  { value: OrderStatus.PROCESSING.toString(), label: "Đang xử lí" },
+  { value: OrderStatus.SHIPPING.toString(), label: "Đang giao" },
+  { value: OrderStatus.DONE.toString(), label: "Hoàn thành" },
+  { value: OrderStatus.CANCELED.toString(), label: "Đã hủy" },
+] as const;
+
 export default function OrderPage() {
   const [query, setQuery] = useQueryStates({
     page: parseAsInteger.withDefault(1),
     limit: parseAsInteger.withDefault(5),
     status: parseAsInteger,
-    order: parseAsStringLiteral([
-      "create_asc",
-      "create_desc",
-      "update_asc",
-      "update_desc",
-    ]).withDefault("create_desc"),
+    order: parseAsStringLiteral(
+      orderOptions.map((item) => item.value)
+    ).withDefault("create_desc"),
     from: parseAsIsoDateTime.withDefault(
       new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     ),
@@ -41,8 +48,8 @@ export default function OrderPage() {
       orderService.user.filter({
         page: query.page,
         limit: query.limit,
-        order: "create_desc",
-        status: undefined,
+        order: query.order,
+        status: query.status ?? undefined,
         from: query.from.toISOString(),
         to: query.to.toISOString(),
       }),
@@ -50,45 +57,43 @@ export default function OrderPage() {
   return (
     <div>
       <h1 className="font-medium text-2xl mb-4">Đơn hàng</h1>
-      <div className="flex">
-        <div className="flex space-x-2 items-center rounded-md border-2 p-1 px-2 w-1/3">
-          <SearchIcon />
-          <input
-            type="text"
-            className="outline-none border-none flex-1"
-            placeholder="Mã đơn hàng"
-          />
+      <div className="flex space-x-2 mb-2">
+        <div className="w-1/4 ms-auto space-y-2">
+          <p className="font-semibold text-sm">Trạng thái</p>
+          <AppSelector
+            data={statusOptions.map((item) => ({
+              value: item.value,
+              label: item.label,
+            }))}
+            defaultValue={query.status?.toString() || "-1"}
+            onValueChange={(value) => {
+              setQuery({
+                ...query,
+                status:
+                  value === "-1"
+                    ? null
+                    : (Number(value) as typeof query.status),
+              });
+            }}
+            className="w-full"
+          ></AppSelector>
         </div>
-        <Select defaultValue="newest">
-          <SelectTrigger className="ms-auto">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Mới nhất</SelectItem>
-            <SelectItem value="oldest">Cũ nhất</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="w-1/4 space-y-2">
+          <p className="font-semibold text-sm">Sắp xếp</p>
+          <AppSelector
+            data={orderOptions.map((item) => ({
+              value: item.value,
+              label: item.label,
+            }))}
+            defaultValue={query.order}
+            onValueChange={(value) =>
+              setQuery({ ...query, order: value as typeof query.order })
+            }
+            className="w-full"
+          ></AppSelector>
+        </div>
       </div>
-      <ul className="flex w-full items-center justify-center my-4">
-        <li
-          data-selected={true}
-          className="py-2 px-6 cursor-pointer border-b-2 border-b-transparent hover:border-b-primary flex-1 text-center data-[selected=true]:bg-primary-light data-[selected=true]:border-b-primary"
-        >
-          Tất cả
-        </li>
-        <li className="py-2 px-6 cursor-pointer border-b-2 border-b-transparent hover:border-b-primary flex-1 text-center">
-          Chờ xác nhận
-        </li>
-        <li className="py-2 px-6 cursor-pointer border-b-2 border-b-transparent hover:border-b-primary flex-1 text-center">
-          Đang xử lí
-        </li>
-        <li className="py-2 px-6 cursor-pointer border-b-2 border-b-transparent hover:border-b-primary flex-1 text-center">
-          Thành công
-        </li>
-        <li className="py-2 px-6 cursor-pointer border-b-2 border-b-transparent hover:border-b-primary flex-1 text-center">
-          Thất bại
-        </li>
-      </ul>
+
       <OrderTable
         orders={
           data?.data.result.map((order) => ({

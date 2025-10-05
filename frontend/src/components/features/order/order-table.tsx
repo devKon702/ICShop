@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CircleX, Info, QrCode, Trash, X } from "lucide-react";
+import { CircleX, Info, QrCode } from "lucide-react";
 import { OrderStatus } from "@/constants/enums";
 import ClampText from "@/components/common/clamp-text";
 import { useModalActions } from "@/store/modal-store";
