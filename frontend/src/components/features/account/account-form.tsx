@@ -1,5 +1,6 @@
 "use client";
 import CustomInput from "@/components/common/custom-input";
+import SafeImage from "@/components/common/safe-image";
 import {
   Form,
   FormControl,
@@ -8,8 +9,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import env from "@/constants/env";
+import accountService from "@/libs/services/account.service";
+import { useModalActions } from "@/store/modal-store";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -22,16 +26,31 @@ const schema = z.object({
 });
 
 export default function AccountForm() {
+  const { openModal, closeModal } = useModalActions();
+
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       avatarUrl: "",
-      name: "Nguyễn Nhật Kha",
-      email: "nhatkha117@gmail.com",
+      name: "",
+      email: "",
       phone: "",
     },
-    mode: "all",
-    disabled: true,
+    mode: "onSubmit",
+  });
+
+  const {} = useQuery({
+    queryKey: ["me"],
+    queryFn: () =>
+      accountService.getMe().then((res) => {
+        form.reset({
+          avatarUrl: res.data.user.avatarUrl || "",
+          name: res.data.user.name,
+          email: res.data.email,
+          phone: res.data.user.phone || "",
+        });
+        return res;
+      }),
   });
 
   return (
@@ -47,8 +66,8 @@ export default function AccountForm() {
                   className="relative size-30 mx-auto shrink-0 rounded-full overflow-hidden group data-[disabled=false]:cursor-pointer"
                   data-disabled={!!field.disabled}
                 >
-                  <Image
-                    src={"/uploads/ic.jpg"}
+                  <SafeImage
+                    src={`${env.NEXT_PUBLIC_FILE_URL}/${field.value}`}
                     alt="Hình đại diện"
                     width={200}
                     height={200}
@@ -68,8 +87,24 @@ export default function AccountForm() {
                 <input
                   type="file"
                   hidden
-                  {...field}
                   accept="image/jpg, image/png, image/jpeg"
+                  onChange={(e) => {
+                    if (
+                      e.currentTarget.files &&
+                      e.currentTarget.files.length > 0
+                    ) {
+                      openModal({
+                        type: "imageCropper",
+                        props: {
+                          file: e.currentTarget.files[0],
+                          onImageComplete(file, previewUrl) {
+                            form.setValue("avatarUrl", previewUrl);
+                            closeModal();
+                          },
+                        },
+                      });
+                    }
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -101,6 +136,24 @@ export default function AccountForm() {
             render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <CustomInput
+                    type="text"
+                    isError={fieldState.invalid}
+                    className="disabled:opacity-60"
+                    {...field}
+                  ></CustomInput>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="phone"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Số điện thoại</FormLabel>
                 <FormControl>
                   <CustomInput
                     type="text"

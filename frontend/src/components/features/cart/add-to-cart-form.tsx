@@ -4,7 +4,7 @@ import cartService from "@/libs/services/cart.service";
 import useCartStore from "@/store/cart-store";
 import { cn } from "@/utils/className";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React from "react";
 import { toast } from "sonner";
 
 interface AddToCartFormProps {
@@ -38,16 +38,7 @@ export default function AddToCartForm({
       toast.error("Thêm vào giỏ hàng thất bại");
     },
   });
-  useEffect(() => {
-    function handle() {
-      console.log("need login");
-      toast.error("Vui lòng đăng nhập để sử dụng chức năng này");
-    }
-    window.addEventListener("needlogin", handle);
-    return () => {
-      window.removeEventListener("needlogin", handle);
-    };
-  }, []);
+
   return (
     <div className={cn(className)}>
       <Counter

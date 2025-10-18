@@ -44,11 +44,11 @@ export default function AdminLoginForm() {
         toast.success(res.message, { position: "bottom-right" });
         const account = res.data.account;
         setUser({
-          id: account.id,
           avatarUrl: account.user.avatarUrl || null,
           email: account.email,
           name: account.user.name,
           role: account.role,
+          phone: account.user.phone,
         });
         setToken(res.data.token);
       })

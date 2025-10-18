@@ -3,10 +3,12 @@ import apiAxios from "@/libs/api/api-axios";
 import { OrderDetailSchema } from "@/libs/schemas/order-detail.schema";
 import { OrderTimelineSchema } from "@/libs/schemas/order-timeline.schema";
 import { OrderBaseSchema } from "@/libs/schemas/order.schema";
+import { ProductBaseSchema } from "@/libs/schemas/product.schema";
 import {
   ApiResponseSchema,
   PaginatedResponseSchema,
 } from "@/libs/schemas/response.schema";
+import { UserBaseSchema } from "@/libs/schemas/user.schema";
 import { axiosHandler } from "@/utils/response-handler";
 import { z } from "zod";
 
@@ -65,7 +67,70 @@ const orderService = {
         )
       ),
   },
-  admin: {},
+  admin: {
+    filter: (params: {
+      status?: OrderStatus;
+      from?: string;
+      to?: string;
+      page: number;
+      limit: number;
+      sortBy: "create_asc" | "create_desc" | "update_asc" | "update_desc";
+      receiverPhone?: string;
+      email?: string;
+      code?: string;
+      isActive?: boolean;
+    }) => {
+      return axiosHandler(
+        apiAxios.get("/v1/admin/order", {
+          params: {
+            status: params.status,
+            from: params.from,
+            to: params.to,
+            page: params.page,
+            limit: params.limit,
+            sortBy: params.sortBy,
+            receiverPhone: params.receiverPhone,
+            email: params.email,
+            code: params.code,
+            isActive: params.isActive,
+          },
+        }),
+        PaginatedResponseSchema(
+          OrderBaseSchema.extend({
+            user: UserBaseSchema.extend({
+              account: z.object({ email: z.string() }),
+            }),
+          })
+        )
+      );
+    },
+    getById: (id: number) =>
+      axiosHandler(
+        apiAxios.get(`/v1/admin/order/${id}`),
+        ApiResponseSchema(
+          OrderBaseSchema.extend({
+            user: UserBaseSchema.extend({
+              account: z.object({ email: z.string() }),
+            }),
+            creator: UserBaseSchema.extend({
+              account: z.object({ email: z.string() }),
+            }),
+            details: z.array(
+              OrderDetailSchema.extend({
+                product: ProductBaseSchema.omit({ desc: true }),
+              })
+            ),
+            timelines: z.array(
+              OrderTimelineSchema.extend({
+                creator: UserBaseSchema.extend({
+                  account: z.object({ email: z.string() }),
+                }),
+              })
+            ),
+          })
+        )
+      ),
+  },
 };
 
 export default orderService;

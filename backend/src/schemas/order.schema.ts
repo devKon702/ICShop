@@ -44,7 +44,7 @@ export const createOrderSchema = z.object({
     }, "Tên và số điện thoại người nhận là bắt buộc"),
 });
 
-export const getMyOrderSchema = z.object({
+export const filterMyOrdersSchema = z.object({
   query: z.object({
     page: z.coerce.number().min(1).default(1),
     limit: z.coerce.number().min(1).default(10),
@@ -108,19 +108,46 @@ export const updateTimelineDescSchema = z.object({
   }),
 });
 
-export const filterOrderSchema = z.object({
+export const adminFilterOrdersSchema = z.object({
   query: z.object({
     code: z.string().optional(),
-    status: z
-      .number()
-      .refine((val) => Object.values(OrderStatus).includes(val))
+    email: z.string().optional(),
+    receiverPhone: z
+      .string()
+      .regex(/^\d+$/, "Số điện thoại không hợp lệ")
       .optional(),
-    isActive: z.enum(["0", "1"]).transform((val) => !!Number(val)),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
+    status: z.coerce
+      .number()
+      .refine(
+        (val) => Object.values(OrderStatus).includes(val),
+        "Trạng thái đơn hàng không hợp lệ"
+      )
+      .optional(),
+    isActive: z
+      .enum(["0", "1"])
+      .transform((val) => !!Number(val))
+      .optional(),
+    from: z
+      .string()
+      .datetime()
+      .transform((val) => {
+        const d = new Date(val);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      })
+      .optional(),
+    to: z
+      .string()
+      .datetime()
+      .transform((val) => {
+        const d = new Date(val);
+        d.setHours(23, 59, 59, 999);
+        return d;
+      })
+      .optional(),
     page: z.coerce.number().min(1).default(1),
     limit: z.coerce.number().min(1).default(10),
-    order: z
+    sortBy: z
       .enum(["create_asc", "create_desc", "update_asc", "update_desc"])
       .default("create_desc"),
   }),

@@ -13,7 +13,8 @@ import CreateAddressForm from "@/components/features/address/create-address-form
 import UpdateAddressForm from "@/components/features/address/update-address-form";
 import SafeImage from "@/components/common/safe-image";
 import { bankAccount } from "@/constants/shop";
-import OrderConfirmationForm from "@/components/features/order/order-confirmation-form";
+import OrderConfirmationForm from "@/components/features/order/user/order-confirmation-form";
+import AdminOrderDetail from "@/components/features/order/admin/admin-order-detail";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -97,6 +98,12 @@ export default function ModalContainer() {
                         className="w-full h-full object-contain"
                       />
                     </div>
+                  </FormModal>
+                );
+              case "adminOrderDetail":
+                return (
+                  <FormModal title="Chi tiết đơn hàng">
+                    <AdminOrderDetail orderId={item.props.orderId} />
                   </FormModal>
                 );
               default:

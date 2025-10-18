@@ -25,7 +25,7 @@ export default function AppSelector({
   onValueChange,
 }: SelectorProps) {
   return (
-    <Select value={defaultValue} onValueChange={onValueChange}>
+    <Select onValueChange={onValueChange} defaultValue={defaultValue}>
       <SelectTrigger className={cn("cursor-pointer bg-white", className)}>
         <SelectValue />
       </SelectTrigger>

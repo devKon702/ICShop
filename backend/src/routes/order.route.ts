@@ -8,8 +8,8 @@ import {
   cancleOrderSchema,
   createOrderSchema,
   createOrderTimelineSchema,
-  filterOrderSchema,
-  getMyOrderSchema,
+  adminFilterOrdersSchema,
+  filterMyOrdersSchema,
   getOrderByIdSchema,
   seenOrderTimelineSchema,
   updateTimelineDescSchema,
@@ -24,16 +24,16 @@ orderRouter.get(
   path,
   verifyAccessToken,
   authorize([Role.USER]),
-  validate(getMyOrderSchema),
-  orderController.getMyOrder
+  validate(filterMyOrdersSchema),
+  orderController.filterMyOrders
 );
 
-// GET /order/filter
+// GET /admin/order
 orderRouter.get(
-  adminPath + "/filter",
+  adminPath,
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  validate(filterOrderSchema),
+  validate(adminFilterOrdersSchema),
   orderController.adminFilterOrder
 );
 
@@ -54,9 +54,9 @@ orderRouter.get(
   orderController.getMyOrderById
 );
 
-// GET /order/:id/detail
+// GET /admin/order/:id
 orderRouter.get(
-  adminPath + "/:id/detail",
+  adminPath + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(getOrderByIdSchema),

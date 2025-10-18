@@ -4,6 +4,7 @@ import {
   UnsignedInt,
   DecimalString,
   DateTimeSchema,
+  TinyText,
 } from "../schemas/shared.schema";
 
 export const OrderDetailSchema = z.object({
@@ -12,6 +13,7 @@ export const OrderDetailSchema = z.object({
   productId: UnsignedInt,
   quantity: UnsignedInt,
   unitPrice: DecimalString,
+  unit: TinyText,
   vat: DecimalString,
   version: z.number().int(),
   creatorId: UnsignedInt,

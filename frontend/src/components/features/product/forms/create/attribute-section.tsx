@@ -116,6 +116,11 @@ export default function AttributeSection({
                   setSelectedPairs([...selectedPairs]);
                 }
               }}
+              initialValue={
+                selectedPairs.find(
+                  (pair) => pair.attributeId === row.attribute?.id
+                )?.valueId || undefined
+              }
               className="bg-white p-5 rounded-md w-full flex-1"
             ></SearchCombobox>
             <div

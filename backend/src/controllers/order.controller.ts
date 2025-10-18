@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
-import { TypedRequest } from "../types/TypedRequest";
 import orderRepository from "../repositories/order.repository";
-import { ResponseObject, StatusCode } from "../models/response";
 import { TokenPayload } from "../types/token-payload";
 import {
   cancleOrderSchema,
   createOrderSchema,
   createOrderTimelineSchema,
-  filterOrderSchema,
-  getMyOrderSchema,
+  adminFilterOrdersSchema,
+  filterMyOrdersSchema,
   getOrderByIdSchema,
   seenOrderTimelineSchema,
   updateTimelineDescSchema,
@@ -20,13 +18,11 @@ import { OrderResponseCode } from "../constants/codes/order.code";
 import { DeliveryType, OrderStatus } from "../constants/db";
 import { successResponse } from "../utils/response";
 import { Decimal } from "@prisma/client/runtime/library";
-import { time } from "console";
 import addressRepository from "../repositories/address.repository";
 import { NotFoundError } from "../errors/not-found-error";
-import { add } from "winston";
-import userRepository from "../repositories/user.repository";
 
 class OrderController {
+  // USER
   public create = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
@@ -106,6 +102,7 @@ class OrderController {
       quantity: item.quantity,
       unitPrice: productPrices[index]!.price,
       vat: productPrices[index]!.wholesale.vat,
+      unit: productPrices[index]!.wholesale.unit,
     }));
     // Get delivery fee
     const deliveryFee = Decimal(0);
@@ -143,12 +140,11 @@ class OrderController {
         successResponse(OrderResponseCode.OK, "Tạo đơn hàng thành công", order)
       );
   };
-
-  public getMyOrder = async (req: Request, res: Response) => {
+  public filterMyOrders = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
       query: { status, page, limit, from, to, order },
-    } = getMyOrderSchema.parse(req);
+    } = filterMyOrdersSchema.parse(req);
     const [orders, total] = await orderRepository.filterByUserId(sub, {
       page,
       limit,
@@ -168,7 +164,6 @@ class OrderController {
         )
       );
   };
-
   public getMyOrderById = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
@@ -192,29 +187,6 @@ class OrderController {
         )
       );
   };
-  public adminGetOrderById = async (req: Request, res: Response) => {
-    const {
-      params: { id },
-    } = res.locals.tokenPayload as TokenPayload;
-    const order = await orderRepository.findDetailById(id);
-    if (!order)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        OrderResponseCode.NOT_FOUND,
-        "Không tìm thấy đơn hàng",
-        true
-      );
-    res
-      .status(HttpStatus.OK)
-      .json(
-        successResponse(
-          OrderResponseCode.OK,
-          "Lấy thông tin đơn hàng thành công",
-          order
-        )
-      );
-  };
-
   public cancelOrder = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
@@ -259,7 +231,6 @@ class OrderController {
         )
       );
   };
-
   public seenOrderTimeline = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
@@ -284,7 +255,6 @@ class OrderController {
         )
       );
   };
-
   public getMyUnseenOrderTimeline = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const timelines = await orderRepository.findMyUnseenTimeline(sub);
@@ -295,6 +265,68 @@ class OrderController {
           OrderResponseCode.OK,
           "Lấy thông báo thành công",
           timelines
+        )
+      );
+  };
+  // ADMIN
+  public adminFilterOrder = async (req: Request, res: Response) => {
+    const {
+      query: {
+        code,
+        email,
+        receiverPhone,
+        status,
+        page,
+        limit,
+        from: startDate,
+        to: endDate,
+        sortBy: order,
+      },
+    } = adminFilterOrdersSchema.parse(req);
+
+    const [result, total] = await orderRepository.filterOrder({
+      code,
+      email,
+      receiverPhone,
+      status,
+      page,
+      limit,
+      order,
+      startDate: startDate,
+      endDate: endDate,
+    });
+
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          OrderResponseCode.OK,
+          "Lọc đơn hàng thành công",
+          result,
+          { page, limit, total }
+        )
+      );
+  };
+
+  public adminGetOrderById = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+    } = getOrderByIdSchema.parse(req);
+    const order = await orderRepository.findDetailById(id);
+    if (!order)
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        OrderResponseCode.NOT_FOUND,
+        "Không tìm thấy đơn hàng",
+        true
+      );
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          OrderResponseCode.OK,
+          "Lấy thông tin đơn hàng thành công",
+          order
         )
       );
   };
@@ -361,33 +393,6 @@ class OrderController {
           OrderResponseCode.OK,
           "Cập nhật mô tả thay đổi trạng thái thành công",
           timeline
-        )
-      );
-  };
-
-  public adminFilterOrder = async (req: Request, res: Response) => {
-    const {
-      query: { code, status, page, limit, startDate, endDate, order },
-    } = filterOrderSchema.parse(req);
-
-    const [result, total] = await orderRepository.filterOrder({
-      code,
-      status,
-      page,
-      limit,
-      order,
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
-    });
-
-    res
-      .status(HttpStatus.OK)
-      .json(
-        successResponse(
-          OrderResponseCode.OK,
-          "Lọc đơn hàng thành công",
-          result,
-          { page, limit, total }
         )
       );
   };

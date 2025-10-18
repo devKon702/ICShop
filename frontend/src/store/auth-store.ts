@@ -6,6 +6,7 @@ type User = {
   email: string;
   avatarUrl: string | null;
   role: "user" | "admin";
+  phone: string | null;
 };
 
 interface AuthState {

@@ -452,6 +452,7 @@ model OrderDetail {
   unitPrice  Decimal  @db.Decimal(15,3)
   /// Phần trăm thuế áp dụng
   vat        Decimal      @db.Decimal(5,2) @default(0)
+  unit       String   @db.TinyText
 
   version            Int               @default(1) @db.UnsignedInt
   creatorId          Int               @db.UnsignedInt

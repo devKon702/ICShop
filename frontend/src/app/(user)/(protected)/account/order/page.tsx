@@ -1,6 +1,7 @@
 "use client";
 import AppSelector from "@/components/common/app-selector";
-import OrderTable from "@/components/features/order/order-table";
+import SetBreadCrump from "@/components/common/set-breadcrump";
+import OrderTable from "@/components/features/order/user/order-table";
 import { DeliveryType, OrderStatus } from "@/constants/enums";
 import orderService from "@/libs/services/order.service";
 import { useQuery } from "@tanstack/react-query";
@@ -56,6 +57,19 @@ export default function OrderPage() {
   });
   return (
     <div>
+      <SetBreadCrump
+        breadcrumps={[
+          { label: "Trang chủ", href: "/" },
+          {
+            label: "Tài khoản",
+            href: "/account",
+          },
+          {
+            label: "Đơn hàng",
+            href: "/account/order",
+          },
+        ]}
+      ></SetBreadCrump>
       <h1 className="font-medium text-2xl mb-4">Đơn hàng</h1>
       <div className="flex space-x-2 mb-2">
         <div className="w-1/4 ms-auto space-y-2">

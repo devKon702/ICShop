@@ -121,6 +121,7 @@ export default function BasicSection({
                       value: item.id,
                       label: item.name,
                     }))}
+                    initialValue={field.value || undefined}
                     onItemSelect={(item) => field.onChange(Number(item.value))}
                     className={`bg-white p-5 rounded-md w-full ${
                       fieldState.error && "border-red-400 text-red-300"

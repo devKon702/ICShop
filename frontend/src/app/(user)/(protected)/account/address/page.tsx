@@ -1,4 +1,5 @@
 "use client";
+import SetBreadCrump from "@/components/common/set-breadcrump";
 import AddressList from "@/components/features/address/address-list";
 import { Button } from "@/components/ui/button";
 import { useModalActions } from "@/store/modal-store";
@@ -9,6 +10,16 @@ export default function AddressPage() {
   const { openModal } = useModalActions();
   return (
     <div>
+      <SetBreadCrump
+        breadcrumps={[
+          {
+            label: "Trang chủ",
+            href: "/",
+          },
+          { label: "Tài khoản", href: "/account" },
+          { label: "Địa chỉ nhận hàng", href: "/account/address" },
+        ]}
+      ></SetBreadCrump>
       <div className="flex items-center justify-between mb-4">
         <h1 className="font-medium text-2xl mb-4">Địa chỉ nhận hàng</h1>
         <Button

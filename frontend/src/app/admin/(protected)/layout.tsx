@@ -45,6 +45,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         avatarUrl: user.avatarUrl,
         email: data.data.email,
         role: data.data.role,
+        phone: user.phone,
       });
       setAllowed(true);
     }
@@ -62,7 +63,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       role="admin"
       onUnauthorized={() => {
         clearAuth();
-        router.replace(ROUTE.adminLogin);
+        router.push(ROUTE.adminLogin);
         toast.info("Vui lòng đăng nhập lại");
       }}
     >

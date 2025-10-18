@@ -154,7 +154,6 @@ export default function CreateProductForm({
         <Button
           type="submit"
           className="flex ml-auto mr-4 my-4 px-4 py-2 text-white rounded-md font-semibold cursor-pointer opacity-80 hover:opacity-100"
-          onClick={() => console.log(form.formState.errors)}
         >
           Tạo sản phẩm
         </Button>

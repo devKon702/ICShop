@@ -1,4 +1,5 @@
 "use client";
+import SetBreadCrump from "@/components/common/set-breadcrump";
 import CartHeader from "@/components/features/cart/cart-header";
 import CartList from "@/components/features/cart/cart-list";
 import CartSummary from "@/components/features/cart/cart-summary";
@@ -26,6 +27,12 @@ export default function CartPage() {
   });
   return (
     <div className="grid grid-cols-12 space-x-3">
+      <SetBreadCrump
+        breadcrumps={[
+          { label: "Trang chủ", href: "/" },
+          { label: "Giỏ hàng", href: "/cart" },
+        ]}
+      ></SetBreadCrump>
       <div className="col-span-9 rounded-md bg-white p-2 shadow-md">
         <h1 className="font-medium text-2xl p-2">Giỏ hàng</h1>
         <CartHeader />

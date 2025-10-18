@@ -80,6 +80,7 @@ export default function SearchCombobox<T extends string | number>({
                     setOpen(false);
                     setSelected(item);
                     onItemSelect?.(item);
+                    console.log("selected", item);
                   }}
                   className="cursor-pointer"
                 >

@@ -74,7 +74,17 @@ class OrderRepository {
   public findDetailById = (id: number) => {
     return prisma.order.findUnique({
       where: { id },
-      include: { details: { include: { product: true } }, timelines: true },
+      include: {
+        creator: { include: { account: { select: { email: true } } } },
+        user: { include: { account: { select: { email: true } } } },
+        details: { include: { product: { omit: { desc: true } } } },
+        timelines: {
+          include: {
+            creator: { include: { account: { select: { email: true } } } },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
     });
   };
 
@@ -117,6 +127,7 @@ class OrderRepository {
         productId: number;
         quantity: number;
         unitPrice: Decimal;
+        unit: string;
         vat: Decimal;
       }[];
     }
@@ -151,6 +162,7 @@ class OrderRepository {
               quantity: item.quantity,
               unitPrice: item.unitPrice,
               vat: item.vat,
+              unit: item.unit,
               creatorId: userId,
               modifierId: userId,
             })),
@@ -220,6 +232,8 @@ class OrderRepository {
 
   public filterOrder = (data: {
     code?: string;
+    email?: string;
+    receiverPhone?: string;
     status?: number;
     startDate?: Date;
     endDate?: Date;
@@ -229,7 +243,13 @@ class OrderRepository {
   }) => {
     const where: any = {};
     if (data.code) where.code = { startsWith: data.code };
-    if (data.status) where.status = data.status;
+    if (data.email)
+      where.user = {
+        account: { email: { startsWith: data.email } },
+      };
+    if (data.receiverPhone)
+      where.receiverPhone = { endsWith: data.receiverPhone };
+    if (data.status !== undefined) where.status = data.status;
     if (data.startDate || data.endDate) {
       where.createdAt = {};
       if (data.startDate) {
@@ -261,7 +281,9 @@ class OrderRepository {
         take: data.limit,
         skip: data.limit * (data.page - 1),
         orderBy,
-        include: { user: true },
+        include: {
+          user: { include: { account: { select: { email: true } } } },
+        },
       }),
       prisma.order.count({ where }),
     ]);

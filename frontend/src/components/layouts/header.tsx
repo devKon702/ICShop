@@ -52,6 +52,7 @@ export default function Header() {
         name: data.data.user.name,
         avatarUrl: data.data.user.avatarUrl,
         role: data.data.role,
+        phone: data.data.user.phone,
       });
     }
   }, [data, setUser]);
@@ -140,7 +141,7 @@ export default function Header() {
             }
           >
             <i className="bx bxs-user-circle text-4xl"></i>
-            <p className="text-sm text-nowrap">Đăng nhập</p>
+            {/* <p className="text-sm text-nowrap">Đăng nhập</p> */}
           </div>
         )}
       </div>

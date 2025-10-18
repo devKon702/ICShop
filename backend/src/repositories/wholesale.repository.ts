@@ -70,6 +70,7 @@ class WholesaleRepository {
             min_quantity: true,
             max_quantity: true,
             quantity_step: true,
+            unit: true,
           },
         },
       },

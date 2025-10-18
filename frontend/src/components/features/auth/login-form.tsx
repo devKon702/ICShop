@@ -62,6 +62,7 @@ export default function LoginForm({
           avatarUrl: data.account.user.avatarUrl,
           name: data.account.user.name,
           role: data.account.role,
+          phone: data.account.user.phone,
         },
         data.token
       );

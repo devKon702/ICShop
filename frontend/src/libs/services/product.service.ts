@@ -1,12 +1,12 @@
 import apiAxios from "@/libs/api/api-axios";
 import { apiFetch } from "@/libs/api/api-fetch";
 import { SafeAttributeValueSchema } from "@/libs/schemas/attribute-value.schema";
-import {
-  AttributeBaseSchema,
-  SafeAttributeSchema,
-} from "@/libs/schemas/attribute.schema";
+import { SafeAttributeSchema } from "@/libs/schemas/attribute.schema";
 import { SafeCategoryBaseSchema } from "@/libs/schemas/category.schema";
-import { SafeProductAttributeSchema } from "@/libs/schemas/product-attribute.schema";
+import {
+  ProductAttributeBaseSchema,
+  SafeProductAttributeSchema,
+} from "@/libs/schemas/product-attribute.schema";
 import {
   ProductImageBaseSchema,
   SafeProductImageSchema,
@@ -90,7 +90,7 @@ const productService = {
         apiAxios.post("/v1/admin/product", data),
         ApiResponseSchema(
           ProductBaseSchema.extend({
-            attributes: z.array(AttributeBaseSchema),
+            attributes: z.array(ProductAttributeBaseSchema),
             creator: UserBaseSchema,
             wholesale: WholesaleBaseSchema.extend({
               details: z.array(WholesaleDetailBaseSchema),

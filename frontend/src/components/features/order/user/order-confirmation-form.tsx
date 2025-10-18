@@ -98,7 +98,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
   });
 
   return (
-    <div className="flex">
+    <div className="flex p-4">
       <div className="space-y-2 min-w-lg">
         <Select
           value={selectedDeliveryType.toString()}

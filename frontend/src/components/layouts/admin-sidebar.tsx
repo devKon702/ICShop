@@ -53,7 +53,7 @@ export default function AdminSidebar({}) {
               .logout()
               .then(() => {
                 clearAuth();
-                router.replace(ROUTE.adminLogin);
+                // router.replace(ROUTE.adminLogin);
               })
               .catch(() => {
                 toast.error("Lỗi");
