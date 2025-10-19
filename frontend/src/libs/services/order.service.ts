@@ -1,7 +1,7 @@
 import { DeliveryType, OrderStatus } from "@/constants/enums";
 import apiAxios from "@/libs/api/api-axios";
 import { OrderDetailSchema } from "@/libs/schemas/order-detail.schema";
-import { OrderTimelineSchema } from "@/libs/schemas/order-timeline.schema";
+import { OrderTimelineBaseSchema } from "@/libs/schemas/order-timeline.schema";
 import { OrderBaseSchema } from "@/libs/schemas/order.schema";
 import { ProductBaseSchema } from "@/libs/schemas/product.schema";
 import {
@@ -26,7 +26,7 @@ const orderService = {
         ApiResponseSchema(
           OrderBaseSchema.extend({
             details: z.array(OrderDetailSchema),
-            timelines: z.array(OrderTimelineSchema),
+            timelines: z.array(OrderTimelineBaseSchema),
           })
         )
       ),
@@ -62,7 +62,7 @@ const orderService = {
         ApiResponseSchema(
           OrderBaseSchema.extend({
             details: z.array(OrderDetailSchema),
-            timelines: z.array(OrderTimelineSchema),
+            timelines: z.array(OrderTimelineBaseSchema),
           })
         )
       ),
@@ -121,12 +121,26 @@ const orderService = {
               })
             ),
             timelines: z.array(
-              OrderTimelineSchema.extend({
+              OrderTimelineBaseSchema.extend({
                 creator: UserBaseSchema.extend({
                   account: z.object({ email: z.string() }),
                 }),
               })
             ),
+          })
+        )
+      ),
+
+    changeStatus: (data: {
+      status: OrderStatus;
+      desc: string;
+      orderId: number;
+    }) =>
+      axiosHandler(
+        apiAxios.post(`/v1/admin/order/timeline`, data),
+        ApiResponseSchema(
+          OrderBaseSchema.extend({
+            timelines: z.array(OrderTimelineBaseSchema),
           })
         )
       ),

@@ -15,80 +15,81 @@ import SafeImage from "@/components/common/safe-image";
 import { bankAccount } from "@/constants/shop";
 import OrderConfirmationForm from "@/components/features/order/user/order-confirmation-form";
 import AdminOrderDetail from "@/components/features/order/admin/admin-order-detail";
+import ChangeOrderStatusForm from "@/components/features/order/admin/change-order-status-form";
 
 export default function ModalContainer() {
   const modal = useModal();
   return (
     <>
       {modal.map((item, index) => (
-        <div key={index} className="fixed inset-0">
+        <div key={index}>
           {(() => {
             switch (item.type) {
               case "alert":
                 return <AlertModal {...item.props} />;
               case "prompt":
                 return (
-                  <FormModal title={item.props.title}>
+                  <FormModal title={item.props.title} index={index}>
                     <PromptForm {...item.props} />
                   </FormModal>
                 );
               case "createCategory":
                 return (
-                  <FormModal title="Tạo danh mục">
+                  <FormModal title="Tạo danh mục" index={index}>
                     <CreateCategoryForm {...item.props} />
                   </FormModal>
                 );
               case "createAttribute":
                 return (
-                  <FormModal title="Thêm thông số">
+                  <FormModal title="Thêm thông số" index={index}>
                     <CreateAttributeForm {...item.props} />
                   </FormModal>
                 );
               case "createValue":
                 return (
-                  <FormModal title="Thêm giá trị thông số">
+                  <FormModal title="Thêm giá trị thông số" index={index}>
                     <CreateValueForm {...item.props} />
                   </FormModal>
                 );
               case "createProduct":
                 return (
-                  <FormModal title="Tạo Sản Phẩm">
+                  <FormModal title="Tạo Sản Phẩm" index={index}>
                     <CreateProductForm {...item.props} />
                   </FormModal>
                 );
               case "imageCropper":
                 return (
-                  <FormModal title="Chỉnh sửa ảnh">
+                  <FormModal title="Chỉnh sửa ảnh" index={index}>
                     <ImageCropper {...item.props} />
                   </FormModal>
                 );
               case "auth":
                 return (
-                  <FormModal>
+                  <FormModal index={index}>
                     <AuthTabs />
                   </FormModal>
                 );
               case "createAddress":
                 return (
-                  <FormModal title="Thêm địa chỉ">
+                  <FormModal title="Thêm địa chỉ" index={index}>
                     <CreateAddressForm />
                   </FormModal>
                 );
               case "updateAddress":
                 return (
-                  <FormModal title="Cập nhật địa chỉ">
+                  <FormModal title="Cập nhật địa chỉ" index={index}>
                     <UpdateAddressForm address={item.props.address} />
                   </FormModal>
                 );
               case "orderConfirmation":
                 return (
-                  <FormModal title="Xác nhận đơn hàng">
+                  <FormModal title="Xác nhận đơn hàng" index={index}>
                     <OrderConfirmationForm />
                   </FormModal>
                 );
               case "qrCode":
                 return (
-                  <FormModal>
+                  <FormModal index={index}>
                     <div className="p-4 aspect-square w-[80dvh]">
                       <SafeImage
                         src={`https://img.vietqr.io/image/${bankAccount.bankName}-${bankAccount.accountNumber}-print.png?amount=${item.props.amount}&addInfo=${item.props.qrString}&accountName=${bankAccount.accountHolder}`}
@@ -102,8 +103,17 @@ export default function ModalContainer() {
                 );
               case "adminOrderDetail":
                 return (
-                  <FormModal title="Chi tiết đơn hàng">
+                  <FormModal title="Chi tiết đơn hàng" index={index}>
                     <AdminOrderDetail orderId={item.props.orderId} />
+                  </FormModal>
+                );
+              case "changeOrderStatus":
+                return (
+                  <FormModal title="Cập nhật trạng thái đơn hàng" index={index}>
+                    <ChangeOrderStatusForm
+                      orderId={item.props.orderId}
+                      currentStatus={item.props.currentStatus}
+                    />
                   </FormModal>
                 );
               default:

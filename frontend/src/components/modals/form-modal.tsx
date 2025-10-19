@@ -12,14 +12,19 @@ import React from "react";
 export default function FormModal({
   title,
   children,
+  index,
 }: {
   title?: string;
   children: React.ReactNode;
+  index: number;
 }) {
-  const { closeModal } = useModalActions();
+  const { removeModalAt } = useModalActions();
   return (
-    <Dialog open={true} onOpenChange={(o) => !o && closeModal()}>
-      <DialogContent showCloseButton={false} className="p-0 gap-0">
+    <Dialog open={true} onOpenChange={(o) => !o && removeModalAt(index)}>
+      <DialogContent
+        className="p-0 gap-0 max-h-[90dvh] overflow-y-auto app"
+        showCloseButton={false}
+      >
         <DialogDescription></DialogDescription>
         <DialogHeader>
           {title && (

@@ -8,7 +8,7 @@ import {
 } from "../schemas/shared.schema";
 import { OrderStatus } from "@/constants/enums";
 
-export const OrderTimelineSchema = z.object({
+export const OrderTimelineBaseSchema = z.object({
   id: ID,
   orderId: UnsignedInt,
   status: TinyInt.refine((val) =>
@@ -29,4 +29,4 @@ export const OrderTimelineSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
-export type OrderTimeline = z.infer<typeof OrderTimelineSchema>;
+export type OrderTimeline = z.infer<typeof OrderTimelineBaseSchema>;

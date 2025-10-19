@@ -334,29 +334,23 @@ class OrderController {
   public adminChangeOrderStatus = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
-      params: { id },
-      body: { status, desc },
+      body: { status, desc, orderId },
     } = createOrderTimelineSchema.parse(req);
 
-    const order = await orderRepository.findById(id);
+    const order = await orderRepository.findById(orderId);
     if (!order) {
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        OrderResponseCode.NOT_FOUND,
-        "Không tìm thấy đơn hàng",
-        true
-      );
+      throw new NotFoundError("Không tìm thấy đơn hàng");
     }
     if (order.status === status) {
       throw new AppError(
-        HttpStatus.NOT_FOUND,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         OrderResponseCode.INVALID_STATUS_CHANGE,
         "Trạng thái đơn hàng không đổi",
         true
       );
     }
 
-    const newOrder = await orderRepository.changeOrderStatus(sub, id, {
+    const newOrder = await orderRepository.changeOrderStatus(sub, orderId, {
       status,
       desc,
     });

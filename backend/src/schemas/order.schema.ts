@@ -85,10 +85,8 @@ export const seenOrderTimelineSchema = z.object({
 });
 
 export const createOrderTimelineSchema = z.object({
-  params: z.object({
-    id: z.coerce.number().min(1, "ID không hợp lệ"),
-  }),
   body: z.object({
+    orderId: z.coerce.number().min(1, "ID đơn hàng không hợp lệ"),
     status: z
       .number()
       .refine(

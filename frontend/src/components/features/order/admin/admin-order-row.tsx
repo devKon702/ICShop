@@ -1,5 +1,10 @@
-import AppSelector from "@/components/common/app-selector";
 import ClampText from "@/components/common/clamp-text";
+import ChangeOrderStatusForm from "@/components/features/order/admin/change-order-status-form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { OrderStatus } from "@/constants/enums";
 import { ORDER_STATUS_OPTIONS } from "@/constants/order-status";
@@ -28,7 +33,9 @@ interface AdminOrderRowProps {
 }
 
 export default function AdminOrderRow({ order }: AdminOrderRowProps) {
+  const [openPopover, setOpenPopover] = React.useState(false);
   const { openModal } = useModalActions();
+
   return (
     <TableRow>
       <TableCell>
@@ -59,35 +66,50 @@ export default function AdminOrderRow({ order }: AdminOrderRowProps) {
       </TableCell>
       <TableCell>{formatPrice(order.total)} VNĐ</TableCell>
       <TableCell>
-        <AppSelector
-          data={ORDER_STATUS_OPTIONS.map(({ label, value }) => ({
-            label,
-            value: value.toString(),
-          }))}
-          data-status={order.status}
-          className={`${ORDER_STATUS_OPTIONS.map(
-            (item) => `data-[status=${item.value}]: ${item.color}`
-          ).join(" ")} px-2 py-1 rounded-md w-fit cursor-pointer`}
-          defaultValue={order.status.toString()}
-          onValueChange={(value) => {
+        <Popover open={openPopover} onOpenChange={setOpenPopover}>
+          <PopoverTrigger>
+            <div
+              className={`rounded-md px-2 py-1 w-fit cursor-pointer ${
+                ORDER_STATUS_OPTIONS.find((item) => item.value === order.status)
+                  ?.color
+              }`}
+            >
+              {
+                ORDER_STATUS_OPTIONS.find((item) => item.value === order.status)
+                  ?.label
+              }
+            </div>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            side="left"
+            className="w-fit min-w-[40dvw] "
+          >
+            <ChangeOrderStatusForm
+              orderId={order.id}
+              currentStatus={order.status}
+              title={`Đơn hàng ${order.code.toUpperCase()}`}
+              onSuccess={() => setOpenPopover(false)}
+            />
+          </PopoverContent>
+        </Popover>
+        {/* <div
+          className={`rounded-md px-2 py-1 w-fit cursor-pointer ${
+            ORDER_STATUS_OPTIONS.find((item) => item.value === order.status)
+              ?.color
+          }`}
+          onClick={() => {
             openModal({
-              type: "prompt",
-              props: {
-                title: "Ghi chú",
-                defaultValue: ORDER_STATUS_OPTIONS.find(
-                  (item) => item.value.toString() === value
-                )?.label,
-                onSubmit: (note) => {
-                  console.log("Change status", {
-                    orderId: order.id,
-                    newStatus: value,
-                    note,
-                  });
-                },
-              },
+              type: "changeOrderStatus",
+              props: { orderId: order.id, currentStatus: order.status },
             });
           }}
-        ></AppSelector>
+        >
+          {
+            ORDER_STATUS_OPTIONS.find((item) => item.value === order.status)
+              ?.label
+          }
+        </div> */}
       </TableCell>
       <TableCell>
         <div className="flex gap-2 items-center">

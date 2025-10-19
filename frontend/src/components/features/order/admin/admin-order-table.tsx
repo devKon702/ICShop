@@ -47,8 +47,8 @@ export default function AdminOrderTable() {
     page: parseAsInteger.withDefault(1),
     limit: parseAsInteger.withDefault(10),
   });
-  const { data: ordersData, isFetching } = useQuery({
-    queryKey: ["admin-orders", { ...query }],
+  const { data: ordersData, isLoading } = useQuery({
+    queryKey: ["orders", { ...query }],
     queryFn: async () =>
       orderService.admin.filter({
         status: query.status ?? undefined,
@@ -77,7 +77,7 @@ export default function AdminOrderTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isFetching ? (
+          {isLoading ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center">
                 <Skeleton className="h-8 w-full" />

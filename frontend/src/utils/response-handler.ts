@@ -10,6 +10,7 @@ export async function axiosHandler<T>(
     const res = await request;
     const parsed = schema.safeParse(res.data);
     if (!parsed.success) {
+      console.error("Response data validation failed");
       throw parsed.error;
     }
     return parsed.data;
@@ -20,7 +21,7 @@ export async function axiosHandler<T>(
         throw parsedError.data;
       }
     }
-    console.log(err);
+    console.error(err);
     throw err;
   }
 }
@@ -46,11 +47,12 @@ export async function fetchHandler<T>(
     const data = await res.json();
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
+      console.error("Response data validation failed");
       throw parsed.error;
     }
     return parsed.data;
   } catch (err) {
-    console.log(err);
+    console.error(err);
     throw err;
   }
 }

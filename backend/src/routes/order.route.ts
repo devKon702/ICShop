@@ -81,9 +81,9 @@ orderRouter.post(
   orderController.cancelOrder
 );
 
-// POST /order/:id
+// POST /admin/order/timeline
 orderRouter.post(
-  adminPath + "/:id",
+  adminPath + "/timeline",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(createOrderTimelineSchema),

@@ -158,7 +158,10 @@ export default function AdminOrderFilterBar() {
         </InputGroup>
         <Button
           className="w-fit ml-auto"
-          onClick={() => setQuery({ ...query, ...filter, page: 1 })}
+          onClick={(e) => {
+            setQuery({ ...query, ...filter, page: 1 });
+            console.log(e.target);
+          }}
         >
           <Filter /> <span>Lọc</span>
         </Button>

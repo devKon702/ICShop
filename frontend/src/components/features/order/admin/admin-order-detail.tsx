@@ -3,40 +3,42 @@ import ClampText from "@/components/common/clamp-text";
 import SafeImage from "@/components/common/safe-image";
 import Separator from "@/components/common/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DeliveryType, OrderStatus } from "@/constants/enums";
+import { DeliveryType } from "@/constants/enums";
 import env from "@/constants/env";
+import { ORDER_STATUS_OPTIONS } from "@/constants/order-status";
 import orderService from "@/libs/services/order.service";
+import { formatIsoDateTime } from "@/utils/date";
 import { formatPrice } from "@/utils/price";
 import { useQuery } from "@tanstack/react-query";
 import { LucideAlertCircle } from "lucide-react";
 import React from "react";
 
-const statusItems = {
-  [OrderStatus.CANCELED]: {
-    label: "Đã hủy",
-    className: "bg-red-100 text-red-500 bg-red-500/10",
-  },
-  [OrderStatus.PENDING]: {
-    label: "Chờ xác nhận",
-    className: "bg-yellow-100 text-yellow-500 bg-yellow-500/10",
-  },
-  [OrderStatus.PAID]: {
-    label: "Đã thanh toán",
-    className: "bg-green-100 text-green-500 bg-green-500/10",
-  },
-  [OrderStatus.PROCESSING]: {
-    label: "Đang xử lí",
-    className: "bg-blue-100 text-blue-500 bg-blue-500/10",
-  },
-  [OrderStatus.SHIPPING]: {
-    label: "Đang giao",
-    className: "bg-indigo-100 text-indigo-500 bg-indigo-500/10",
-  },
-  [OrderStatus.DONE]: {
-    label: "Hoàn thành",
-    className: "bg-gray-100 text-gray-500 bg-gray-500/10",
-  },
-};
+// const statusItems = {
+//   [OrderStatus.CANCELED]: {
+//     label: "Đã hủy",
+//     className: "bg-red-100 text-red-500 bg-red-500/10",
+//   },
+//   [OrderStatus.PENDING]: {
+//     label: "Chờ xác nhận",
+//     className: "bg-yellow-100 text-yellow-500 bg-yellow-500/10",
+//   },
+//   [OrderStatus.PAID]: {
+//     label: "Đã thanh toán",
+//     className: "bg-green-100 text-green-500 bg-green-500/10",
+//   },
+//   [OrderStatus.PROCESSING]: {
+//     label: "Đang xử lí",
+//     className: "bg-blue-100 text-blue-500 bg-blue-500/10",
+//   },
+//   [OrderStatus.SHIPPING]: {
+//     label: "Đang giao",
+//     className: "bg-indigo-100 text-indigo-500 bg-indigo-500/10",
+//   },
+//   [OrderStatus.DONE]: {
+//     label: "Hoàn thành",
+//     className: "bg-gray-100 text-gray-500 bg-gray-500/10",
+//   },
+// };
 
 interface AdminOrderDetailProps {
   orderId: number;
@@ -77,8 +79,9 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
             </div>
           </div>
         </section>
+        {/* Thông tin đơn hàng */}
         <section className="grid grid-cols-2 gap-2">
-          <div>
+          <div className="space-y-2">
             <div className="rounded-md shadow border">
               <p className="bg-primary/10 p-2 font-semibold">
                 Thông tin đơn hàng
@@ -93,14 +96,14 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
                 <div>
                   <p className="font-semibold">Trạng thái:</p>{" "}
                   <p className="text-sm font-semibold opacity-50">
-                    {statusItems[data.data.status].label}
+                    {ORDER_STATUS_OPTIONS[data.data.status].label}
                   </p>
                 </div>
                 <div>
                   <p className="font-semibold">Ngày đặt:</p>
 
                   <p className="text-sm font-semibold opacity-50">
-                    {data.data.createdAt.toLocaleString()}
+                    {formatIsoDateTime(data.data.createdAt)}
                   </p>
                 </div>
                 <div>
@@ -118,12 +121,14 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
                 </div>
               </div>
             </div>
-            <div className="rounded-md shadow border">
-              <p className="bg-primary/10 p-2">Lịch sử trạng thái</p>
+            <div className="rounded-md shadow border overflow-hidden">
+              <p className="bg-primary/10 p-2 font-semibold">
+                Lịch sử trạng thái
+              </p>
               {data.data.timelines.map((timeline, index) => (
                 <div
                   key={timeline.id}
-                  className="bg-white p-2 flex items-center space-x-4"
+                  className="bg-white p-2 flex items-center space-x-4 border"
                 >
                   <div className="flex flex-col items-center">
                     <div
@@ -132,18 +137,24 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
                       }`}
                     ></div>
                   </div>
-                  <div>
-                    <p className="font-semibold">
-                      {statusItems[timeline.status].label}
-                    </p>
-                    <p className="font-semibold opacity-50 text-sm">
-                      {timeline.createdAt.toLocaleString()}
+                  <div className="flex w-full items-center gap-4">
+                    <div className="flex-1">
+                      <p className="font-semibold">
+                        {ORDER_STATUS_OPTIONS[timeline.status].label}
+                      </p>
+                      <p className="text-sm font-semibold opacity-50">
+                        {timeline.desc}
+                      </p>
+                    </div>
+                    <p className="font-semibold text-sm ml-auto w-fit">
+                      {formatIsoDateTime(timeline.createdAt)}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+          {/* Product List */}
           <div className="rounded-md shadow border h-fit bg-white">
             <p className="font-semibold bg-primary/10 p-2">Sản phẩm</p>
             <div>

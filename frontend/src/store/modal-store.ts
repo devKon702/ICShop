@@ -65,13 +65,15 @@ type ModalType =
     >
   | Modal<"orderConfirmation", { onOrderSuccess?: () => void }>
   | Modal<"qrCode", { qrString: string; amount: number }>
-  | Modal<"adminOrderDetail", { orderId: number }>;
+  | Modal<"adminOrderDetail", { orderId: number }>
+  | Modal<"changeOrderStatus", { orderId: number; currentStatus: number }>;
 
 interface modalState {
   modal: ModalType[];
   actions: {
     openModal: (modal: ModalType) => void;
     closeModal: () => void;
+    removeModalAt: (index: number) => void;
   };
 }
 
@@ -81,6 +83,12 @@ const useModalStore = create<modalState>()(
     actions: {
       openModal: (modal) => set({ modal: [...get().modal, modal] }),
       closeModal: () => set({ modal: [...get().modal.slice(0, -1)] }),
+      removeModalAt: (index: number) => {
+        set({
+          modal: get().modal.filter((_, i) => i !== index),
+        });
+        console.log("Removed modal at index:", index);
+      },
     },
   }))
 );
