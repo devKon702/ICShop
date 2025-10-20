@@ -2,7 +2,7 @@
 import ImageCropper from "@/components/common/image-cropper";
 import CreateAttributeForm from "@/components/features/attribute/admin/create-attribute-form";
 import CreateValueForm from "@/components/features/attribute/admin/create-value-form";
-import CreateProductForm from "@/components/features/product/forms/create/create-product-form";
+import CreateProductForm from "@/components/features/product/admin/forms/create/create-product-form";
 import AlertModal from "@/components/modals/alert-modal";
 import FormModal from "@/components/modals/form-modal";
 import { useModal } from "@/store/modal-store";
@@ -16,6 +16,7 @@ import { bankAccount } from "@/constants/shop";
 import OrderConfirmationForm from "@/components/features/order/user/order-confirmation-form";
 import AdminOrderDetail from "@/components/features/order/admin/admin-order-detail";
 import ChangeOrderStatusForm from "@/components/features/order/admin/change-order-status-form";
+import UpdateProductForm from "@/components/features/product/admin/forms/update/update-product-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -55,6 +56,12 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Tạo Sản Phẩm" index={index}>
                     <CreateProductForm {...item.props} />
+                  </FormModal>
+                );
+              case "updateProduct":
+                return (
+                  <FormModal title="Cập Nhật Sản Phẩm" index={index}>
+                    <UpdateProductForm {...item.props} />
                   </FormModal>
                 );
               case "imageCropper":

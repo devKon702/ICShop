@@ -12,10 +12,10 @@ import attributeService from "@/libs/services/attribute.service";
 import productService from "@/libs/services/product.service";
 import { toast } from "sonner";
 import { FormProductSchema } from "@/libs/schemas/form.schema";
-import BasicSection from "@/components/features/product/forms/create/basic-section";
-import AttributeSection from "@/components/features/product/forms/create/attribute-section";
-import { WholesaleSection } from "@/components/features/product/forms/create/wholesale-section";
-import ImageSection from "@/components/features/product/forms/create/image-section";
+import BasicSection from "@/components/features/product/admin/forms/create/basic-section";
+import AttributeSection from "@/components/features/product/admin/forms/create/attribute-section";
+import { WholesaleSection } from "@/components/features/product/admin/forms/create/wholesale-section";
+import ImageSection from "@/components/features/product/admin/forms/create/image-section";
 
 const FormSchema = FormProductSchema;
 type FormValues = z.infer<typeof FormProductSchema>;
@@ -118,7 +118,6 @@ export default function CreateProductForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          console.log(data);
           if (!poster) {
             toast.error("Hãy thêm ảnh poster cho sản phẩm");
             return;

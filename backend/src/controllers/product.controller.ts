@@ -255,7 +255,7 @@ class ProductController {
   public updateInfo = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
-      body: { datasheetLink, desc, name, vat, weight },
+      body: { datasheetLink, desc, name, weight },
       params: { id },
     } = updateProductSchema.parse(req);
 
@@ -267,7 +267,6 @@ class ProductController {
       name,
       datasheetLink,
       desc: sanitizedDesc,
-      vat,
       weight,
     });
 

@@ -93,7 +93,7 @@ class HighlightController {
   public getHighlightDetail = async (req: Request, res: Response) => {
     const types = Object.values(HighlightType);
     const result = await Promise.all(
-      types.map((item) => highlightRepository.getHighlightDetail(item))
+      types.map((item) => highlightRepository.adminGetHighlight(item))
     );
 
     const list = types.map((item, index) => ({

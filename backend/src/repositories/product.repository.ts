@@ -278,7 +278,6 @@ class ProductRepository {
       datasheetLink: string | null;
       desc: string | null;
       weight: number;
-      vat: number;
     }
   ) => {
     return prisma.product.update({

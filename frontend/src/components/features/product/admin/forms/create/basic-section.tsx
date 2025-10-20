@@ -1,6 +1,6 @@
 import CustomInput from "@/components/common/custom-input";
 import SearchCombobox from "@/components/common/search-combobox";
-import ProductFormLabel from "@/components/features/product/forms/create/product-form-label";
+import ProductFormLabel from "@/components/features/product/admin/forms/create/product-form-label";
 import {
   FormControl,
   FormField,

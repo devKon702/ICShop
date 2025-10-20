@@ -62,7 +62,7 @@ class HighlightRepository {
     });
   };
 
-  public getHighlightDetail = async (type: HighlightType) => {
+  public adminGetHighlight = async (type: HighlightType) => {
     return prisma.productHighlight.findMany({
       where: { type },
       include: { product: { include: { creator: true, modifier: true } } },

@@ -150,7 +150,6 @@ export const updateProductSchema = z.object({
       .number()
       .int("Phải là kiểu số nguyên")
       .min(0, "Cân nặng tối thiểu 0 gram"),
-    vat: z.number().min(0, "Giá thuế tối thiểu là 0%"),
   }),
   params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),
 });
