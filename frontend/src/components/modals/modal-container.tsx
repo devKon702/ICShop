@@ -54,13 +54,17 @@ export default function ModalContainer() {
                 );
               case "createProduct":
                 return (
-                  <FormModal title="Tạo Sản Phẩm" index={index}>
+                  <FormModal title="Tạo Sản Phẩm" index={index} useCloseButton>
                     <CreateProductForm {...item.props} />
                   </FormModal>
                 );
               case "updateProduct":
                 return (
-                  <FormModal title="Cập Nhật Sản Phẩm" index={index}>
+                  <FormModal
+                    title="Cập Nhật Sản Phẩm"
+                    index={index}
+                    useCloseButton
+                  >
                     <UpdateProductForm {...item.props} />
                   </FormModal>
                 );
@@ -84,13 +88,21 @@ export default function ModalContainer() {
                 );
               case "updateAddress":
                 return (
-                  <FormModal title="Cập nhật địa chỉ" index={index}>
+                  <FormModal
+                    title="Cập nhật địa chỉ"
+                    index={index}
+                    useCloseButton
+                  >
                     <UpdateAddressForm address={item.props.address} />
                   </FormModal>
                 );
               case "orderConfirmation":
                 return (
-                  <FormModal title="Xác nhận đơn hàng" index={index}>
+                  <FormModal
+                    title="Xác nhận đơn hàng"
+                    index={index}
+                    useCloseButton
+                  >
                     <OrderConfirmationForm />
                   </FormModal>
                 );

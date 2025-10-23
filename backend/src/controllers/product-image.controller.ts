@@ -58,7 +58,13 @@ class ProductImageController {
     await storage.delete(productImage.imageUrl);
     res
       .status(HttpStatus.OK)
-      .json(successResponse(ProductImageResponseCode.OK, "Xóa ảnh thành công"));
+      .json(
+        successResponse(
+          ProductImageResponseCode.OK,
+          "Xóa ảnh thành công",
+          productImage
+        )
+      );
   };
   public updatePosition = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;

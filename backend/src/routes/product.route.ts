@@ -43,7 +43,7 @@ productRouter.get(
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(getProductByIdSchema),
-  productController.getById4Admin
+  productController.adminGetById
 );
 
 // GET /admin/product?cid=&name=&active=&page=&limit=&order=

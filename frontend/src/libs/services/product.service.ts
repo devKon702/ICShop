@@ -1,8 +1,17 @@
 import apiAxios from "@/libs/api/api-axios";
 import { apiFetch } from "@/libs/api/api-fetch";
-import { SafeAttributeValueSchema } from "@/libs/schemas/attribute-value.schema";
-import { SafeAttributeSchema } from "@/libs/schemas/attribute.schema";
-import { SafeCategoryBaseSchema } from "@/libs/schemas/category.schema";
+import {
+  AttributeValueBaseSchema,
+  SafeAttributeValueSchema,
+} from "@/libs/schemas/attribute-value.schema";
+import {
+  AttributeBaseSchema,
+  SafeAttributeSchema,
+} from "@/libs/schemas/attribute.schema";
+import {
+  CategoryBaseSchema,
+  SafeCategoryBaseSchema,
+} from "@/libs/schemas/category.schema";
 import {
   ProductAttributeBaseSchema,
   SafeProductAttributeSchema,
@@ -58,6 +67,28 @@ type ProductType = {
 
 const productService = {
   admin: {
+    getById: (productId: number) =>
+      axiosHandler(
+        apiAxios.get("/v1/admin/product/" + productId),
+        ApiResponseSchema(
+          ProductBaseSchema.extend({
+            category: CategoryBaseSchema,
+            creator: UserBaseSchema,
+            modifier: UserBaseSchema,
+            images: z.array(ProductImageBaseSchema),
+            wholesale: WholesaleBaseSchema.extend({
+              details: z.array(WholesaleDetailBaseSchema),
+            }),
+            attributes: z.array(
+              ProductAttributeBaseSchema.extend({
+                attributeValue: AttributeValueBaseSchema.extend({
+                  attribute: AttributeBaseSchema,
+                }),
+              })
+            ),
+          })
+        )
+      ),
     filter: async (params: {
       name: string;
       cid: number | null;
@@ -125,6 +156,23 @@ const productService = {
       );
     },
 
+    deleteImageGallery: async (imageId: number) =>
+      axiosHandler(
+        apiAxios.delete("/v1/gallery/" + imageId),
+        ApiResponseSchema(ProductImageBaseSchema)
+      ),
+
+    updateImageGallery: async (imageId: number, image: File) => {
+      const formData = new FormData();
+      formData.append("image", image);
+      return axiosHandler(
+        apiAxios.patch(`/v1/gallery/${imageId}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        }),
+        ApiResponseSchema(ProductImageBaseSchema)
+      );
+    },
+
     delete: async (productId: number) =>
       axiosHandler(
         apiAxios.delete("v1/admin/product/" + productId),
@@ -138,6 +186,70 @@ const productService = {
         }),
         ApiResponseSchema(
           ProductBaseSchema.extend({ modifier: UserBaseSchema })
+        )
+      ),
+
+    updateBasic: async (
+      productId: number,
+      data: {
+        name: string;
+        desc: string | null;
+        datasheetLink: string | null;
+        weight: number;
+      }
+    ) =>
+      axiosHandler(
+        apiAxios.patch(`/v1/admin/product/${productId}/info`, data),
+        ApiResponseSchema(
+          ProductBaseSchema.extend({ modifier: UserBaseSchema })
+        )
+      ),
+
+    updateCategory: async (
+      productId: number,
+      data: { categoryId: number; vids: number[] }
+    ) =>
+      axiosHandler(
+        apiAxios.patch(`/v1/admin/product/${productId}/category`, data),
+        ApiResponseSchema(
+          ProductBaseSchema.extend({
+            modifier: UserBaseSchema,
+            attributes: z.array(
+              ProductAttributeBaseSchema.extend({
+                atttributeValue: AttributeValueBaseSchema.extend({
+                  attribute: AttributeBaseSchema.pick({ id: true, name: true }),
+                }),
+              })
+            ),
+          })
+        )
+      ),
+
+    updateWholesale: async (
+      productId: number,
+      data: {
+        min_quantity: number;
+        max_quantity: number;
+        unit: string;
+        quantity_step: number;
+        vat: number;
+        details: {
+          min: number;
+          max: number | null;
+          price: number;
+          desc: string;
+        }[];
+      }
+    ) =>
+      axiosHandler(
+        apiAxios.patch(`/v1/admin/product/${productId}/wholesale`, data),
+        ApiResponseSchema(
+          ProductBaseSchema.extend({
+            modifier: UserBaseSchema,
+            wholesale: WholesaleBaseSchema.extend({
+              details: z.array(WholesaleDetailBaseSchema),
+            }),
+          })
         )
       ),
   },

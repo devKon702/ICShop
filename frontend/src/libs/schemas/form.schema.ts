@@ -30,7 +30,7 @@ export const FormWholesaleSchema = z
           .number()
           .int("Phải là kiểu số nguyên")
           .min(1, "Tối thiểu là 0"),
-        max: z.null(),
+        max: z.null().optional(),
         price: z.coerce
           .number()
           .min(0, "Giá tối thiểu là 0")

@@ -27,7 +27,7 @@ interface Props {
 }
 
 export default function ProductRow({ product }: Props) {
-  const { closeModal } = useModalActions();
+  const { openModal, closeModal } = useModalActions();
   const queryClient = useQueryClient();
   const { mutate: deleteProductMutate } = useMutation({
     mutationFn: () => productService.admin.delete(product.id),
@@ -93,7 +93,15 @@ export default function ProductRow({ product }: Props) {
       </TableCell>
       <TableCell>
         <div className="flex gap-2 justify-center items-center">
-          <Pencil className="cursor-pointer p-1" />
+          <Pencil
+            className="cursor-pointer p-1"
+            onClick={() => {
+              openModal({
+                type: "updateProduct",
+                props: { productId: product.id },
+              });
+            }}
+          />
           {/* <Info className="cursor-pointer p-1" /> */}
           <Trash
             className="cursor-pointer p-1 text-red-400 hover:text-red-600"

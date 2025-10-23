@@ -56,7 +56,7 @@ export default function ProductManagementPage() {
   });
   const { data: categoryData } = useQuery({
     queryKey: ["categories", { level: 3 }],
-    queryFn: categoryService.getLeafCagory,
+    queryFn: categoryService.getLeafCategory,
   });
 
   if (isError) {

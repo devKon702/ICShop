@@ -311,11 +311,9 @@ class ProductRepository {
       include: {
         modifier: true,
         attributes: {
-          select: {
+          include: {
             attributeValue: {
-              select: {
-                id: true,
-                value: true,
+              include: {
                 attribute: { select: { id: true, name: true } },
               },
             },

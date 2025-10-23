@@ -48,7 +48,7 @@ class ProductController {
       );
   };
 
-  public getById4Admin = async (req: Request, res: Response) => {
+  public adminGetById = async (req: Request, res: Response) => {
     const {
       params: { id },
     } = getProductByIdSchema.parse(req);

@@ -84,6 +84,7 @@ export default function AdminOrderRow({ order }: AdminOrderRowProps) {
             align="start"
             side="left"
             className="w-fit min-w-[40dvw] "
+            sideOffset={10}
           >
             <ChangeOrderStatusForm
               orderId={order.id}

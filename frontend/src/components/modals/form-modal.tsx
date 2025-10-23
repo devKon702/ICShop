@@ -1,22 +1,26 @@
 import Separator from "@/components/common/separator";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useModalActions } from "@/store/modal-store";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 import React from "react";
 
 export default function FormModal({
   title,
   children,
   index,
+  useCloseButton = false,
 }: {
   title?: string;
   children: React.ReactNode;
   index: number;
+  useCloseButton?: boolean;
 }) {
   const { removeModalAt } = useModalActions();
   return (
@@ -24,6 +28,12 @@ export default function FormModal({
       <DialogContent
         className="p-0 gap-0 max-h-[90dvh] overflow-y-auto app"
         showCloseButton={false}
+        {...(useCloseButton
+          ? {
+              onEscapeKeyDown: (e) => e.preventDefault(),
+              onPointerDownOutside: (e) => e.preventDefault(),
+            }
+          : {})}
       >
         <DialogDescription></DialogDescription>
         <DialogHeader>
@@ -31,6 +41,11 @@ export default function FormModal({
             <>
               <DialogTitle className="font-bold text-2xl px-4 py-2">
                 {title}
+                {useCloseButton && (
+                  <DialogClose className="cursor-pointer float-right p-1">
+                    <X />
+                  </DialogClose>
+                )}
               </DialogTitle>
               <Separator />
             </>

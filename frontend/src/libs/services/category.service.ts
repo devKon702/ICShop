@@ -41,7 +41,7 @@ const categoryService = {
       ApiResponseSchema(AdminCategoryTreeSchema)
     ),
 
-  getLeafCagory: async () =>
+  getLeafCategory: async () =>
     axiosHandler(
       apiAxios.get("/v1/admin/category/leaf"),
       ApiResponseSchema(z.array(CategoryBaseSchema))
