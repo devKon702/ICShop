@@ -45,7 +45,7 @@ productImageRouter.patch(
 
 // PATCH /gallery/:id
 productImageRouter.patch(
-  path,
+  path + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   upload.single("image"),

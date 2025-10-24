@@ -1,15 +1,27 @@
 import { prisma } from "../prisma";
 
 class WholesaleRepository {
-  public updateWholesaleByProductId = async (
-    userId: number,
+  public findByProductId = async (
     productId: number,
+    includeDetails: boolean = false
+  ) => {
+    return prisma.wholesale.findUnique({
+      where: { productId },
+      include: { details: includeDetails },
+    });
+  };
+  public update = async (
+    userId: number,
+    wholesaleId: number,
     data: {
-      min_quantity: number;
-      max_quantity: number;
-      unit: string;
-      quantity_step: number;
-      details: {
+      wholesale?: {
+        min_quantity: number;
+        max_quantity: number;
+        unit: string;
+        quantity_step: number;
+        vat: number;
+      };
+      details?: {
         min: number;
         max: number | null;
         price: number;
@@ -17,29 +29,50 @@ class WholesaleRepository {
       }[];
     }
   ) => {
-    return prisma.wholesale.update({
-      where: { productId },
-      data: {
-        min_quantity: data.min_quantity,
-        max_quantity: data.max_quantity,
-        quantity_step: data.quantity_step,
-        unit: data.unit,
-        modifierId: userId,
-        version: { increment: 1 },
-        details: {
-          createMany: {
-            data: data.details.map((item) => ({
-              min: item.min,
-              max: item.max,
-              price: item.price,
-              desc: item.desc,
-              creatorId: userId,
-              modifierId: userId,
-            })),
+    return prisma.$transaction(async (tx) => {
+      if (data.details) {
+        // Delete all existing details
+        await tx.wholesaleDetail.deleteMany({
+          where: { wholesaleId },
+        });
+        // Update product price to match the first detail price
+        await tx.product.updateMany({
+          where: { wholesale: { id: wholesaleId } },
+          data: {
+            price: data.details[0].price || 0,
+            version: { increment: 1 },
+            modifierId: userId,
           },
+        });
+      }
+      // Update wholesale info and add new details
+      return await tx.wholesale.update({
+        where: { id: wholesaleId },
+        data: {
+          ...(data.wholesale && {
+            min_quantity: data.wholesale.min_quantity,
+            max_quantity: data.wholesale.max_quantity,
+            unit: data.wholesale.unit,
+            quantity_step: data.wholesale.quantity_step,
+            vat: data.wholesale.vat,
+            version: { increment: 1 },
+            modifierId: userId,
+          }),
+          ...(data.details && {
+            createMany: {
+              data: data.details.map((item) => ({
+                min: item.min,
+                max: item.max,
+                price: item.price,
+                desc: item.desc,
+                creatorId: userId,
+                modifierId: userId,
+              })),
+            },
+          }),
         },
-      },
-      include: { details: true },
+        include: { details: true },
+      });
     });
   };
 

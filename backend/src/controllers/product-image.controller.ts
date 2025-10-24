@@ -13,6 +13,9 @@ import { ProductImageResponseCode } from "../constants/codes/product-image.code"
 import { handleImagesUpload, validateFile } from "../utils/file";
 import storage from "../storage";
 import { successResponse } from "../utils/response";
+import { ValidateError } from "../errors/validate-error";
+import { ValidateResponseCode } from "../constants/codes/validate.code";
+import { NotFoundError } from "../errors/not-found-error";
 
 class ProductImageController {
   public create = async (req: Request, res: Response) => {
@@ -21,32 +24,28 @@ class ProductImageController {
       body: { productId },
     } = createProductImageSchema.parse(req);
     const file = req.file;
-    validateFile(file, {
-      inputField: "image",
-      maxSize: 1024 * 1024,
-      type: "image",
+    if (!file)
+      throw new ValidateError(ValidateResponseCode.INVALID_FILE, [
+        { field: "image", message: "Không tìm thấy file" },
+      ]);
+
+    const productImage = await handleImagesUpload({
+      files: [file],
+      fn: async (urls) =>
+        productImageRepository.create(sub, productId, urls[0]),
+      oldUrls: [],
+      options: { maxSize: 512 * 1024, inputField: "image" },
     });
-    if (file) {
-      const fileName = String(Date.now());
-      const earlyUrl = storage.getEarlyDir(fileName, file.mimetype);
-      const productImage = await productImageRepository.create(
-        sub,
-        productId,
-        earlyUrl
+
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          ProductImageResponseCode.OK,
+          "Thêm ảnh thành công",
+          productImage
+        )
       );
-      await storage.save(file.buffer, fileName, file.mimetype);
-      res
-        .status(HttpStatus.OK)
-        .json(
-          successResponse(
-            ProductImageResponseCode.OK,
-            "Thêm ảnh thành công",
-            productImage
-          )
-        );
-    } else {
-      throw new Error("");
-    }
   };
 
   public delete = async (req: Request, res: Response) => {
@@ -95,27 +94,24 @@ class ProductImageController {
     const file = req.file;
 
     if (!file)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        ProductImageResponseCode.FILE_NOT_FOUND,
-        "Không tìm thấy file",
-        true
-      );
+      throw new ValidateError(ValidateResponseCode.INVALID_FILE, [
+        { field: "image", message: "Không tìm thấy file" },
+      ]);
 
     const productImage = await productImageRepository.findById(id);
     if (!productImage)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
+      throw new NotFoundError(
         ProductImageResponseCode.NOT_FOUND,
-        "Không tìm thấy",
-        true
+        "Không tìm thấy ảnh sản phẩm"
       );
 
-    const result = await handleImagesUpload(
-      [file],
-      (newUrls) => productImageRepository.updateImage(sub, id, newUrls[0]),
-      [productImage.imageUrl]
-    );
+    const result = await handleImagesUpload({
+      files: [file],
+      fn: (newUrls) => productImageRepository.updateImage(sub, id, newUrls[0]),
+      oldUrls: [productImage.imageUrl],
+      options: { maxSize: 512 * 1024, inputField: "image" },
+    });
+    await storage.delete(productImage.imageUrl);
     res
       .status(HttpStatus.OK)
       .json(

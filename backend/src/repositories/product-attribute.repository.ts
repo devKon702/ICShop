@@ -16,6 +16,19 @@ class ProductAttributeRepository {
       },
     });
   };
+
+  public findByProductId = async (productId: number) => {
+    return prisma.productAttribute.findMany({
+      where: { productId },
+      include: {
+        attributeValue: {
+          include: {
+            attribute: true,
+          },
+        },
+      },
+    });
+  };
 }
 
 export default new ProductAttributeRepository();

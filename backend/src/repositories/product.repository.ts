@@ -86,7 +86,7 @@ class ProductRepository {
     });
   };
 
-  public findById4Admin = async (id: number) => {
+  public adminFindById = async (id: number) => {
     return prisma.product.findUnique({
       where: { id },
       include: {
@@ -99,6 +99,12 @@ class ProductRepository {
           include: { attributeValue: { include: { attribute: true } } },
         },
       },
+    });
+  };
+
+  public findById = async (id: number, isActive?: boolean) => {
+    return prisma.product.findUnique({
+      where: { id, isActive },
     });
   };
 
@@ -129,7 +135,7 @@ class ProductRepository {
     return Promise.all([productsPs, countPs]);
   };
 
-  public filter4Admin = async (
+  public adminFilter = async (
     cid: number | undefined,
     name: string | undefined,
     page: number,
@@ -283,43 +289,49 @@ class ProductRepository {
     return prisma.product.update({
       where: { id: productId },
       data: { ...data, version: { increment: 1 }, modifierId: userId },
-      include: { modifier: true },
     });
   };
 
-  public updateCategory = async (
+  public updateCategoryAndAttribute = async (
     userId: number,
     productId: number,
-    data: { categoryId: number; vids: number[] }
+    data: { categoryId?: number; vids: number[] }
   ) => {
-    return prisma.product.update({
-      where: { id: productId },
-      data: {
-        categoryId: data.categoryId,
-        version: { increment: 1 },
-        modifierId: userId,
-        attributes: {
-          createMany: {
-            data: data.vids.map((item) => ({
-              attributeValueId: item,
-              creatorId: userId,
-              modifierId: userId,
-            })),
+    return prisma.$transaction(async (tx) => {
+      // delete existing attributes
+      await tx.productAttribute.deleteMany({
+        where: { productId },
+      });
+      return tx.product.update({
+        where: { id: productId },
+        data: {
+          ...(data.categoryId && {
+            categoryId: data.categoryId,
+            version: { increment: 1 },
+            modifierId: userId,
+          }),
+          attributes: {
+            createMany: {
+              data: data.vids.map((item) => ({
+                attributeValueId: item,
+                creatorId: userId,
+                modifierId: userId,
+              })),
+            },
           },
         },
-      },
-      include: {
-        modifier: true,
-        attributes: {
-          include: {
-            attributeValue: {
-              include: {
-                attribute: { select: { id: true, name: true } },
+        include: {
+          attributes: {
+            include: {
+              attributeValue: {
+                include: {
+                  attribute: true,
+                },
               },
             },
           },
         },
-      },
+      });
     });
   };
 
@@ -333,9 +345,6 @@ class ProductRepository {
         id: productId,
       },
       data: { posterUrl, modifierId: userId, version: { increment: 1 } },
-      include: {
-        modifier: true,
-      },
     });
   };
 

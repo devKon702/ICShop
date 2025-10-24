@@ -138,38 +138,7 @@ const productService = {
         apiAxios.patch(`/v1/admin/product/${productId}/poster`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         }),
-        ApiResponseSchema(
-          ProductBaseSchema.extend({ modifier: UserBaseSchema })
-        )
-      );
-    },
-
-    addImageGallery: async (productId: number, image: File) => {
-      const formData = new FormData();
-      formData.append("image", image);
-      formData.append("productId", productId.toString());
-      return axiosHandler(
-        apiAxios.post("/v1/gallery", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        }),
-        ApiResponseSchema(ProductImageBaseSchema)
-      );
-    },
-
-    deleteImageGallery: async (imageId: number) =>
-      axiosHandler(
-        apiAxios.delete("/v1/gallery/" + imageId),
-        ApiResponseSchema(ProductImageBaseSchema)
-      ),
-
-    updateImageGallery: async (imageId: number, image: File) => {
-      const formData = new FormData();
-      formData.append("image", image);
-      return axiosHandler(
-        apiAxios.patch(`/v1/gallery/${imageId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        }),
-        ApiResponseSchema(ProductImageBaseSchema)
+        ApiResponseSchema(ProductBaseSchema)
       );
     },
 
@@ -200,9 +169,7 @@ const productService = {
     ) =>
       axiosHandler(
         apiAxios.patch(`/v1/admin/product/${productId}/info`, data),
-        ApiResponseSchema(
-          ProductBaseSchema.extend({ modifier: UserBaseSchema })
-        )
+        ApiResponseSchema(ProductBaseSchema)
       ),
 
     updateCategory: async (
@@ -213,11 +180,10 @@ const productService = {
         apiAxios.patch(`/v1/admin/product/${productId}/category`, data),
         ApiResponseSchema(
           ProductBaseSchema.extend({
-            modifier: UserBaseSchema,
             attributes: z.array(
               ProductAttributeBaseSchema.extend({
-                atttributeValue: AttributeValueBaseSchema.extend({
-                  attribute: AttributeBaseSchema.pick({ id: true, name: true }),
+                attributeValue: AttributeValueBaseSchema.extend({
+                  attribute: AttributeBaseSchema,
                 }),
               })
             ),
@@ -235,7 +201,6 @@ const productService = {
         vat: number;
         details: {
           min: number;
-          max: number | null;
           price: number;
           desc: string;
         }[];
@@ -244,11 +209,8 @@ const productService = {
       axiosHandler(
         apiAxios.patch(`/v1/admin/product/${productId}/wholesale`, data),
         ApiResponseSchema(
-          ProductBaseSchema.extend({
-            modifier: UserBaseSchema,
-            wholesale: WholesaleBaseSchema.extend({
-              details: z.array(WholesaleDetailBaseSchema),
-            }),
+          WholesaleBaseSchema.extend({
+            details: z.array(WholesaleDetailBaseSchema),
           })
         )
       ),

@@ -29,6 +29,9 @@ import wholesaleRepository from "../repositories/wholesale.repository";
 import { NotFoundError } from "../errors/not-found-error";
 import productImageRepository from "../repositories/product-image.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
+import productAttributeRepository from "../repositories/product-attribute.repository";
+import { ValidateError } from "../errors/validate-error";
+import { ValidateResponseCode } from "../constants/codes/validate.code";
 
 class ProductController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -52,7 +55,7 @@ class ProductController {
     const {
       params: { id },
     } = getProductByIdSchema.parse(req);
-    const product = await productRepository.findById4Admin(id);
+    const product = await productRepository.adminFindById(id);
     if (!product) new NotFoundError(ProductResponseCode.NOT_FOUND);
     res
       .status(HttpStatus.OK)
@@ -86,11 +89,11 @@ class ProductController {
       );
   };
 
-  public filter4Admin = async (req: Request, res: Response) => {
+  public adminFilter = async (req: Request, res: Response) => {
     const {
       query: { name, cid, page, limit, order, active },
     } = filterProductSchema.parse(req);
-    const [products, total] = await productRepository.filter4Admin(
+    const [products, total] = await productRepository.adminFilter(
       cid,
       name,
       page,
@@ -216,30 +219,25 @@ class ProductController {
     const poster = req.file;
     // Check poster provided
     if (!poster)
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        ProductResponseCode.POSTER_REQUIRED,
-        "Không tìm thấy file",
-        true
-      );
-    const product = await productRepository.findById4Check(id);
+      throw new ValidateError(ValidateResponseCode.INVALID_FILE, [
+        { field: "poster", message: "Không tìm thấy file" },
+      ]);
+    const product = await productRepository.findById(id);
     if (!product)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
+      throw new NotFoundError(
         ProductResponseCode.NOT_FOUND,
-        "Không tìm thấy sản phẩm",
-        true
+        "Không tìm thấy sản phẩm"
       );
     // Handle file change
-    const result = await handleImagesUpload(
-      [poster],
-      (newUrls) => productRepository.updatePoster(sub, id, newUrls[0]),
-      product.posterUrl ? [product.posterUrl] : [],
-      {
+    const result = await handleImagesUpload({
+      files: [poster],
+      fn: (newUrls) => productRepository.updatePoster(sub, id, newUrls[0]),
+      oldUrls: product.posterUrl ? [product.posterUrl] : [],
+      options: {
         inputField: "poster",
         maxSize: 512 * 1024,
-      }
-    );
+      },
+    });
 
     res
       .status(HttpStatus.OK)
@@ -262,7 +260,7 @@ class ProductController {
     // Sannitize desc
     const sanitizedDesc = desc === null ? null : sanitizeHtml(desc);
 
-    // Cập nhật
+    // Update info
     const newProduct = await productRepository.updateInfo(sub, id, {
       name,
       datasheetLink,
@@ -287,64 +285,37 @@ class ProductController {
       body: { vids, categoryId },
       params: { id },
     } = updateProductCategorySchema.parse(req);
-    const product = await productRepository.findById4Check(id);
-    if (!product)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        ProductResponseCode.NOT_FOUND,
-        "Không tìm thấy sản phẩm",
-        true
-      );
-    // Check valid category
-    const category = await categoryRepository.findById(categoryId);
+    // Get product, category, product attributes
+    const [product, category, productAttributes] = await Promise.all([
+      productRepository.findById(id),
+      categoryRepository.findById(categoryId),
+      productAttributeRepository.findByProductId(id),
+    ]);
     // Check exists
-    if (!category)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        ProductResponseCode.CATEGORY_NOT_FOUND,
-        "Không tìm thấy danh mục",
-        true
+    if (!product)
+      throw new NotFoundError(
+        ProductResponseCode.NOT_FOUND,
+        "Không tìm thấy sản phẩm"
       );
+    if (!category)
+      throw new NotFoundError(
+        ProductResponseCode.CATEGORY_NOT_FOUND,
+        "Không tìm thấy danh mục"
+      );
+
     // Only add product to category level 3
-    if (product.categoryId !== categoryId && category.level !== 3)
+    if (category.level !== 3)
       throw new AppError(
         HttpStatus.UNPROCESSABLE_ENTITY,
         ProductResponseCode.INVALID_CATEGORY,
         "Chỉ có thể chọn danh mục cấp 3",
         true
       );
-
-    const oldValueIds = product.attributes.map((item) => item.attributeValueId);
-    // value ids that need to be add link
-    const addValueIds = vids.filter((item) => !oldValueIds.includes(item));
-    // value ids that need to be delete link
-    const deleteValueIds = oldValueIds.filter((item) => !vids.includes(item));
-    // Check value is in the correct category
-    if (addValueIds.length > 0) {
-      const validValue: number[] = [];
-      // Get all value id in category
-      category.attributes.forEach((attr) =>
-        attr.values.forEach((value) => validValue.push(value.id))
-      );
-      // Check addValueIds is all in the validValue
-      if (addValueIds.some((item) => !validValue.includes(item)))
-        throw new AppError(
-          HttpStatus.UNPROCESSABLE_ENTITY,
-          ProductResponseCode.INVALID_ATTRIBUTE_VALUE,
-          "Thông số không thuộc danh mục",
-          true
-        );
-    }
     // Update category and add value
-    const result = await productRepository.updateCategory(sub, id, {
-      categoryId,
-      vids: addValueIds,
+    const result = await productRepository.updateCategoryAndAttribute(sub, id, {
+      categoryId: categoryId === product.categoryId ? undefined : categoryId,
+      vids,
     });
-    // Delete value id
-    const deletePs = deleteValueIds.map((item) =>
-      attributeValueRepository.delete(item)
-    );
-    await Promise.all(deletePs);
     res
       .status(HttpStatus.OK)
       .json(
@@ -377,36 +348,72 @@ class ProductController {
   public updateWholesale = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
-      body: { details, max_quantity, min_quantity, quantity_step, unit },
+      body: { details, max_quantity, min_quantity, quantity_step, unit, vat },
       params: { id },
     } = updateWholesaleProductSchema.parse(req);
     // Update wholesale
-    const wholesale = await wholesaleRepository.updateWholesaleByProductId(
-      sub,
-      id,
-      { min_quantity, max_quantity, quantity_step, unit, details }
-    );
-    // get new detail id -> for delete old detail
-    const excludeIds = wholesale.details.map((item) => item.id);
-    // Cặp nhật giá hiển thị mặc định cho sản phẩm
-    const updatePricePs = productRepository.updatePrice(
-      sub,
-      id,
-      details[0].price
-    );
-    // Xóa các detail giá dư thừa
-    const deleteOtherDetailPs = wholesaleRepository.deleteAllDetailByProductId(
-      id,
-      excludeIds
-    );
-    await Promise.all([updatePricePs, deleteOtherDetailPs]);
+    const [product, wholesale] = await Promise.all([
+      productRepository.findById(id),
+      wholesaleRepository.findByProductId(id, true),
+    ]);
+    if (!product)
+      throw new NotFoundError(
+        ProductResponseCode.NOT_FOUND,
+        "Không tìm thấy sản phẩm"
+      );
+    if (!wholesale)
+      throw new NotFoundError(
+        ProductResponseCode.WHOLESALE_NOT_FOUND,
+        "Không tìm thấy bảng giá"
+      );
+
+    // Check value changed
+    const isWholesaleChanged =
+      wholesale.min_quantity !== min_quantity ||
+      wholesale.max_quantity !== max_quantity ||
+      wholesale.quantity_step !== quantity_step ||
+      wholesale.unit !== unit ||
+      !wholesale.vat.equals(vat);
+    const isDetailsChanged = (() => {
+      if (wholesale.details.length !== details.length) return true;
+      for (let i = 0; i < details.length; i++) {
+        if (
+          wholesale.details[i].min !== details[i].min ||
+          wholesale.details[i].max !== details[i].max ||
+          wholesale.details[i].price.equals(details[i].price) ||
+          wholesale.details[i].desc !== details[i].desc
+        ) {
+          return true;
+        }
+      }
+      return false;
+    })();
+    const wholesaleUpdated = wholesaleRepository.update(sub, wholesale.id, {
+      wholesale: isWholesaleChanged
+        ? {
+            min_quantity,
+            max_quantity,
+            quantity_step,
+            unit,
+            vat,
+          }
+        : undefined,
+      details: isDetailsChanged
+        ? details.map((item) => ({
+            min: item.min,
+            max: item.max,
+            price: item.price,
+            desc: item.desc,
+          }))
+        : undefined,
+    });
     res
       .status(HttpStatus.OK)
       .json(
         successResponse(
           ProductResponseCode.OK,
           "Cập nhật bảng giá thành công",
-          wholesale
+          wholesaleUpdated
         )
       );
   };

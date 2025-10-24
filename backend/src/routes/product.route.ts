@@ -52,7 +52,7 @@ productRouter.get(
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(filterProductSchema),
-  productController.filter4Admin
+  productController.adminFilter
 );
 
 // POST /admin/product

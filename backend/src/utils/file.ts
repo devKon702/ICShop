@@ -62,12 +62,17 @@ export const getFileName = (serveUrl: string) => {
   return serveUrl.split("/").pop() ?? "";
 };
 
-export const handleImagesUpload = async <T>(
-  files: Express.Multer.File[],
-  fn: (newUrls: string[]) => Promise<T>,
-  oldUrls: string[],
-  options?: { inputField?: string; maxSize?: number }
-) => {
+export const handleImagesUpload = async <T>({
+  files,
+  fn,
+  oldUrls,
+  options,
+}: {
+  files: Express.Multer.File[];
+  fn: (newUrls: string[]) => Promise<T>;
+  oldUrls: string[];
+  options?: { inputField?: string; maxSize?: number };
+}) => {
   // Validate files
   files.forEach((file) =>
     validateFile(file, {

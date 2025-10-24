@@ -1,8 +1,9 @@
 import SafeImage from "@/components/common/safe-image";
 import env from "@/constants/env";
+import galleryService from "@/libs/services/gallery.service";
 import productService from "@/libs/services/product.service";
 import { useModalActions } from "@/store/modal-store";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Images, Upload, X } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -23,25 +24,36 @@ export default function UpdateImageForm({
   const [galleryItems, setGalleryItems] =
     useState<{ id: number; url: string }[]>(gallery);
 
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const queryClient = useQueryClient();
 
   const { mutate: addImageMutate } = useMutation({
     mutationFn: async (data: { productId: number; file: File }) =>
-      productService.admin.addImageGallery(data.productId, data.file),
+      galleryService.addImageGallery(data.productId, data.file),
     onSuccess: (data) => {
       setGalleryItems([
         ...galleryItems,
         { id: data.data.id, url: data.data.imageUrl },
       ]);
+      queryClient.invalidateQueries({
+        queryKey: ["product", { id: productId }],
+      });
       toast.success("Thêm ảnh thành công");
+    },
+    onError: () => {
+      toast.error("Thêm ảnh thất bại, vui lòng thử lại");
     },
   });
   const { mutate: deleteImageMutate } = useMutation({
     mutationFn: async (data: { productId: number; imageId: number }) =>
-      productService.admin.deleteImageGallery(data.imageId),
+      galleryService.deleteImageGallery(data.imageId),
     onSuccess: (data) => {
       toast.success("Xoá ảnh thành công");
-      setGalleryItems((prev) => prev.filter((item) => item.id !== data.id));
+      setGalleryItems((prev) =>
+        prev.filter((item) => item.id !== data.data.id)
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["product", { id: productId }],
+      });
     },
     onError: () => {
       toast.error("Xoá ảnh thất bại, vui lòng thử lại");
@@ -52,7 +64,7 @@ export default function UpdateImageForm({
       productId: number;
       imageId: number;
       file: File;
-    }) => productService.admin.updateImageGallery(data.imageId, data.file),
+    }) => galleryService.updateImageGallery(data.imageId, data.file),
     onSuccess: (data) => {
       toast.success("Cập nhật ảnh thành công");
       setGalleryItems((prev) =>
@@ -62,6 +74,9 @@ export default function UpdateImageForm({
             : item
         )
       );
+      queryClient.invalidateQueries({
+        queryKey: ["product", { id: productId }],
+      });
     },
   });
   const { mutate: updatePosterMutate } = useMutation({
@@ -70,6 +85,12 @@ export default function UpdateImageForm({
     onSuccess: (data) => {
       toast.success("Cập nhật poster thành công");
       setPoster(data.data.posterUrl ?? null);
+      queryClient.invalidateQueries({
+        queryKey: ["product", { id: productId }],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      });
     },
     onError: () => {
       toast.error("Cập nhật poster thất bại, vui lòng thử lại");
@@ -115,9 +136,13 @@ export default function UpdateImageForm({
                   props: {
                     file: e.currentTarget.files[0],
                     onImageComplete: (file, previewUrl) => {
-                      setPoster(previewUrl);
-                      updatePosterMutate(file);
-                      closeModal();
+                      if (
+                        confirm("Bạn có chắc muốn cập nhật ảnh đại diện không?")
+                      ) {
+                        updatePosterMutate(file);
+                        setPoster(previewUrl);
+                        closeModal();
+                      }
                     },
                   },
                 });
@@ -126,7 +151,7 @@ export default function UpdateImageForm({
           />
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {gallery.map((item, index) => (
+          {galleryItems.map((item, index) => (
             <div key={index}>
               <label
                 htmlFor={`gallery-${index}`}
@@ -142,7 +167,14 @@ export default function UpdateImageForm({
                       alt="Gallery item"
                       className="absolute rounded-md inset-0"
                     />
-                    <div className="rounded-full p-1 absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 not-hover:opacity-70 bg-red-100 cursor-pointer shadow-lg text-red-400">
+                    <div
+                      className="rounded-full p-1 absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 not-hover:opacity-70 bg-red-100 cursor-pointer shadow-lg text-red-400"
+                      onClick={() => {
+                        if (confirm("Bạn có chắc muốn xoá ảnh này không?")) {
+                          deleteImageMutate({ productId, imageId: item.id });
+                        }
+                      }}
+                    >
                       <X />
                     </div>
                   </>
@@ -159,12 +191,17 @@ export default function UpdateImageForm({
                       type: "imageCropper",
                       props: {
                         file: e.currentTarget.files[0],
-                        onImageComplete: (file, previewUrl) => {
-                          gallery.splice(index, 1, previewUrl);
-                          galleryFiles.splice(index, 1, file);
-                          setGallery([...gallery]);
-                          setGalleryFiles([...galleryFiles]);
-                          closeModal();
+                        onImageComplete: (file) => {
+                          if (
+                            confirm("Bạn có chắc muốn cập nhật ảnh này không?")
+                          ) {
+                            closeModal();
+                            updateImageMutate({
+                              productId,
+                              imageId: item.id,
+                              file,
+                            });
+                          }
                         },
                       },
                     });
@@ -192,10 +229,13 @@ export default function UpdateImageForm({
                     type: "imageCropper",
                     props: {
                       file: e.currentTarget.files[0],
-                      onImageComplete: (file, previewUrl) => {
-                        setGallery([...gallery, previewUrl]);
-                        setGalleryFiles([...galleryFiles, file]);
-                        closeModal();
+                      onImageComplete: (file) => {
+                        if (
+                          confirm("Bạn có chắc muốn cập nhật ảnh này không?")
+                        ) {
+                          addImageMutate({ productId, file });
+                          closeModal();
+                        }
                       },
                     },
                   });
