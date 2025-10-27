@@ -16,6 +16,7 @@ export default function UpdateProductForm({ productId }: Props) {
   const { data, isLoading } = useQuery({
     queryKey: ["product", { id: productId }],
     queryFn: () => productService.admin.getById(productId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   if (isLoading) {
     return (

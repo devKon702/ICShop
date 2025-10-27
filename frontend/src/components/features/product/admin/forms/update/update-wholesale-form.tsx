@@ -11,15 +11,16 @@ import {
 import { FormProductSchema } from "@/libs/schemas/form.schema";
 import productService from "@/libs/services/product.service";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash, Wallet } from "lucide-react";
-import { nanoid } from "nanoid";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const formSchema = FormProductSchema.shape.wholesale;
+const formSchema = z.object({
+  wholesale: FormProductSchema.shape.wholesale,
+});
 
 interface Props {
   productId: number;
@@ -41,31 +42,37 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      min_quantity: wholesale.min_quantity,
-      max_quantity: wholesale.max_quantity,
-      unit: wholesale.unit,
-      quantity_step: wholesale.quantity_step,
-      vat: wholesale.vat,
-      details: wholesale.details,
+      wholesale: {
+        min_quantity: wholesale.min_quantity,
+        max_quantity: wholesale.max_quantity,
+        unit: wholesale.unit,
+        quantity_step: wholesale.quantity_step,
+        vat: wholesale.vat,
+        details: wholesale.details,
+      },
     },
     mode: "onSubmit",
   });
-  const queryClient = new QueryClient();
-  const details = form.watch("details");
+  const queryClient = useQueryClient();
+  const { fields: details } = useFieldArray({
+    control: form.control,
+    name: "wholesale.details",
+  });
 
   const [enable, setEnable] = React.useState(false);
 
   const { mutate: updateMutate, isPending } = useMutation({
     mutationFn: (data: z.infer<typeof formSchema>) =>
       productService.admin.updateWholesale(productId, {
-        ...data,
-        details: data.details.map((item) => ({ ...item, max: null })),
+        ...data.wholesale,
+        details: data.wholesale.details.map((item) => ({ ...item, max: null })),
       }),
     onSuccess: () => {
       toast.success("Cập nhật bảng giá thành công");
       queryClient.invalidateQueries({
-        queryKey: ["products", { id: productId }],
+        queryKey: ["product", { id: productId }],
       });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       setEnable(false);
     },
     onError: () => {
@@ -84,7 +91,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
         </p>
         <div className="flex space-x-2">
           <FormField
-            name="min_quantity"
+            name="wholesale.min_quantity"
             control={form.control}
             render={({ field, fieldState }) => (
               <FormItem className="flex-1">
@@ -97,7 +104,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                     min="1"
                     onChange={(e) => {
                       form.setValue(
-                        "min_quantity",
+                        "wholesale.min_quantity",
                         Number(e.currentTarget.value)
                       );
                       setEnable(true);
@@ -110,7 +117,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
           />
 
           <FormField
-            name="max_quantity"
+            name="wholesale.max_quantity"
             control={form.control}
             render={({ field, fieldState }) => (
               <FormItem className="flex-1">
@@ -124,7 +131,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                     max="999"
                     onChange={(e) => {
                       form.setValue(
-                        "max_quantity",
+                        "wholesale.max_quantity",
                         Number(e.currentTarget.value)
                       );
                       setEnable(true);
@@ -137,7 +144,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
           />
 
           <FormField
-            name="unit"
+            name="wholesale.unit"
             control={form.control}
             render={({ field, fieldState }) => (
               <FormItem className="flex-1">
@@ -148,7 +155,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                     {...field}
                     isError={fieldState.invalid}
                     onChange={(e) => {
-                      form.setValue("unit", e.currentTarget.value);
+                      form.setValue("wholesale.unit", e.currentTarget.value);
                       setEnable(true);
                     }}
                   />
@@ -158,7 +165,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
             )}
           />
           <FormField
-            name="quantity_step"
+            name="wholesale.quantity_step"
             control={form.control}
             render={({ field, fieldState }) => (
               <FormItem className="flex-1">
@@ -171,7 +178,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                     min="1"
                     onChange={(e) => {
                       form.setValue(
-                        "quantity_step",
+                        "wholesale.quantity_step",
                         Number(e.currentTarget.value)
                       );
                       setEnable(true);
@@ -184,7 +191,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
           />
 
           <FormField
-            name="vat"
+            name="wholesale.vat"
             control={form.control}
             render={({ field, fieldState }) => (
               <FormItem className="flex-1">
@@ -198,7 +205,10 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                     {...field}
                     isError={fieldState.invalid}
                     onChange={(e) => {
-                      form.setValue("vat", Number(e.currentTarget.value));
+                      form.setValue(
+                        "wholesale.vat",
+                        Number(e.currentTarget.value)
+                      );
                       setEnable(true);
                     }}
                   />
@@ -209,10 +219,10 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
           />
         </div>
         {details.map((fieldItem, index: number) => (
-          <div key={nanoid()} className="flex space-x-2 items-start mb-2">
+          <div key={fieldItem.id} className="flex space-x-2 items-start mb-2">
             <FormField
               control={form.control}
-              name={`details.${index}.min`}
+              name={`wholesale.details.${index}.min`}
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
@@ -224,11 +234,11 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                       {...field}
                       onChange={(e) => {
                         form.setValue(
-                          `details.${index}.min`,
+                          `wholesale.details.${index}.min`,
                           Number(e.currentTarget.value)
                         );
                         form.setValue(
-                          `details.${index}.desc`,
+                          `wholesale.details.${index}.desc`,
                           `${e.currentTarget.value}+`
                         );
                         setEnable(true);
@@ -241,7 +251,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
             />
             <FormField
               control={form.control}
-              name={`details.${index}.price`}
+              name={`wholesale.details.${index}.price`}
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
@@ -257,7 +267,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                       iconAlign="end"
                       onChange={(e) => {
                         form.setValue(
-                          `details.${index}.price`,
+                          `wholesale.details.${index}.price`,
                           Number(e.currentTarget.value)
                         );
                         setEnable(true);
@@ -270,7 +280,7 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
             />
             <FormField
               control={form.control}
-              name={`details.${index}.desc`}
+              name={`wholesale.details.${index}.desc`}
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
@@ -292,8 +302,10 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                 onClick={() => {
                   if (details.length > 1) {
                     form.setValue(
-                      "details",
-                      details.filter((_, i) => i !== index)
+                      "wholesale.details",
+                      form
+                        .getValues("wholesale.details")
+                        .filter((_, i) => i !== index)
                     );
                     setEnable(true);
                   }
@@ -302,13 +314,17 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
             </div>
           </div>
         ))}
+        <p className="text-red-400">
+          {form.formState.errors.wholesale?.message}
+        </p>
+
         <div
           className="w-full p-2 flex space-x-2 bg-primary-light text-primary font-semibold round-sm cursor-pointer"
           onClick={() => {
             const last = details.findLast(() => true);
             const nextMin = last ? Number(last.min) + 1 : 1;
-            form.setValue("details", [
-              ...details,
+            form.setValue("wholesale.details", [
+              ...form.getValues("wholesale.details"),
               { min: nextMin, desc: `${nextMin}+`, price: 0 },
             ]);
             setEnable(true);

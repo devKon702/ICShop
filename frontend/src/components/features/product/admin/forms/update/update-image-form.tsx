@@ -47,13 +47,13 @@ export default function UpdateImageForm({
     mutationFn: async (data: { productId: number; imageId: number }) =>
       galleryService.deleteImageGallery(data.imageId),
     onSuccess: (data) => {
-      toast.success("Xoá ảnh thành công");
       setGalleryItems((prev) =>
         prev.filter((item) => item.id !== data.data.id)
       );
       queryClient.invalidateQueries({
         queryKey: ["product", { id: productId }],
       });
+      toast.success("Xoá ảnh thành công");
     },
     onError: () => {
       toast.error("Xoá ảnh thất bại, vui lòng thử lại");
@@ -66,7 +66,6 @@ export default function UpdateImageForm({
       file: File;
     }) => galleryService.updateImageGallery(data.imageId, data.file),
     onSuccess: (data) => {
-      toast.success("Cập nhật ảnh thành công");
       setGalleryItems((prev) =>
         prev.map((item) =>
           item.id === data.data.id
@@ -77,20 +76,19 @@ export default function UpdateImageForm({
       queryClient.invalidateQueries({
         queryKey: ["product", { id: productId }],
       });
+      toast.success("Cập nhật ảnh thành công");
     },
   });
   const { mutate: updatePosterMutate } = useMutation({
     mutationFn: async (file: File) =>
       productService.admin.updatePoster(productId, file),
     onSuccess: (data) => {
-      toast.success("Cập nhật poster thành công");
-      setPoster(data.data.posterUrl ?? null);
+      setPoster(data.data.posterUrl || null);
       queryClient.invalidateQueries({
         queryKey: ["product", { id: productId }],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["products"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Cập nhật poster thành công");
     },
     onError: () => {
       toast.error("Cập nhật poster thất bại, vui lòng thử lại");
@@ -109,7 +107,8 @@ export default function UpdateImageForm({
           >
             {poster ? (
               <SafeImage
-                src={`${env.NEXT_PUBLIC_FILE_URL}/${poster}`}
+                key={poster}
+                src={env.NEXT_PUBLIC_FILE_URL + "/" + poster}
                 width={200}
                 height={200}
                 alt="Poster"
@@ -121,9 +120,6 @@ export default function UpdateImageForm({
               </>
             )}
           </label>
-          <div className="rounded-full p-1 absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 not-hover:opacity-70 bg-red-100 cursor-pointer shadow-lg text-red-400">
-            <X />
-          </div>
           <input
             id="poster"
             type="file"
@@ -135,12 +131,12 @@ export default function UpdateImageForm({
                   type: "imageCropper",
                   props: {
                     file: e.currentTarget.files[0],
-                    onImageComplete: (file, previewUrl) => {
+                    onImageComplete: (file) => {
                       if (
                         confirm("Bạn có chắc muốn cập nhật ảnh đại diện không?")
                       ) {
                         updatePosterMutate(file);
-                        setPoster(previewUrl);
+                        // setPoster(previewUrl);
                         closeModal();
                       }
                     },
@@ -161,6 +157,7 @@ export default function UpdateImageForm({
                 {item.url && (
                   <>
                     <SafeImage
+                      key={item.url}
                       src={`${env.NEXT_PUBLIC_FILE_URL}/${item.url}`}
                       width={100}
                       height={100}
@@ -169,7 +166,8 @@ export default function UpdateImageForm({
                     />
                     <div
                       className="rounded-full p-1 absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 not-hover:opacity-70 bg-red-100 cursor-pointer shadow-lg text-red-400"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
                         if (confirm("Bạn có chắc muốn xoá ảnh này không?")) {
                           deleteImageMutate({ productId, imageId: item.id });
                         }

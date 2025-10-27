@@ -12,7 +12,7 @@ import attributeService from "@/libs/services/attribute.service";
 import categoryService from "@/libs/services/category.service";
 import productService from "@/libs/services/product.service";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tag } from "lucide-react";
 import { nanoid } from "nanoid";
 import React, { useEffect } from "react";
@@ -114,11 +114,16 @@ export default function UpdateCategoryForm({
     enabled: Boolean(categoryId),
     staleTime: 5 * 60 * 1000,
   });
+  const queryClient = useQueryClient();
 
   const { mutate: updatewMutate, isPending } = useMutation({
     mutationFn: (data: z.infer<typeof formSchema>) =>
       productService.admin.updateCategory(productId, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["product", { id: productId }],
+      });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Cập nhật thành công");
       setEnable(false);
     },

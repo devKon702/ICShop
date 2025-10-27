@@ -80,6 +80,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center space-x-2">
                 <span className="font-semibold">{data?.data.user.name}</span>
                 <SafeImage
+                  key={data?.data.user.avatarUrl || ""}
                   src={data?.data.user.avatarUrl || ""}
                   alt="Avatar"
                   height={40}

@@ -55,6 +55,7 @@ export default function ProductRow({ product }: Props) {
     <TableRow>
       <TableCell>
         <SafeImage
+          key={`${env.NEXT_PUBLIC_FILE_URL}/${product.posterUrl}`}
           src={`${env.NEXT_PUBLIC_FILE_URL}/${product.posterUrl}`}
           alt="Poster"
           width={40}

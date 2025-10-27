@@ -63,6 +63,7 @@ export default function ImageMagnifier({
         <div className="relative aspect-square w-full">
           {src && (
             <SafeImage
+              key={src}
               ref={imgRef}
               src={src}
               alt={imageAlt}

@@ -46,7 +46,7 @@ class WholesaleRepository {
         });
       }
       // Update wholesale info and add new details
-      return await tx.wholesale.update({
+      return tx.wholesale.update({
         where: { id: wholesaleId },
         data: {
           ...(data.wholesale && {
@@ -59,15 +59,17 @@ class WholesaleRepository {
             modifierId: userId,
           }),
           ...(data.details && {
-            createMany: {
-              data: data.details.map((item) => ({
-                min: item.min,
-                max: item.max,
-                price: item.price,
-                desc: item.desc,
-                creatorId: userId,
-                modifierId: userId,
-              })),
+            details: {
+              createMany: {
+                data: data.details.map((item) => ({
+                  min: item.min,
+                  max: item.max,
+                  price: item.price,
+                  desc: item.desc,
+                  creatorId: userId,
+                  modifierId: userId,
+                })),
+              },
             },
           }),
         },

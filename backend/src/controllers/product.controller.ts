@@ -380,7 +380,7 @@ class ProductController {
         if (
           wholesale.details[i].min !== details[i].min ||
           wholesale.details[i].max !== details[i].max ||
-          wholesale.details[i].price.equals(details[i].price) ||
+          !wholesale.details[i].price.equals(details[i].price) ||
           wholesale.details[i].desc !== details[i].desc
         ) {
           return true;
@@ -388,25 +388,29 @@ class ProductController {
       }
       return false;
     })();
-    const wholesaleUpdated = wholesaleRepository.update(sub, wholesale.id, {
-      wholesale: isWholesaleChanged
-        ? {
-            min_quantity,
-            max_quantity,
-            quantity_step,
-            unit,
-            vat,
-          }
-        : undefined,
-      details: isDetailsChanged
-        ? details.map((item) => ({
-            min: item.min,
-            max: item.max,
-            price: item.price,
-            desc: item.desc,
-          }))
-        : undefined,
-    });
+    const wholesaleUpdated = await wholesaleRepository.update(
+      sub,
+      wholesale.id,
+      {
+        wholesale: isWholesaleChanged
+          ? {
+              min_quantity,
+              max_quantity,
+              quantity_step,
+              unit,
+              vat,
+            }
+          : undefined,
+        details: isDetailsChanged
+          ? details.map((item) => ({
+              min: item.min,
+              max: item.max,
+              price: item.price,
+              desc: item.desc,
+            }))
+          : undefined,
+      }
+    );
     res
       .status(HttpStatus.OK)
       .json(
