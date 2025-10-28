@@ -6,7 +6,7 @@ import {
   HighlightTypeEnum,
 } from "./shared.schema";
 
-export const ProductHighlightSchema = z.object({
+export const ProductHighlightBaseSchema = z.object({
   id: z.number().int().min(0).max(255), // UnsignedTinyInt
   productId: UnsignedInt,
   type: HighlightTypeEnum,
@@ -17,4 +17,4 @@ export const ProductHighlightSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
-export type ProductHighlight = z.infer<typeof ProductHighlightSchema>;
+export type ProductHighlight = z.infer<typeof ProductHighlightBaseSchema>;

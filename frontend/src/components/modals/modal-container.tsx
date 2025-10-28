@@ -5,7 +5,7 @@ import CreateValueForm from "@/components/features/attribute/admin/create-value-
 import CreateProductForm from "@/components/features/product/admin/forms/create/create-product-form";
 import AlertModal from "@/components/modals/alert-modal";
 import FormModal from "@/components/modals/form-modal";
-import { useModal } from "@/store/modal-store";
+import { useModal, useModalActions } from "@/store/modal-store";
 import CreateCategoryForm from "@/components/features/category/forms/create-category-form";
 import PromptForm from "@/components/common/promt-form";
 import AuthTabs from "@/components/features/auth/auth-tabs";
@@ -17,9 +17,13 @@ import OrderConfirmationForm from "@/components/features/order/user/order-confir
 import AdminOrderDetail from "@/components/features/order/admin/admin-order-detail";
 import ChangeOrderStatusForm from "@/components/features/order/admin/change-order-status-form";
 import UpdateProductForm from "@/components/features/product/admin/forms/update/update-product-form";
+import ProductDetail from "@/components/features/product/admin/product-detail";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 
 export default function ModalContainer() {
   const modal = useModal();
+  const { openModal } = useModalActions();
   return (
     <>
       {modal.map((item, index) => (
@@ -66,6 +70,29 @@ export default function ModalContainer() {
                     useCloseButton
                   >
                     <UpdateProductForm {...item.props} />
+                  </FormModal>
+                );
+              case "productDetail":
+                return (
+                  <FormModal
+                    title="Chi Tiết Sản Phẩm"
+                    index={index}
+                    titleExtraComponent={
+                      <Button
+                        className="float-right"
+                        onClick={() => {
+                          openModal({
+                            type: "updateProduct",
+                            props: { productId: item.props.productId },
+                          });
+                        }}
+                      >
+                        <Pencil />
+                        Cập nhật
+                      </Button>
+                    }
+                  >
+                    <ProductDetail productId={item.props.productId} />
                   </FormModal>
                 );
               case "imageCropper":

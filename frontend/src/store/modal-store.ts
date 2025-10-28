@@ -49,6 +49,7 @@ type ModalType =
         onSuccess?: () => void;
       }
     >
+  | Modal<"productDetail", { productId: number }>
   | Modal<
       "imageCropper",
       { file: File; onImageComplete: (file: File, previewUrl: string) => void }

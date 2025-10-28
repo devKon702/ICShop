@@ -14,11 +14,13 @@ import React from "react";
 export default function FormModal({
   title,
   children,
+  titleExtraComponent,
   index,
   useCloseButton = false,
 }: {
   title?: string;
   children: React.ReactNode;
+  titleExtraComponent?: React.ReactNode;
   index: number;
   useCloseButton?: boolean;
 }) {
@@ -41,6 +43,7 @@ export default function FormModal({
             <>
               <DialogTitle className="font-bold text-2xl px-4 py-2">
                 {title}
+                {titleExtraComponent}
                 {useCloseButton && (
                   <DialogClose className="cursor-pointer float-right p-1">
                     <X />

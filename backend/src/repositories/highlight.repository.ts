@@ -14,7 +14,7 @@ class HighlightRepository {
         modifierId: userId,
       },
       include: {
-        product: true,
+        product: { include: { category: true } },
       },
     });
   };
@@ -34,38 +34,12 @@ class HighlightRepository {
     });
   };
 
-  public getHighlight = async (type: HighlightType) => {
+  public getHighlight = async (type: HighlightType, isActive?: boolean) => {
     return prisma.productHighlight.findMany({
-      where: { type, product: { isActive: true } },
-      select: {
-        id: true,
-        position: true,
-        product: {
-          select: {
-            id: true,
-            name: true,
-            posterUrl: true,
-            price: true,
-            slug: true,
-            wholesale: {
-              select: {
-                min_quantity: true,
-                max_quantity: true,
-                unit: true,
-                quantity_step: true,
-                id: true,
-              },
-            },
-          },
-        },
+      where: { type, product: { isActive } },
+      include: {
+        product: { include: { category: true } },
       },
-    });
-  };
-
-  public adminGetHighlight = async (type: HighlightType) => {
-    return prisma.productHighlight.findMany({
-      where: { type },
-      include: { product: { include: { creator: true, modifier: true } } },
     });
   };
 }

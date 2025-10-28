@@ -10,7 +10,7 @@ import {
 import { CategoryBaseSchema, CategorySchema } from "./category.schema";
 import { WholesaleSchema } from "./wholesale.schema";
 import { ProductImageBaseSchema } from "./product-image.schema";
-import { ProductHighlightSchema } from "./product-highlight.schema";
+import { ProductHighlightBaseSchema } from "./product-highlight.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
 
 export const ProductBaseSchema = z.object({
@@ -35,7 +35,7 @@ export const ProductSchema = ProductBaseSchema.extend({
   category: CategorySchema.optional(),
   wholesale: WholesaleSchema.nullable().optional(),
   images: z.array(ProductImageBaseSchema).optional(),
-  highlights: z.array(ProductHighlightSchema).optional(),
+  highlights: z.array(ProductHighlightBaseSchema).optional(),
 });
 export type Product = z.infer<typeof ProductSchema>;
 

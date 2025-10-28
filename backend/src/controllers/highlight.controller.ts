@@ -10,6 +10,7 @@ import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response";
 import { HighlightResponseCode } from "../constants/codes/highlight.code";
 import { HighlightType } from "../constants/db";
+import { sanitizeData } from "../utils/sanitize";
 
 class HighlightController {
   public create = async (req: Request, res: Response) => {
@@ -37,13 +38,14 @@ class HighlightController {
     const {
       params: { id },
     } = deleteHighlightSchema.parse(req);
-    await highlightRepository.delete(id);
+    const deleted = await highlightRepository.delete(id);
     res
       .status(HttpStatus.OK)
       .json(
         successResponse(
           HighlightResponseCode.OK,
-          "Xóa sản phẩm khỏi mục nổi bật thành công"
+          "Xóa sản phẩm khỏi mục nổi bật thành công",
+          deleted
         )
       );
   };
@@ -72,12 +74,15 @@ class HighlightController {
   public getHighlight = async (req: Request, res: Response) => {
     const types = Object.values(HighlightType);
     const result = await Promise.all(
-      types.map((item) => highlightRepository.getHighlight(item))
+      types.map((item) => highlightRepository.getHighlight(item, true))
     );
 
     const list = types.map((item, index) => ({
       type: item,
-      list: result[index],
+      list: sanitizeData(result[index], {
+        useDefault: true,
+        removeFields: ["isActive"],
+      }),
     }));
 
     res
@@ -90,10 +95,10 @@ class HighlightController {
         )
       );
   };
-  public getHighlightDetail = async (req: Request, res: Response) => {
+  public adminGetHighlight = async (req: Request, res: Response) => {
     const types = Object.values(HighlightType);
     const result = await Promise.all(
-      types.map((item) => highlightRepository.adminGetHighlight(item))
+      types.map((item) => highlightRepository.getHighlight(item))
     );
 
     const list = types.map((item, index) => ({

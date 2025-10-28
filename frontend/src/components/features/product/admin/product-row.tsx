@@ -1,6 +1,11 @@
 "use client";
 import ClampText from "@/components/common/clamp-text";
 import SafeImage from "@/components/common/safe-image";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { TableCell, TableRow } from "@/components/ui/table";
 import env from "@/constants/env";
 import { CategoryBaseSchema } from "@/libs/schemas/category.schema";
@@ -10,7 +15,7 @@ import productService from "@/libs/services/product.service";
 import { useModalActions } from "@/store/modal-store";
 import { formatPrice } from "@/utils/price";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, Info, Pencil, Trash } from "lucide-react";
+import { BringToFront, Check, Info, Pencil, Trash } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -49,6 +54,9 @@ export default function ProductRow({ product }: Props) {
         `${data.isActive ? "Kích hoạt" : "Ẩn"} sản phẩm thành công`
       );
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({
+        queryKey: ["product", { id: product.id }],
+      });
     },
   });
   return (
@@ -62,14 +70,12 @@ export default function ProductRow({ product }: Props) {
           height={40}
         />
       </TableCell>
-      <TableCell>
-        <ClampText
-          className="cursor-pointer hover:underline w-fit"
-          lines={1}
-          text={product.name}
-        />
+      <TableCell className="flex-1">
+        <ClampText className="w-fit" lines={1} text={product.name} />
       </TableCell>
-      <TableCell>{product.category.name}</TableCell>
+      <TableCell className="min-w-32">
+        <ClampText className="w-fit" lines={1} text={product.category.name} />
+      </TableCell>
       <TableCell>{formatPrice(Number(product.price))}đ</TableCell>
       <TableCell>
         {product.isActive ? (
@@ -94,25 +100,48 @@ export default function ProductRow({ product }: Props) {
       </TableCell>
       <TableCell>
         <div className="flex gap-2 justify-center items-center">
-          <Pencil
-            className="cursor-pointer p-1"
+          <div
+            className="cursor-pointer p-1 hover:bg-primary/10 rounded-md"
             onClick={() => {
               openModal({
                 type: "updateProduct",
                 props: { productId: product.id },
               });
             }}
-          />
-          {/* <Info className="cursor-pointer p-1" /> */}
-          <Trash
-            className="cursor-pointer p-1 text-red-400 hover:text-red-600"
+          >
+            <Pencil className="p-1" />
+          </div>
+          <div
+            className="cursor-pointer p-1 hover:bg-red-600/10 rounded-md"
             onClick={() => {
               if (confirm("Xác nhận xóa sản phẩm " + product.name)) {
                 deleteProductMutate();
               }
             }}
-          />
-          <Info className="cursor-pointer p-1" />
+          >
+            <Trash className="p-1 text-red-400" />
+          </div>
+          <div
+            className="cursor-pointer p-1 hover:bg-gray-600/10 rounded-md"
+            onClick={() => {
+              openModal({
+                type: "productDetail",
+                props: { productId: product.id },
+              });
+            }}
+          >
+            <Info className="cursor-pointer p-1" />
+          </div>
+          <Popover>
+            <PopoverTrigger>
+              <div className="cursor-pointer p-1 hover:bg-gray-600/10 rounded-md">
+                <BringToFront className="cursor-pointer p-1" />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent>
+              <div>Thêm vào nổi bật</div>
+            </PopoverContent>
+          </Popover>
         </div>
       </TableCell>
     </TableRow>

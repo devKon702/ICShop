@@ -12,39 +12,40 @@ import { validate } from "../middlewares/validate.middleware";
 
 const highlightRouter = express.Router();
 const path = "/highlight";
+const adminPath = "/admin/highlight";
 
 // GET /highlight
 highlightRouter.get(path, highlightController.getHighlight);
 
-// GET /highlight/detail
+// GET /admin/highlight
 highlightRouter.get(
-  path + "/detail",
+  adminPath,
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  highlightController.getHighlightDetail
+  highlightController.adminGetHighlight
 );
 
-// POST /highlight
+// POST /admin/highlight
 highlightRouter.post(
-  path,
+  adminPath,
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(createHighlightSchema),
   highlightController.create
 );
 
-// PATCH /highlight
+// PATCH /admin/highlight
 highlightRouter.patch(
-  path,
+  adminPath + "/position",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(updateHighlightPositionSchema),
   highlightController.updatePosition
 );
 
-// DELETE /highlight/:id
+// DELETE /admin/highlight/:id
 highlightRouter.delete(
-  path + "/:id",
+  adminPath + "/:id",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(deleteHighlightSchema),

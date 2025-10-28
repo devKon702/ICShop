@@ -16,3 +16,9 @@ export enum OrderStatus {
   DONE = 5,
   CANCELED = 0,
 }
+
+export enum HighlightType {
+  NEW = "new",
+  HOT = "hot",
+  BEST_SELL = "bestsell",
+}
