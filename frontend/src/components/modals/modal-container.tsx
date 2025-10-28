@@ -20,6 +20,7 @@ import UpdateProductForm from "@/components/features/product/admin/forms/update/
 import ProductDetail from "@/components/features/product/admin/product-detail";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
+import AddToHighlight from "@/components/features/product/admin/forms/add-to-highlight";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -93,6 +94,16 @@ export default function ModalContainer() {
                     }
                   >
                     <ProductDetail productId={item.props.productId} />
+                  </FormModal>
+                );
+              case "addToHighlight":
+                return (
+                  <FormModal
+                    title="Thêm vào mục nổi bật"
+                    index={index}
+                    useCloseButton
+                  >
+                    <AddToHighlight productId={item.props.productId} />
                   </FormModal>
                 );
               case "imageCropper":

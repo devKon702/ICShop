@@ -5,7 +5,7 @@ import Separator from "@/components/common/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeliveryType } from "@/constants/enums";
 import env from "@/constants/env";
-import { ORDER_STATUS_OPTIONS } from "@/constants/order-status";
+import { ORDER_STATUS_OPTIONS } from "@/constants/enum-options";
 import orderService from "@/libs/services/order.service";
 import { formatIsoDateTime } from "@/utils/date";
 import { formatPrice } from "@/utils/price";

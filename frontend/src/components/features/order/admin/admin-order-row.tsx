@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/popover";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { OrderStatus } from "@/constants/enums";
-import { ORDER_STATUS_OPTIONS } from "@/constants/order-status";
+import { ORDER_STATUS_OPTIONS } from "@/constants/enum-options";
 import { useModalActions } from "@/store/modal-store";
 import { formatPrice } from "@/utils/price";
 import { Info } from "lucide-react";

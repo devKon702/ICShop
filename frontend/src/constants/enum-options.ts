@@ -1,4 +1,4 @@
-import { OrderStatus } from "@/constants/enums";
+import { HighlightType, OrderStatus } from "@/constants/enums";
 
 export const ORDER_STATUS_OPTIONS = [
   {
@@ -31,4 +31,10 @@ export const ORDER_STATUS_OPTIONS = [
     label: "Hoàn thành",
     color: "bg-green-100 text-green-500 bg-green-500/10",
   },
+] as const;
+
+export const HIGHLIGHT_OPTIONS = [
+  { value: HighlightType.BEST_SELL, label: "Bán chạy" },
+  { value: HighlightType.HOT, label: "Nổi bật" },
+  { value: HighlightType.NEW, label: "Mới thêm" },
 ] as const;

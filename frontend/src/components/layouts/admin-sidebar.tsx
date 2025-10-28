@@ -8,10 +8,11 @@ import {
   Microchip,
   SquareMenu,
   SquareStack,
+  Sun,
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
@@ -20,12 +21,12 @@ const sidebarMenu = [
   { href: ROUTE.adminOrder, title: "Đơn hàng", icon: <SquareMenu /> },
   { href: ROUTE.adminCategory, title: "Danh mục", icon: <SquareStack /> },
   { href: ROUTE.adminProduct, title: "Sản phẩm", icon: <Microchip /> },
+  { href: "#", title: "Trưng bày", icon: <Sun /> },
   { href: ROUTE.adminUser, title: "Người dùng", icon: <User /> },
 ];
 
 export default function AdminSidebar({}) {
   const pathname = usePathname();
-  const router = useRouter();
   const { clearAuth } = useAuthActions();
   return (
     <ul className="flex flex-col size-full p-2 border-r-2">

@@ -15,7 +15,16 @@ import productService from "@/libs/services/product.service";
 import { useModalActions } from "@/store/modal-store";
 import { formatPrice } from "@/utils/price";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { BringToFront, Check, Info, Pencil, Trash } from "lucide-react";
+import {
+  BringToFront,
+  Check,
+  Info,
+  MoreVertical,
+  Pencil,
+  Sun,
+  Trash,
+  View,
+} from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -135,11 +144,27 @@ export default function ProductRow({ product }: Props) {
           <Popover>
             <PopoverTrigger>
               <div className="cursor-pointer p-1 hover:bg-gray-600/10 rounded-md">
-                <BringToFront className="cursor-pointer p-1" />
+                <MoreVertical className="cursor-pointer p-1" />
               </div>
             </PopoverTrigger>
-            <PopoverContent>
-              <div>Thêm vào nổi bật</div>
+            <PopoverContent align="start" side="left" className="w-fit">
+              <div
+                className="flex gap-2 hover:bg-background p-2 rounded-md cursor-pointer"
+                onClick={() => {
+                  console.log("add to highlight");
+                  openModal({
+                    type: "addToHighlight",
+                    props: { productId: product.id },
+                  });
+                }}
+              >
+                <Sun />
+                Thêm vào nổi bật
+              </div>
+              <div className="flex gap-2 hover:bg-background p-2 rounded-md cursor-pointer">
+                <View />
+                Thêm vào trưng bày
+              </div>
             </PopoverContent>
           </Popover>
         </div>

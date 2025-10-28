@@ -13,7 +13,7 @@ import React, { ButtonHTMLAttributes } from "react";
 
 interface SelectorProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   data: { value: string; label: string }[];
-  defaultValue: string;
+  defaultValue?: string;
   className?: string;
   onValueChange: (value: string) => void;
   disableValues?: string[];
