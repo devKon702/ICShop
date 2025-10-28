@@ -16,6 +16,7 @@ import BasicSection from "@/components/features/product/admin/forms/create/basic
 import AttributeSection from "@/components/features/product/admin/forms/create/attribute-section";
 import { WholesaleSection } from "@/components/features/product/admin/forms/create/wholesale-section";
 import ImageSection from "@/components/features/product/admin/forms/create/image-section";
+import galleryService from "@/libs/services/gallery.service";
 
 const FormSchema = FormProductSchema;
 type FormValues = z.infer<typeof FormProductSchema>;
@@ -95,10 +96,7 @@ export default function CreateProductForm({
         await Promise.all([
           productService.admin.updatePoster(newProductResponse.data.id, poster),
           ...gallery.map((item) =>
-            productService.admin.addImageGallery(
-              newProductResponse.data.id,
-              item
-            )
+            galleryService.addImageGallery(newProductResponse.data.id, item)
           ),
         ]);
       }
