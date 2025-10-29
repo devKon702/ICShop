@@ -7,6 +7,8 @@ export const ROUTE = {
   adminDashboard: "/",
   adminOrder: "/order",
   adminProduct: "/product",
+  adminHighlight: "/highlight",
+  adminShowcase: "/showcase",
   adminCategory: "/category",
   adminUser: "/user",
   adminLogin: "/login",

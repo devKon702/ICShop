@@ -17,6 +17,8 @@ const pageTitles = [
   { href: ROUTE.adminOrder, title: "Quản lí đơn hàng" },
   { href: ROUTE.adminCategory, title: "Quản lí danh mục" },
   { href: ROUTE.adminProduct, title: "Quản lí sản phẩm" },
+  { href: ROUTE.adminHighlight, title: "Quản lí sản phẩm nổi bật" },
+  { href: ROUTE.adminShowcase, title: "Quản lí sản phẩm trưng bày" },
   { href: ROUTE.adminUser, title: "Quản lí người dùng" },
 ];
 

@@ -43,7 +43,11 @@ const highlightService = {
                 HighlightType.BEST_SELL,
               ]),
               list: z.array(
-                ProductBaseSchema.extend({ category: CategoryBaseSchema })
+                ProductHighlightBaseSchema.extend({
+                  product: ProductBaseSchema.extend({
+                    category: CategoryBaseSchema,
+                  }),
+                })
               ),
             })
           )

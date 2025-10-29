@@ -21,7 +21,7 @@ const sidebarMenu = [
   { href: ROUTE.adminOrder, title: "Đơn hàng", icon: <SquareMenu /> },
   { href: ROUTE.adminCategory, title: "Danh mục", icon: <SquareStack /> },
   { href: ROUTE.adminProduct, title: "Sản phẩm", icon: <Microchip /> },
-  { href: "#", title: "Trưng bày", icon: <Sun /> },
+  { href: ROUTE.adminHighlight, title: "Sản phẩm nổi bật", icon: <Sun /> },
   { href: ROUTE.adminUser, title: "Người dùng", icon: <User /> },
 ];
 

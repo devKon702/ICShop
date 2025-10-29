@@ -23,7 +23,7 @@ export default function AddToHighlight({ productId }: Props) {
       highlightService.admin.add(productId, highlightType),
     onSuccess: () => {
       toast.success("Thêm vào mục nổi bật thành công");
-      queryClient.invalidateQueries({ queryKey: ["highlights"] });
+      queryClient.invalidateQueries({ queryKey: ["products", "highlights"] });
       closeModal();
     },
     onError: (err) => {
