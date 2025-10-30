@@ -1,3 +1,4 @@
+import { OrderStatus } from "../constants/db";
 import { prisma } from "../prisma";
 
 class ProductRepository {
@@ -276,6 +277,7 @@ class ProductRepository {
       },
     });
   };
+
   public updateInfo = async (
     userId: number,
     productId: number,
@@ -373,6 +375,52 @@ class ProductRepository {
 
   public delete = async (id: number) => {
     return prisma.product.delete({ where: { id } });
+  };
+
+  public findBestSellingProducts = async (
+    from: Date | undefined,
+    to: Date | undefined,
+    limit: number
+  ) => {
+    const result = await prisma.orderDetail.groupBy({
+      by: ["productId", "unit"],
+      _count: {
+        id: true,
+      },
+      _sum: {
+        quantity: true,
+      },
+      where: {
+        order: {
+          updatedAt: {
+            gte: from,
+            lte: to,
+          },
+          status: OrderStatus.DONE,
+        },
+      },
+      orderBy: {
+        _count: {
+          id: "desc",
+        },
+      },
+      take: limit,
+    });
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: result.map((item) => item.productId) },
+      },
+      omit: {
+        desc: true,
+      },
+    });
+
+    return result.map((item) => ({
+      product: products.find((p) => p.id === item.productId)!,
+      unit: item.unit,
+      totalOrder: item._count.id,
+      totalQuantity: item._sum.quantity!,
+    }));
   };
 }
 
