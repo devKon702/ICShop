@@ -288,6 +288,34 @@ class OrderRepository {
       prisma.order.count({ where }),
     ]);
   };
-}
 
+  public findByProductId = (
+    productId: number,
+    filter: {
+      page: number;
+      limit: number;
+      from: Date | undefined;
+      to: Date | undefined;
+    }
+  ) => {
+    return prisma.order.findMany({
+      where: {
+        details: {
+          some: {
+            productId,
+          },
+        },
+        createdAt: {
+          gte: filter.from,
+          lte: filter.to,
+        },
+      },
+      take: filter.limit,
+      skip: filter.limit * (filter.page - 1),
+      include: {
+        user: { include: { account: true } },
+      },
+    });
+  };
+}
 export default new OrderRepository();

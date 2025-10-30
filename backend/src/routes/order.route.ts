@@ -13,7 +13,10 @@ import {
   getOrderByIdSchema,
   seenOrderTimelineSchema,
   updateTimelineDescSchema,
+  getOrdersByProductIdSchema,
 } from "../schemas/order.schema";
+import { findByIdSchema, idStringSchema } from "../schemas/shared.schema";
+import { get } from "http";
 
 const orderRouter = express.Router();
 const path = "/order";
@@ -43,6 +46,15 @@ orderRouter.get(
   verifyAccessToken,
   authorize([Role.USER]),
   orderController.getMyUnseenOrderTimeline
+);
+
+// GET /admin/order/product/:productId
+orderRouter.get(
+  adminPath + "/product/:id",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(getOrdersByProductIdSchema),
+  orderController.adminFindByProductId
 );
 
 // GET /order/:id

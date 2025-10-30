@@ -10,6 +10,7 @@ import {
   getOrderByIdSchema,
   seenOrderTimelineSchema,
   updateTimelineDescSchema,
+  getOrdersByProductIdSchema,
 } from "../schemas/order.schema";
 import wholesaleRepository from "../repositories/wholesale.repository";
 import { AppError } from "../errors/app-error";
@@ -20,6 +21,7 @@ import { successResponse } from "../utils/response";
 import { Decimal } from "@prisma/client/runtime/library";
 import addressRepository from "../repositories/address.repository";
 import { NotFoundError } from "../errors/not-found-error";
+import productRepository from "../repositories/product.repository";
 
 class OrderController {
   // USER
@@ -387,6 +389,34 @@ class OrderController {
           OrderResponseCode.OK,
           "Cập nhật mô tả thay đổi trạng thái thành công",
           timeline
+        )
+      );
+  };
+
+  public adminFindByProductId = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+      query: { page, limit, from, to },
+    } = getOrdersByProductIdSchema.parse(req);
+    const product = await productRepository.findById(id);
+    if (!product) {
+      throw new NotFoundError("Không tìm thấy sản phẩm");
+    }
+
+    const orders = await orderRepository.findByProductId(id, {
+      page,
+      limit,
+      from,
+      to,
+    });
+
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          OrderResponseCode.OK,
+          "Lấy đơn hàng theo sản phẩm thành công",
+          orders
         )
       );
   };

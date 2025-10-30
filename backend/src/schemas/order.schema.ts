@@ -2,7 +2,7 @@ import { z } from "zod";
 import { phoneRegex, vietnameseRegex } from "../utils/regex";
 import { DeliveryType, OrderStatus } from "../constants/db";
 import { ppid } from "process";
-import { idStringSchema } from "./shared.schema";
+import { idStringSchema, requestSchema } from "./shared.schema";
 import orderController from "../controllers/order.controller";
 
 export const createOrderSchema = z.object({
@@ -66,6 +66,34 @@ export const filterMyOrdersSchema = z.object({
 export const getOrderByIdSchema = z.object({
   params: z.object({
     id: z.coerce.number().min(1, "ID không hợp lệ"),
+  }),
+});
+
+export const getOrdersByProductIdSchema = requestSchema({
+  params: z.object({
+    id: z.coerce.number().min(1, "ID sản phẩm không hợp lệ"),
+  }),
+  query: z.object({
+    page: z.coerce.number().min(1).default(1),
+    limit: z.coerce.number().min(1).default(10),
+    from: z
+      .string()
+      .datetime()
+      .transform((val) => {
+        const d = new Date(val);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      })
+      .optional(),
+    to: z
+      .string()
+      .datetime()
+      .transform((val) => {
+        const d = new Date(val);
+        d.setHours(23, 59, 59, 999);
+        return d;
+      })
+      .optional(),
   }),
 });
 
