@@ -317,5 +317,34 @@ class OrderRepository {
       },
     });
   };
+
+  public countByStatus = (from?: Date, to?: Date) => {
+    return prisma.order.groupBy({
+      by: ["status"],
+      _count: { id: true },
+      where: {
+        createdAt: {
+          gte: from,
+          lte: to,
+        },
+      },
+    });
+  };
+
+  public countInDay = (date: Date) => {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return prisma.order.count({
+      where: {
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+  };
 }
 export default new OrderRepository();
