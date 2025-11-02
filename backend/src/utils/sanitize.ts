@@ -52,6 +52,11 @@ export function sanitizeData<T>(
     if (Array.isArray(value)) {
       return value.map((item) => handle(item));
     }
+    if (value instanceof Date) {
+      // preserve Date objects (copy to avoid mutation)
+      return new Date(value.getTime());
+    }
+
     if (value && typeof value === "object") {
       const result: any = {};
       for (const [key, val] of Object.entries(value)) {

@@ -1,6 +1,5 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -38,23 +37,23 @@ const chartData = [
 
 const chartConfig = {
   desktop: {
-    label: "Success",
-    color: "var(--chart-2)",
-  },
-  mobile: {
-    label: "Processing",
+    label: "Desktop",
     color: "var(--chart-1)",
   },
+  // mobile: {
+  //   label: "Mobile",
+  //   color: "var(--chart-2)",
+  // },
 } satisfies ChartConfig;
 
-export function OrderChart() {
+export function IncomeChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
-          Thống kê đơn hàng
+        <CardTitle className="flex items-center justify-between">
+          Thống kê thu nhập
           <Select defaultValue="3">
-            <SelectTrigger className="ms-auto">
+            <SelectTrigger>
               <SelectValue></SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -64,9 +63,7 @@ export function OrderChart() {
             </SelectContent>
           </Select>
         </CardTitle>
-        <CardDescription>
-          Biểu đồ số lượng đơn hàng được tạo hàng tháng
-        </CardDescription>
+        <CardDescription>Biểu đồ thu nhập của các tháng</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -93,14 +90,14 @@ export function OrderChart() {
               tickCount={3}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Area
+            {/* <Area
               dataKey="mobile"
               type="natural"
               fill="var(--color-mobile)"
               fillOpacity={0.4}
               stroke="var(--color-mobile)"
               stackId="a"
-            />
+            /> */}
             <Area
               dataKey="desktop"
               type="natural"

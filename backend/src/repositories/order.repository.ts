@@ -318,6 +318,52 @@ class OrderRepository {
     });
   };
 
+  public findBestSellingProducts = async (
+    from: Date | undefined,
+    to: Date | undefined,
+    limit: number
+  ) => {
+    const result = await prisma.orderDetail.groupBy({
+      by: ["productId", "unit"],
+      _count: {
+        id: true,
+      },
+      _sum: {
+        quantity: true,
+      },
+      where: {
+        order: {
+          updatedAt: {
+            gte: from,
+            lte: to,
+          },
+          status: OrderStatus.DONE,
+        },
+      },
+      orderBy: {
+        _count: {
+          id: "desc",
+        },
+      },
+      take: limit,
+    });
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: result.map((item) => item.productId) },
+      },
+      omit: {
+        desc: true,
+      },
+    });
+
+    return result.map((item) => ({
+      product: products.find((p) => p.id === item.productId)!,
+      unit: item.unit,
+      totalOrder: item._count.id,
+      totalQuantity: item._sum.quantity!,
+    }));
+  };
+
   public countByStatus = (from?: Date, to?: Date) => {
     return prisma.order.groupBy({
       by: ["status"],
@@ -331,12 +377,7 @@ class OrderRepository {
     });
   };
 
-  public countInDay = (date: Date) => {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
+  public countByCreated = (startOfDay: Date, endOfDay: Date) => {
     return prisma.order.count({
       where: {
         createdAt: {
@@ -344,6 +385,31 @@ class OrderRepository {
           lte: endOfDay,
         },
       },
+    });
+  };
+
+  public findTopUsersByOrderCount = (opts: {
+    limit: number;
+    from?: Date;
+    to?: Date;
+    orderBy: "asc" | "desc";
+  }) => {
+    return prisma.order.groupBy({
+      by: ["userId"],
+      _count: { id: true },
+      where: {
+        status: { notIn: [OrderStatus.CANCELED, OrderStatus.PENDING] },
+        createdAt: {
+          gte: opts.from,
+          lte: opts.to,
+        },
+      },
+      orderBy: {
+        _count: {
+          id: opts.orderBy,
+        },
+      },
+      take: opts.limit,
     });
   };
 }

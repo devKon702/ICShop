@@ -12,7 +12,8 @@ export default function ClampText({
   lines,
   className,
   showTitle = true,
-}: ClampTextProps) {
+  ...props
+}: ClampTextProps & React.ComponentProps<"p">) {
   return (
     <p
       className={`line-clamp-${lines} ${className || ""}`}
@@ -25,6 +26,7 @@ export default function ClampText({
         whiteSpace: "normal",
       }}
       title={showTitle ? text : ""}
+      {...props}
     >
       {text}
     </p>

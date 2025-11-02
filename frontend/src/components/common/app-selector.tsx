@@ -11,23 +11,31 @@ import {
 import { cn } from "@/utils/className";
 import React, { ButtonHTMLAttributes } from "react";
 
-interface SelectorProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  data: { value: string; label: string }[];
-  defaultValue?: string;
+type Option<T extends string> = {
+  value: T;
+  label: string;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface SelectorProps<T extends readonly Option<any>[]>
+  extends ButtonHTMLAttributes<HTMLButtonElement> {
+  data: T;
+  defaultValue?: T[number]["value"];
   className?: string;
-  onValueChange: (value: string) => void;
-  disableValues?: string[];
+  onValueChange: (value: T[number]["value"]) => void;
+  disableValues?: T[number]["value"][];
   disableOutsideClick?: boolean;
 }
 
-export default function AppSelector({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function AppSelector<T extends readonly Option<any>[]>({
   data,
   defaultValue,
   className,
   onValueChange,
   disableValues,
   disableOutsideClick = false,
-}: SelectorProps) {
+}: SelectorProps<T>) {
   return (
     <Select onValueChange={onValueChange} defaultValue={defaultValue}>
       <SelectTrigger className={cn("cursor-pointer bg-white", className)}>

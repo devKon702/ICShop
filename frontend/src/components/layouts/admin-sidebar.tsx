@@ -17,7 +17,7 @@ import React from "react";
 import { toast } from "sonner";
 
 const sidebarMenu = [
-  { href: ROUTE.adminDashboard, title: "Dashboard", icon: <LayoutDashboard /> },
+  { href: ROUTE.adminDashboard, title: "Thống kê", icon: <LayoutDashboard /> },
   { href: ROUTE.adminOrder, title: "Đơn hàng", icon: <SquareMenu /> },
   { href: ROUTE.adminCategory, title: "Danh mục", icon: <SquareStack /> },
   { href: ROUTE.adminProduct, title: "Sản phẩm", icon: <Microchip /> },

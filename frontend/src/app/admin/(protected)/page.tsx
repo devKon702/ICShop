@@ -1,13 +1,27 @@
-import { IncomeChart } from "@/components/features/admin/chart/income-chart";
-import { OrderChart } from "@/components/features/admin/chart/order-chart";
-import { OrderTypePieChart } from "@/components/features/admin/chart/order-type-chart";
-import TopProduct from "@/components/features/admin/rank-table/top-product";
-import SummaryCard from "@/components/features/admin/summary-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, SquareMenu, Truck, Wallet } from "lucide-react";
+"use client";
+import { OrderCountChart } from "@/components/features/dashboard/order-count-chart";
+import { OrderTypeChart } from "@/components/features/dashboard/order-type-chart";
+import SummaryCard from "@/components/features/dashboard/summary-card";
+import { OrderStatus } from "@/constants/enums";
+import statisticsService from "@/libs/services/statistics.service";
+
+import { useQuery } from "@tanstack/react-query";
+import { Clock, SquareMenu, Truck, User } from "lucide-react";
 import React from "react";
+import TopOrderedProduct from "@/components/features/dashboard/top-ordered-product";
+import TopOrderUser from "@/components/features/dashboard/top-order-user";
 
 export default function AdminPage() {
+  const { data: userCount } = useQuery({
+    queryKey: ["statistics", "user", "count"],
+    queryFn: async () => statisticsService.getUserCount(),
+  });
+
+  const { data: orderCountsByStatus } = useQuery({
+    queryKey: ["statistics", "order", "by-status"],
+    queryFn: async () => statisticsService.getOrderCountsByStatus(),
+  });
+
   return (
     <div className="space-y-4">
       <section className="grid grid-cols-4 space-x-4">
@@ -18,16 +32,13 @@ export default function AdminPage() {
             </div>
           }
           title="Đơn hàng"
-          value="230"
-        ></SummaryCard>
-        <SummaryCard
-          icon={
-            <div className="bg-green-50 rounded-md p-2">
-              <Wallet className="text-green-400" />
-            </div>
+          value={
+            orderCountsByStatus
+              ? orderCountsByStatus.data
+                  .reduce((acc, curr) => acc + curr.count, 0)
+                  .toString()
+              : "-"
           }
-          title="Thu nhập"
-          value="1.298.000 VNĐ"
         ></SummaryCard>
         <SummaryCard
           icon={
@@ -35,8 +46,14 @@ export default function AdminPage() {
               <Clock className="text-orange-400" />
             </div>
           }
-          title="Đang chờ"
-          value="5"
+          title="Chờ xác nhận"
+          value={
+            orderCountsByStatus
+              ? orderCountsByStatus.data
+                  .find((o) => o.status === OrderStatus.PENDING)
+                  ?.count.toString() || "0"
+              : "-"
+          }
         ></SummaryCard>
         <SummaryCard
           icon={
@@ -45,38 +62,33 @@ export default function AdminPage() {
             </div>
           }
           title="Đang giao"
-          value="8"
+          value={
+            orderCountsByStatus
+              ? orderCountsByStatus.data
+                  .find((o) => o.status === OrderStatus.SHIPPING)
+                  ?.count.toString() || "0"
+              : "-"
+          }
+        ></SummaryCard>
+        <SummaryCard
+          icon={
+            <div className="bg-green-50 rounded-md p-2">
+              <User className="text-green-400" />
+            </div>
+          }
+          title="Người dùng"
+          value={userCount ? userCount.data.count.toString() : "-"}
         ></SummaryCard>
       </section>
       <section className="flex space-x-4">
-        <div className="w-2/3 flex flex-col space-y-4">
-          <IncomeChart />
-          <div className="flex space-x-4">
-            <div className="w-1/2">
-              <OrderChart />
-            </div>
-            <div className="w-1/2">
-              <OrderTypePieChart />
-            </div>
-          </div>
+        <div className="w-7/12 flex flex-col space-y-4">
+          <OrderCountChart />
+          <TopOrderUser />
+          <div className="space-x-4"></div>
         </div>
-        <div className="w-1/3 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sản phẩm bán chạy</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TopProduct></TopProduct>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Sản phẩm xem nhiều</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TopProduct></TopProduct>
-            </CardContent>
-          </Card>
+        <div className="w-5/12 space-y-4">
+          <OrderTypeChart />
+          <TopOrderedProduct />
         </div>
       </section>
     </div>

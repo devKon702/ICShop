@@ -8,7 +8,9 @@ class UserRepository {
         id: userId,
       },
       include: {
-        account: true,
+        account: {
+          omit: { password: true },
+        },
       },
     });
   };
@@ -34,6 +36,26 @@ class UserRepository {
         avatarUrl,
         version: { increment: 1 },
         modifierId: userId,
+      },
+    });
+  };
+
+  public countUser = (opts?: {
+    from?: Date;
+    to?: Date;
+    isActive?: boolean;
+  }) => {
+    const { from, to, isActive } = opts ?? {};
+    return prisma.user.count({
+      where: {
+        createdAt: {
+          gte: from,
+          lte: to,
+        },
+        account: {
+          isActive,
+          role: Role.USER,
+        },
       },
     });
   };

@@ -13,7 +13,7 @@ import React, { ReactNode, useEffect } from "react";
 import { toast } from "sonner";
 
 const pageTitles = [
-  { href: ROUTE.adminDashboard, title: "Dashboard" },
+  { href: ROUTE.adminDashboard, title: "Thống kê" },
   { href: ROUTE.adminOrder, title: "Quản lí đơn hàng" },
   { href: ROUTE.adminCategory, title: "Quản lí danh mục" },
   { href: ROUTE.adminProduct, title: "Quản lí sản phẩm" },

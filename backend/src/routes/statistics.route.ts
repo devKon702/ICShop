@@ -6,7 +6,9 @@ import { validate } from "../middlewares/validate.middleware";
 import {
   countOrderDailySchema,
   countOrdersByStatusSchema,
+  countUsersSchema,
   getBestSellingProductsSchema,
+  getTopUsersByOrderCountSchema,
 } from "../schemas/statistics.schema";
 import statisticsController from "../controllers/statistics.controller";
 
@@ -14,7 +16,7 @@ const statisticsRouter = express.Router();
 const path = "/statistics";
 
 statisticsRouter.get(
-  path + "/product",
+  path + "/product/best-sellers",
   verifyAccessToken,
   authorize([Role.ADMIN]),
   validate(getBestSellingProductsSchema),
@@ -35,6 +37,22 @@ statisticsRouter.get(
   authorize([Role.ADMIN]),
   validate(countOrderDailySchema),
   statisticsController.countOrderDaily
+);
+
+statisticsRouter.get(
+  path + "/order/top-users",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(getTopUsersByOrderCountSchema),
+  statisticsController.getTopUsersByOrderCount
+);
+
+statisticsRouter.get(
+  path + "/user/count",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(countUsersSchema),
+  statisticsController.countUsers
 );
 
 export default statisticsRouter;

@@ -17,14 +17,27 @@ export function getEndOfDay(date: Date): Date {
   return d;
 }
 
-export function formatIsoDateTime(isoString: string | Date): string {
+export function formatIsoDateTime(
+  isoString: string | Date,
+  options: { date: boolean; time: boolean } = { date: true, time: true }
+): string {
   const date = new Date(isoString).toLocaleString("vi-VI", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+    ...(options.date
+      ? { year: "numeric", month: "2-digit", day: "2-digit" }
+      : {}),
+    ...(options.time
+      ? {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }
+      : {}),
   });
   return date;
+}
+
+export function getDateBeforeDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() - days);
+  return d;
 }
