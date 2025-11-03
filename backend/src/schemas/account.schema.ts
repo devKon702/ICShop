@@ -46,11 +46,11 @@ export const filterAccountSchema = z.object({
 
 export type FilterAccountIType = z.infer<typeof filterAccountSchema>;
 
-export const lockAccountSchema = z.object({
+export const changeAccountStatusSchema = z.object({
   body: z.object({
     accountId: z.coerce.number(),
     isActive: z.boolean(),
   }),
 });
 
-export type LockAccountIType = z.infer<typeof lockAccountSchema>;
+export type LockAccountIType = z.infer<typeof changeAccountStatusSchema>;

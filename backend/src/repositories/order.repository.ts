@@ -412,5 +412,27 @@ class OrderRepository {
       take: opts.limit,
     });
   };
+
+  public findByUserId = (
+    userId: number,
+    filter: { page: number; limit: number; sortBy: "asc" | "desc" }
+  ) => {
+    return Promise.all([
+      prisma.order.findMany({
+        where: { userId },
+        orderBy: { createdAt: filter.sortBy },
+        include: {
+          _count: {
+            select: {
+              details: true,
+            },
+          },
+        },
+        take: filter.limit,
+        skip: filter.limit * (filter.page - 1),
+      }),
+      prisma.order.count({ where: { userId } }),
+    ]);
+  };
 }
 export default new OrderRepository();

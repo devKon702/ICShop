@@ -11,6 +11,7 @@ import {
   seenOrderTimelineSchema,
   updateTimelineDescSchema,
   getOrdersByProductIdSchema,
+  adminGetOrderByUserSchema,
 } from "../schemas/order.schema";
 import wholesaleRepository from "../repositories/wholesale.repository";
 import { AppError } from "../errors/app-error";
@@ -22,6 +23,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 import addressRepository from "../repositories/address.repository";
 import { NotFoundError } from "../errors/not-found-error";
 import productRepository from "../repositories/product.repository";
+import { findByIdSchema } from "../schemas/shared.schema";
 
 class OrderController {
   // USER
@@ -417,6 +419,29 @@ class OrderController {
           OrderResponseCode.OK,
           "Lấy đơn hàng theo sản phẩm thành công",
           orders
+        )
+      );
+  };
+
+  public adminGetOrderByUser = async (req: Request, res: Response) => {
+    const {
+      params: { id },
+      query: { page, limit, sortBy },
+    } = adminGetOrderByUserSchema.parse(req);
+    const [orders, total] = await orderRepository.findByUserId(id, {
+      page,
+      limit,
+      sortBy,
+    });
+
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          OrderResponseCode.OK,
+          "Lấy đơn hàng theo người dùng thành công",
+          orders,
+          { page, limit, total }
         )
       );
   };

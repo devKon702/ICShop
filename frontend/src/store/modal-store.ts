@@ -75,7 +75,19 @@ type ModalType =
   | Modal<"qrCode", { qrString: string; amount: number }>
   | Modal<"adminOrderDetail", { orderId: number }>
   | Modal<"changeOrderStatus", { orderId: number; currentStatus: number }>
-  | Modal<"addToHighlight", { productId: number }>;
+  | Modal<"addToHighlight", { productId: number }>
+  | Modal<
+      "userOrders",
+      {
+        user: {
+          id: number;
+          name: string;
+          email: string;
+          phone: string | null;
+          avatarUrl: string | null;
+        };
+      }
+    >;
 
 interface modalState {
   modal: ModalType[];

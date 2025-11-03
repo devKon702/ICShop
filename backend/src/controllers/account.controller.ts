@@ -9,7 +9,7 @@ import {
   ChangePasswordIType,
   filterAccountSchema,
   getAccountInfoSchema,
-  lockAccountSchema,
+  changeAccountStatusSchema,
 } from "../schemas/account.schema";
 import { UserResponseCode } from "../constants/codes/user.code";
 import { AccountResponseCode } from "../constants/codes/account.code";
@@ -143,11 +143,11 @@ class AccountController {
     );
   };
 
-  public lockAccount = async (req: Request, res: Response) => {
+  public changeStatus = async (req: Request, res: Response) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
       body: { accountId, isActive },
-    } = lockAccountSchema.parse(req);
+    } = changeAccountStatusSchema.parse(req);
 
     // Kiểm tra tự khóa bản thân
     if (sub === accountId)
@@ -168,17 +168,21 @@ class AccountController {
       );
     }
     // Kiểm tra có cần đổi isActive không
-    if (account.isActive != isActive) {
-      await accountRepository.lock(accountId, isActive, sub);
-    }
-    res
-      .status(HttpStatus.OK)
-      .json(
-        successResponse(
-          AccountResponseCode.OK,
-          `${isActive ? "Mở khóa" : "Khóa"} tài khoản thành công`
-        )
-      );
+    const result =
+      account.isActive === isActive
+        ? account
+        : await accountRepository.changeStatus(accountId, isActive, sub);
+
+    res.status(HttpStatus.OK).json(
+      successResponse(
+        AccountResponseCode.OK,
+        isActive ? "Mở khóa tài khoản thành công" : "Khóa tài khoản thành công",
+        sanitizeData(result, {
+          useDefault: false,
+          removeFields: ["password"],
+        })
+      )
+    );
     return;
   };
 }

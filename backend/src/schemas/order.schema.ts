@@ -178,3 +178,14 @@ export const adminFilterOrdersSchema = z.object({
       .default("create_desc"),
   }),
 });
+
+export const adminGetOrderByUserSchema = requestSchema({
+  params: z.object({
+    id: z.coerce.number().min(1, "ID người dùng không hợp lệ"),
+  }),
+  query: z.object({
+    page: z.coerce.number().min(1).default(1),
+    limit: z.coerce.number().min(1).default(10),
+    sortBy: z.enum(["asc", "desc"]).default("desc"),
+  }),
+});

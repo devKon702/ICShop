@@ -144,6 +144,24 @@ const orderService = {
           })
         )
       ),
+
+    getByUserId: (
+      userId: number,
+      filter: { page: number; limit: number; sortBy: "asc" | "desc" }
+    ) => {
+      const query = new URLSearchParams();
+      query.append("page", filter.page.toString());
+      query.append("limit", filter.limit.toString());
+      query.append("sortBy", filter.sortBy);
+      return axiosHandler(
+        apiAxios.get(`/v1/admin/order/user/${userId}?${query.toString()}`),
+        PaginatedResponseSchema(
+          OrderBaseSchema.extend({
+            _count: z.object({ details: z.number() }),
+          })
+        )
+      );
+    },
   },
 };
 

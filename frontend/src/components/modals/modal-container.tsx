@@ -21,6 +21,7 @@ import ProductDetail from "@/components/features/product/admin/product-detail";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import AddToHighlight from "@/components/features/product/admin/forms/add-to-highlight";
+import AdminUserOrders from "@/components/features/order/admin/admin-user-orders";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -171,6 +172,12 @@ export default function ModalContainer() {
                       orderId={item.props.orderId}
                       currentStatus={item.props.currentStatus}
                     />
+                  </FormModal>
+                );
+              case "userOrders":
+                return (
+                  <FormModal title="Đơn hàng người dùng" index={index}>
+                    <AdminUserOrders user={item.props.user} />
                   </FormModal>
                 );
               default:

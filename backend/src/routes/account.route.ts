@@ -6,7 +6,7 @@ import {
   changePasswordSchema,
   filterAccountSchema,
   getAccountInfoSchema,
-  lockAccountSchema,
+  changeAccountStatusSchema,
 } from "../schemas/account.schema";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
@@ -47,13 +47,13 @@ accountRouter.patch(
   accountController.changePassword
 );
 
-// PATCH /account/lock
+// PATCH /account/status
 accountRouter.patch(
-  path + "/lock",
+  path + "/status",
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  validate(lockAccountSchema),
-  accountController.lockAccount
+  validate(changeAccountStatusSchema),
+  accountController.changeStatus
 );
 
 export default accountRouter;

@@ -12,7 +12,11 @@ import env from "@/constants/env";
 import { cn } from "@/utils/className";
 import { Button } from "@/components/ui/button";
 import { formatIsoDateTime } from "@/utils/date";
-
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import accountService from "@/libs/services/account.service";
+import { toast } from "sonner";
+import { Lock, LockOpen, SquareMenu } from "lucide-react";
+import { useModalActions } from "@/store/modal-store";
 interface Props {
   accounts: {
     id: number;
@@ -29,6 +33,26 @@ interface Props {
 }
 
 export default function AccountTable({ accounts }: Props) {
+  const { openModal } = useModalActions();
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: (data: { accountId: number; isActive: boolean }) =>
+      accountService.changeStatus({
+        accountId: data.accountId,
+        isActive: data.isActive,
+      }),
+    onSuccess: (data) => {
+      toast.success(
+        `${data.data.isActive ? "Mở khóa" : "Khóa"} tài khoản ${
+          data.data.email
+        } thành công.`
+      );
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+    },
+    onError: (e) => {
+      toast.error(e.message || "Thay đổi trạng thái tài khoản thất bại.");
+    },
+  });
   return (
     <Table>
       <TableHeader>
@@ -72,13 +96,52 @@ export default function AccountTable({ accounts }: Props) {
                       : "bg-red-100 text-red-700"
                   )}
                 >
-                  {account.isActive ? "Đang hoạt động" : "Đã khoá"}
+                  {account.isActive ? "Hoạt động" : "Khoá"}
                 </span>
               </TableCell>
               <TableCell>
-                <Button variant="outline" size="sm">
-                  {account.isActive ? "Khoá" : "Mở khoá"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (
+                        confirm(
+                          `Bạn có chắc muốn ${
+                            account.isActive ? "khóa" : "mở khóa"
+                          } tài khoản ${account.email} không?`
+                        )
+                      ) {
+                        mutate({
+                          accountId: account.id,
+                          isActive: !account.isActive,
+                        });
+                      }
+                    }}
+                  >
+                    {account.isActive ? <Lock /> : <LockOpen />}
+                  </Button>
+                  <Button
+                    className="bg-primary/10 text-primary hover:bg-primary/20"
+                    size="sm"
+                    onClick={() => {
+                      openModal({
+                        type: "userOrders",
+                        props: {
+                          user: {
+                            id: account.id,
+                            name: account.user.name,
+                            email: account.email,
+                            phone: account.user.phone,
+                            avatarUrl: account.user.avatarUrl,
+                          },
+                        },
+                      });
+                    }}
+                  >
+                    <SquareMenu />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))

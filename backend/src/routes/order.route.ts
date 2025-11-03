@@ -14,6 +14,7 @@ import {
   seenOrderTimelineSchema,
   updateTimelineDescSchema,
   getOrdersByProductIdSchema,
+  adminGetOrderByUserSchema,
 } from "../schemas/order.schema";
 import { findByIdSchema, idStringSchema } from "../schemas/shared.schema";
 import { get } from "http";
@@ -55,6 +56,15 @@ orderRouter.get(
   authorize([Role.ADMIN]),
   validate(getOrdersByProductIdSchema),
   orderController.adminFindByProductId
+);
+
+// GET /admin/order/user/:id
+orderRouter.get(
+  adminPath + "/user/:id",
+  verifyAccessToken,
+  authorize([Role.ADMIN]),
+  validate(adminGetOrderByUserSchema),
+  orderController.adminGetOrderByUser
 );
 
 // GET /order/:id

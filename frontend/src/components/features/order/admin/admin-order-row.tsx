@@ -30,9 +30,13 @@ interface AdminOrderRowProps {
       phone: string;
     };
   };
+  showUser?: boolean;
 }
 
-export default function AdminOrderRow({ order }: AdminOrderRowProps) {
+export default function AdminOrderRow({
+  order,
+  showUser = true,
+}: AdminOrderRowProps) {
   const [openPopover, setOpenPopover] = React.useState(false);
   const { openModal } = useModalActions();
 
@@ -41,19 +45,23 @@ export default function AdminOrderRow({ order }: AdminOrderRowProps) {
       <TableCell>
         <div>
           <p>{order.code.toUpperCase()}</p>
-          <p>{new Date(order.createdAt).toLocaleString()}</p>
+          <p className="font-semibold text-xs opacity-50">
+            {new Date(order.createdAt).toLocaleString()}
+          </p>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="flex flex-col items-start">
-          <div className="font-semibold">
-            {order.user.name}, {order.user.phone}
+      {showUser && (
+        <TableCell>
+          <div className="flex flex-col items-start">
+            <div className="font-semibold">
+              {order.user.name}, {order.user.phone}
+            </div>
+            <div className="text-xs font-semibold opacity-50">
+              {order.user.email}
+            </div>
           </div>
-          <div className="text-xs font-semibold opacity-50">
-            {order.user.email}
-          </div>
-        </div>
-      </TableCell>
+        </TableCell>
+      )}
       <TableCell>
         <div className="flex flex-col items-start">
           <div className="font-semibold">
@@ -94,23 +102,6 @@ export default function AdminOrderRow({ order }: AdminOrderRowProps) {
             />
           </PopoverContent>
         </Popover>
-        {/* <div
-          className={`rounded-md px-2 py-1 w-fit cursor-pointer ${
-            ORDER_STATUS_OPTIONS.find((item) => item.value === order.status)
-              ?.color
-          }`}
-          onClick={() => {
-            openModal({
-              type: "changeOrderStatus",
-              props: { orderId: order.id, currentStatus: order.status },
-            });
-          }}
-        >
-          {
-            ORDER_STATUS_OPTIONS.find((item) => item.value === order.status)
-              ?.label
-          }
-        </div> */}
       </TableCell>
       <TableCell>
         <div className="flex gap-2 items-center">

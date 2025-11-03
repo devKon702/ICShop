@@ -37,6 +37,12 @@ const accountService = {
       )
     );
   },
+
+  changeStatus: async (data: { accountId: number; isActive: boolean }) =>
+    axiosHandler(
+      apiAxios.patch(`/v1/account/status`, data),
+      ApiResponseSchema(AccountBaseSchema)
+    ),
 };
 
 export default accountService;

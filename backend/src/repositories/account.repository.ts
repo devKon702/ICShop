@@ -139,7 +139,7 @@ class AccountRepository {
     return Promise.all([filterPs, countPs]);
   };
 
-  public lock = async (
+  public changeStatus = async (
     accountId: number,
     isActive: boolean,
     modifierId: number
