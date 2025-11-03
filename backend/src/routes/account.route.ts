@@ -30,7 +30,7 @@ accountRouter.get(
   accountController.getInfo
 );
 
-// GET /account?name=&email=&page=&limit=&role=
+// GET /account?name=&email=&phone=&page=&limit=&role=
 accountRouter.get(
   path,
   verifyAccessToken,

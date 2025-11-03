@@ -34,9 +34,13 @@ export const filterAccountSchema = z.object({
       .string()
       .transform((val) => (val.trim() ? val : undefined))
       .optional(),
-    page: z.coerce.number().min(1, "Số trang phải lớn hơn 0"),
-    limit: z.coerce.number().min(1, "SỐ lượng phải lớn hơn 0"),
+    phone: z.string().optional(),
+    page: z.coerce.number().min(1, "Số trang phải lớn hơn 0").default(1),
+    limit: z.coerce.number().min(1, "Số lượng phải lớn hơn 0").default(10),
     role: z.enum([Role.ADMIN, Role.USER]).default(Role.USER),
+    sortBy: z
+      .enum(["created-asc", "created-desc", "name-asc", "name-desc"])
+      .default("created-desc"),
   }),
 });
 

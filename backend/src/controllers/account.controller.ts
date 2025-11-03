@@ -16,6 +16,7 @@ import { AccountResponseCode } from "../constants/codes/account.code";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 import { Role } from "../constants/db";
 import { http } from "winston";
+import { sanitizeData } from "../utils/sanitize";
 
 class AccountController {
   public getInfo = async (req: Request, res: Response) => {
@@ -117,26 +118,29 @@ class AccountController {
 
   public filter = async (req: Request, res: Response) => {
     const {
-      query: { email, name, limit, page, role },
+      query: { email, name, phone, limit, page, role, sortBy },
     } = filterAccountSchema.parse(req);
 
     const [accounts, count] = await accountRepository.filter({
       email,
       name,
+      phone,
       role,
       page,
       limit,
+      sortBy,
     });
-    res
-      .status(HttpStatus.OK)
-      .json(
-        successResponse(
-          AccountResponseCode.OK,
-          "Lọc tài khoản thành công",
-          accounts,
-          { total: count, page, limit }
-        )
-      );
+    res.status(HttpStatus.OK).json(
+      successResponse(
+        AccountResponseCode.OK,
+        "Lọc tài khoản thành công",
+        sanitizeData(accounts, {
+          useDefault: false,
+          removeFields: ["password"],
+        }),
+        { total: count, page, limit }
+      )
+    );
   };
 
   public lockAccount = async (req: Request, res: Response) => {

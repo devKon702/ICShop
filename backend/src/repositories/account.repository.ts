@@ -1,3 +1,4 @@
+import { start } from "repl";
 import { Role } from "../constants/db";
 import { prisma } from "../prisma";
 
@@ -94,15 +95,19 @@ class AccountRepository {
   public filter = async ({
     email,
     name,
+    phone,
     role,
     page,
     limit,
+    sortBy,
   }: {
     email: string | undefined;
     name: string | undefined;
+    phone: string | undefined;
     role: Role;
     page: number;
     limit: number;
+    sortBy: "created-asc" | "created-desc" | "name-asc" | "name-desc";
   }) => {
     const whereObj = {
       ...(email && { email: { contains: email } }),
@@ -111,26 +116,24 @@ class AccountRepository {
           name: { contains: name },
         },
       }),
+      ...(phone && {
+        user: {
+          phone: { contains: phone },
+        },
+      }),
       role,
     };
     const filterPs = prisma.account.findMany({
       where: whereObj,
-      select: {
-        id: true,
-        email: true,
-        isEmailAuth: true,
-        isGoogleSigned: true,
-        createdAt: true,
-        creatorId: true,
-        modifierId: true,
-        updatedAt: true,
-        version: true,
-        role: true,
-        isActive: true,
-        user: true,
-      },
+      include: { user: true },
       take: limit,
-      skip: limit * (page - 1 < 0 ? 0 : page - 1),
+      skip: limit * (page - 1),
+      orderBy: {
+        ...(sortBy === "created-asc" && { createdAt: "asc" }),
+        ...(sortBy === "created-desc" && { createdAt: "desc" }),
+        ...(sortBy === "name-asc" && { user: { name: "asc" } }),
+        ...(sortBy === "name-desc" && { user: { name: "desc" } }),
+      },
     });
     const countPs = prisma.account.count({ where: whereObj });
     return Promise.all([filterPs, countPs]);
