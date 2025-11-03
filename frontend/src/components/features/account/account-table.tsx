@@ -17,6 +17,7 @@ import accountService from "@/libs/services/account.service";
 import { toast } from "sonner";
 import { Lock, LockOpen, SquareMenu } from "lucide-react";
 import { useModalActions } from "@/store/modal-store";
+import Link from "next/link";
 interface Props {
   accounts: {
     id: number;
@@ -85,7 +86,20 @@ export default function AccountTable({ accounts }: Props) {
               </TableCell>
               <TableCell>{account.email}</TableCell>
               <TableCell>{account.user.name}</TableCell>
-              <TableCell>{account.user.phone || "-"}</TableCell>
+              <TableCell>
+                {account.user.phone ? (
+                  <Link
+                    className="hover:underline cursor-pointer"
+                    title={`Zalo: ${account.user.phone}`}
+                    href={`https://zalo.me/${account.user.phone}`}
+                    target="_blank"
+                  >
+                    {account.user.phone}
+                  </Link>
+                ) : (
+                  "-"
+                )}
+              </TableCell>
               <TableCell>{formatIsoDateTime(account.createdAt)}</TableCell>
               <TableCell>
                 <span
