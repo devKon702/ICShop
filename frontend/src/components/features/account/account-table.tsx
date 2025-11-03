@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Lock, LockOpen, SquareMenu } from "lucide-react";
 import { useModalActions } from "@/store/modal-store";
 import Link from "next/link";
+import { getMailLinkFromEmail, getZaloLinkFromPhone } from "@/utils/string";
 interface Props {
   accounts: {
     id: number;
@@ -84,14 +85,23 @@ export default function AccountTable({ accounts }: Props) {
                   alt={account.user.name}
                 />
               </TableCell>
-              <TableCell>{account.email}</TableCell>
+              <TableCell>
+                <Link
+                  href={getMailLinkFromEmail(account.email) ?? "#"}
+                  className="hover:underline cursor-pointer"
+                  title={`Mail: ${account.email}`}
+                  target="_blank"
+                >
+                  {account.email}
+                </Link>
+              </TableCell>
               <TableCell>{account.user.name}</TableCell>
               <TableCell>
                 {account.user.phone ? (
                   <Link
                     className="hover:underline cursor-pointer"
                     title={`Zalo: ${account.user.phone}`}
-                    href={`https://zalo.me/${account.user.phone}`}
+                    href={getZaloLinkFromPhone(account.user.phone) ?? "#"}
                     target="_blank"
                   >
                     {account.user.phone}
