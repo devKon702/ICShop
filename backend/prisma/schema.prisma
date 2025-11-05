@@ -43,6 +43,7 @@ model Product {
   highlights         ProductHighlight[]
   orderDetails       OrderDetail[]
   cartDetails        CartDetail[]
+  productCollections ProductCollection[]
 
   @@fulltext([name])
   @@index([slug])
@@ -214,7 +215,7 @@ enum HighlightType {
 }
 
 model ProductHighlight {
-  id        Int           @id @default(autoincrement()) @db.UnsignedTinyInt
+  id        Int           @id @default(autoincrement()) @db.UnsignedInt
   /// ID của sản phẩm
   productId Int       @db.UnsignedInt
   product   Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
@@ -228,6 +229,51 @@ model ProductHighlight {
   creator            User              @relation("ProdHighCreated", fields: [creatorId], references: [id])
   modifierId         Int               @db.UnsignedInt
   modifier           User              @relation("ProdHighModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model Collection {
+  id      Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// Tên bộ sưu tập (tiếng Việt)
+  name    String  @db.Text
+  /// Mô tả bộ sưu tập (tiếng Việt)
+  desc    String  @db.Text
+  /// Vị trí hiển thị trong danh sách
+  position  Int       @db.UnsignedTinyInt @default(1)
+  /// Đuôi đường dẫn đến trang bộ sưu tập
+  slug       String     @db.VarChar(150) @unique
+  // Trạng thái hiển thị cho bộ sưu tập
+  isActive           Boolean           @default(true)
+
+  productCollections  ProductCollection[]
+  
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("CollectionCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("CollectionModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model ProductCollection {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  /// ID của sản phẩm
+  productId    Int       @db.UnsignedInt
+  /// ID của bộ sưu tập
+  collectionId Int       @db.UnsignedInt
+  /// Vị trí hiển thị trong bộ sưu tập
+  position     Int       @db.UnsignedTinyInt @default(1)
+
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("ProductCollectionCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("ProductCollectionModified", fields: [modifierId], references: [id])
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 }
@@ -320,6 +366,14 @@ model User {
   // ProductHighlight
   ProductHighlightCreateds ProductHighlight[] @relation("ProdHighCreated") 
   ProductHighlightModifieds ProductHighlight[] @relation("ProdHighModified") 
+
+  // Collection
+  CollectionCreateds Collection[] @relation("CollectionCreated") 
+  CollectionModifieds Collection[] @relation("CollectionModified")
+
+  // ProductCollection
+  ProductCollectionCreateds ProductCollection[] @relation("ProductCollectionCreated") 
+  ProductCollectionModifieds ProductCollection[] @relation("ProductCollectionModified")
 
   // Account
   AccountCreateds Account[] @relation("AccountCreated") 
