@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import AddToHighlight from "@/components/features/product/admin/forms/add-to-highlight";
 import AdminUserOrders from "@/components/features/order/admin/admin-user-orders";
+import CreateCollectionForm from "@/components/features/collection/create-collection-form";
+import AddToCollection from "@/components/features/product/admin/forms/add-to-collection";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -107,6 +109,16 @@ export default function ModalContainer() {
                     <AddToHighlight productId={item.props.productId} />
                   </FormModal>
                 );
+              case "addToCollection":
+                return (
+                  <FormModal
+                    title="Thêm vào bộ sưu tập"
+                    index={index}
+                    useCloseButton
+                  >
+                    <AddToCollection productId={item.props.productId} />
+                  </FormModal>
+                );
               case "imageCropper":
                 return (
                   <FormModal title="Chỉnh sửa ảnh" index={index}>
@@ -178,6 +190,12 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Đơn hàng người dùng" index={index}>
                     <AdminUserOrders user={item.props.user} />
+                  </FormModal>
+                );
+              case "createCollection":
+                return (
+                  <FormModal title="Tạo bộ sưu tập" index={index}>
+                    <CreateCollectionForm {...item.props} />
                   </FormModal>
                 );
               default:

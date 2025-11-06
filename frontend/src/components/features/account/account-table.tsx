@@ -128,6 +128,9 @@ export default function AccountTable({ accounts }: Props) {
                   <Button
                     variant="outline"
                     size="sm"
+                    title={
+                      account.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"
+                    }
                     onClick={() => {
                       if (
                         confirm(
@@ -148,6 +151,7 @@ export default function AccountTable({ accounts }: Props) {
                   <Button
                     className="bg-primary/10 text-primary hover:bg-primary/20"
                     size="sm"
+                    title="Các đơn hàng đã đặt"
                     onClick={() => {
                       openModal({
                         type: "userOrders",

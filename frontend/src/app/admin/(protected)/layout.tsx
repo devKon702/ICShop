@@ -18,7 +18,7 @@ const pageTitles = [
   { href: ROUTE.adminCategory, title: "Quản lí danh mục" },
   { href: ROUTE.adminProduct, title: "Quản lí sản phẩm" },
   { href: ROUTE.adminHighlight, title: "Quản lí sản phẩm nổi bật" },
-  { href: ROUTE.adminShowcase, title: "Quản lí sản phẩm trưng bày" },
+  { href: ROUTE.adminCollection, title: "Quản lí bộ sưu tập" },
   { href: ROUTE.adminUser, title: "Quản lí người dùng" },
 ];
 
@@ -74,7 +74,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <section className="w-1/6">
             <AdminSidebar></AdminSidebar>
           </section>
-          <section className="flex-1 overflow-auto app px-4 py-2">
+          <section className="flex-1 overflow-auto app px-4 py-2 flex flex-col">
             <div className="flex items-center justify-between mb-4 rounded-lg">
               <h1 className="font-bold text-2xl">
                 {pageTitles.find((item) => item.href == pathname)?.title}
@@ -82,8 +82,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center space-x-2">
                 <span className="font-semibold">{data?.data.user.name}</span>
                 <SafeImage
-                  key={data?.data.user.avatarUrl || ""}
-                  src={data?.data.user.avatarUrl || ""}
+                  key={data?.data.user.avatarUrl}
+                  src={
+                    !!data?.data.user.avatarUrl
+                      ? data?.data.user.avatarUrl
+                      : undefined
+                  }
+                  appFileBase
+                  avatarPlaceholderName={data?.data.user.name}
                   alt="Avatar"
                   height={40}
                   width={40}

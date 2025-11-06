@@ -44,7 +44,10 @@ class CollectionController {
     );
   };
 
-  public adminGetCollections = async (req: Request, res: Response) => {
+  public adminGetCollectionsWithProducts = async (
+    req: Request,
+    res: Response
+  ) => {
     const collections = await collectionRepository.findMany({
       orderBy: "asc",
       product: {
@@ -63,7 +66,7 @@ class CollectionController {
       );
   };
 
-  public adminGetSimpleCollections = async (req: Request, res: Response) => {
+  public adminGetCollections = async (req: Request, res: Response) => {
     const collections = await collectionRepository.findMany({
       orderBy: "asc",
     });

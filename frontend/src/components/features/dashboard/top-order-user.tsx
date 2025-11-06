@@ -2,12 +2,14 @@ import SafeImage from "@/components/common/safe-image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import env from "@/constants/env";
 import statisticsService from "@/libs/services/statistics.service";
+import { useModalActions } from "@/store/modal-store";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, Phone } from "lucide-react";
 import React from "react";
-import { toast } from "sonner";
 
 export default function TopOrderUser() {
+  const { openModal } = useModalActions();
+
   const { data } = useQuery({
     queryKey: ["statistics", "order", "top-users"],
     queryFn: async () =>
@@ -55,7 +57,20 @@ export default function TopOrderUser() {
                 </div>
                 <div
                   className="ml-auto text-sm text-muted-foreground hover:underline cursor-pointer"
-                  onClick={() => toast.info("Đang phát triển")}
+                  onClick={() => {
+                    openModal({
+                      type: "userOrders",
+                      props: {
+                        user: {
+                          id: item.user.id,
+                          name: item.user.name,
+                          email: item.user.account.email,
+                          phone: item.user.phone,
+                          avatarUrl: item.user.avatarUrl,
+                        },
+                      },
+                    });
+                  }}
                 >
                   <span>{item.orderCount} đơn</span>
                 </div>

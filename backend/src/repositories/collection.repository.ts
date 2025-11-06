@@ -75,6 +75,9 @@ class CollectionRepository {
             include: {
               product: {
                 omit: { desc: true },
+                include: {
+                  category: true,
+                },
               },
             },
             take: opts?.limit,

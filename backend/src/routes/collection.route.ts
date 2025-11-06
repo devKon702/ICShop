@@ -16,7 +16,7 @@ const collectionRouter = express.Router();
 
 const path = "/collections";
 const adminPath = "/admin/collections";
-const adminProductCollectionPath = "/admin/product-collection";
+const adminProductCollectionPath = "/admin/product-collections";
 
 // GET /collections
 collectionRouter.get(
@@ -33,12 +33,12 @@ collectionRouter.get(
   collectionController.adminGetCollections
 );
 
-// GET /admin/collections/simple
+// GET /admin/collections/products
 collectionRouter.get(
-  adminPath + "/simple",
+  adminPath + "/products",
   verifyAccessToken,
   authorize([Role.ADMIN]),
-  collectionController.adminGetSimpleCollections
+  collectionController.adminGetCollectionsWithProducts
 );
 
 // POST /admin/collections
@@ -68,7 +68,7 @@ collectionRouter.patch(
   collectionController.updateCollection
 );
 
-// PATCH /admin/product-collection/:id
+// PATCH /admin/product-collections/:id
 collectionRouter.patch(
   adminProductCollectionPath + "/:id",
   verifyAccessToken,
@@ -86,7 +86,7 @@ collectionRouter.delete(
   collectionController.deleteCollection
 );
 
-// DELETE /admin/product-collection/:id
+// DELETE /admin/product-collections/:id
 collectionRouter.delete(
   adminProductCollectionPath + "/:id",
   verifyAccessToken,

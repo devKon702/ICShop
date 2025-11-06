@@ -20,9 +20,9 @@ import {
   Info,
   MoreVertical,
   Pencil,
-  Sun,
+  Shapes,
+  Star,
   Trash,
-  View,
 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
@@ -67,6 +67,7 @@ export default function ProductRow({ product }: Props) {
       });
     },
   });
+
   return (
     <TableRow>
       <TableCell>
@@ -157,12 +158,20 @@ export default function ProductRow({ product }: Props) {
                   });
                 }}
               >
-                <Sun />
+                <Star />
                 Thêm vào nổi bật
               </div>
-              <div className="flex gap-2 hover:bg-background p-2 rounded-md cursor-pointer">
-                <View />
-                Thêm vào trưng bày
+              <div
+                className="flex gap-2 hover:bg-background p-2 rounded-md cursor-pointer"
+                onClick={() => {
+                  openModal({
+                    type: "addToCollection",
+                    props: { productId: product.id },
+                  });
+                }}
+              >
+                <Shapes />
+                Thêm vào bộ sưu tập
               </div>
             </PopoverContent>
           </Popover>

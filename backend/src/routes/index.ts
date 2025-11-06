@@ -13,6 +13,7 @@ import highlightRouter from "./highlight.route";
 import productImageRouter from "./product-image.route";
 import locationRouter from "./location.route";
 import statisticsRouter from "./statistics.route";
+import collectionRouter from "./collection.route";
 
 const router = express.Router();
 
@@ -30,5 +31,6 @@ router.use("/v1", cartRouter);
 router.use("/v1", orderRouter);
 router.use("/v1", locationRouter);
 router.use("/v1", statisticsRouter);
+router.use("/v1", collectionRouter);
 
 export default router;

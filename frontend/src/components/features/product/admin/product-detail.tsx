@@ -192,7 +192,7 @@ function ProductSection({
   icon: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg bg-white shadow overflow-hidden w-full">
+    <section className="rounded-lg bg-white shadow border overflow-hidden w-full">
       <h2 className="text-lg font-semibold flex items-center bg-primary/10 text-primary p-2">
         {icon}
         <span className="ml-2">{title}</span>

@@ -76,6 +76,7 @@ type ModalType =
   | Modal<"adminOrderDetail", { orderId: number }>
   | Modal<"changeOrderStatus", { orderId: number; currentStatus: number }>
   | Modal<"addToHighlight", { productId: number }>
+  | Modal<"addToCollection", { productId: number }>
   | Modal<
       "userOrders",
       {
@@ -87,7 +88,8 @@ type ModalType =
           avatarUrl: string | null;
         };
       }
-    >;
+    >
+  | Modal<"createCollection", { onSuccess?: () => void }>;
 
 interface modalState {
   modal: ModalType[];
