@@ -30,7 +30,7 @@ const SafeImage = ({
         : `https://placehold.co/${width}x${height}.jpg`;
     }
     if (appFileBase) {
-      return new URL(src, env.NEXT_PUBLIC_FILE_URL).href;
+      return new URL(src, env.NEXT_PUBLIC_FILE_URL + "/").href;
     }
     return src;
   });

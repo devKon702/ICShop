@@ -125,7 +125,15 @@ export default function OrderTable({ orders, totalPage }: OrderTableProps) {
                         <QrCode className="text-primary" />
                       </div>
                     )}
-                    <div className="p-1 cursor-pointer">
+                    <div
+                      className="p-1 cursor-pointer"
+                      onClick={() =>
+                        openModal({
+                          type: "adminOrderDetail",
+                          props: { orderId: order.id },
+                        })
+                      }
+                    >
                       <Info />
                     </div>
                     {order.status === OrderStatus.PENDING && (

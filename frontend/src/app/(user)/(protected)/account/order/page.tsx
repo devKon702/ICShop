@@ -38,10 +38,12 @@ export default function OrderPage() {
     order: parseAsStringLiteral(
       orderOptions.map((item) => item.value)
     ).withDefault("create_desc"),
-    from: parseAsIsoDateTime.withDefault(
-      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    ),
-    to: parseAsIsoDateTime.withDefault(new Date()),
+    // from: parseAsIsoDateTime.withDefault(
+    //   new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    // ),
+    // to: parseAsIsoDateTime.withDefault(new Date()),
+    from: parseAsIsoDateTime,
+    to: parseAsIsoDateTime,
   });
   const { data } = useQuery({
     queryKey: ["orders", { ...query }],
@@ -51,8 +53,8 @@ export default function OrderPage() {
         limit: query.limit,
         order: query.order,
         status: query.status ?? undefined,
-        from: query.from.toISOString(),
-        to: query.to.toISOString(),
+        from: query.from?.toISOString(),
+        to: query.to?.toISOString(),
       }),
   });
   return (

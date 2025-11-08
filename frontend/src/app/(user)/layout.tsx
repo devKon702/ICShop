@@ -14,8 +14,10 @@ export default async function UserLayout({
   return (
     <UserProvider>
       <>
-        <Header></Header>
-        <CategoryBar></CategoryBar>
+        <div className="sticky top-0 z-50">
+          <Header></Header>
+          <CategoryBar></CategoryBar>
+        </div>
         <TopBreadcrump></TopBreadcrump>
         <div className="mx-24 my-2">{children}</div>
         <Footer></Footer>

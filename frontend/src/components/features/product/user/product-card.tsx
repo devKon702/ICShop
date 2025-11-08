@@ -10,7 +10,7 @@ interface ProductCardProps {
   product: {
     id: number;
     name: string;
-    posterUrl: string;
+    posterUrl: string | null;
     price: number;
     slug: string;
   };
@@ -21,25 +21,26 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <Link
-      target="_blank"
       href={`${ROUTE.product}/${slug}`}
-      className="flex flex-col space-y-3 rounded-sm cursor-pointer bg-white border py-2 px-3 hover:border-primary"
+      className="flex h-full flex-col space-y-1 rounded-sm cursor-pointer bg-white border hover:border-primary"
     >
-      <div className="w-full h-36">
+      <div className="w-full aspect-square overflow-hidden">
         <SafeImage
           src={`${env.NEXT_PUBLIC_FILE_URL}/${posterUrl}`}
           alt={name}
-          width={100}
-          height={100}
-          className="w-full h-full object-cover"
-        ></SafeImage>
+          width={200}
+          height={200}
+          className="size-full object-cover hover:scale-110 transition-all duration-300"
+        />
       </div>
-      <ClampText
-        text={name}
-        lines={2}
-        className="hover:text-primary text-sm"
-      ></ClampText>
-      <p className="font-bold mt-auto">{formatPrice(price) + "đ"}</p>
+      <div className="flex flex-col px-2 py-1 space-y-2 flex-1">
+        <ClampText
+          text={name}
+          lines={2}
+          className="hover:text-primary text-sm font-semibold"
+        />
+        <p className="font-bold mt-auto ml-auto">{formatPrice(price) + " đ"}</p>
+      </div>
     </Link>
   );
 }

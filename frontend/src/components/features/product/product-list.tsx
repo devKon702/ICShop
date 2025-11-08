@@ -1,4 +1,4 @@
-import ProductCard from "@/components/features/product/product-card";
+import ProductCard from "@/components/features/product/user/product-card";
 import React from "react";
 
 interface ProductListProps {

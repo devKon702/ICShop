@@ -16,7 +16,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import accountService from "@/libs/services/account.service";
 import { authService } from "@/libs/services/auth.service";
 import SafeImage from "@/components/common/safe-image";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, UserCircle } from "lucide-react";
 import Separator from "@/components/common/separator";
 import ClampText from "@/components/common/clamp-text";
 import cartService from "@/libs/services/cart.service";
@@ -73,6 +73,7 @@ export default function Header() {
         <Link
           href={ROUTE.cart}
           className="relative cursor-pointer flex flex-col items-center"
+          title="Giỏ hàng"
         >
           <ShoppingCart className="size-10 p-2 hover:bg-black/10 rounded-full transition-all duration-500" />
           <div className="absolute top-0 right-0 translate-x-1/5 -translate-y-1/5 text-xs bg-red-500 text-white font-bold px-1 rounded-full">
@@ -91,7 +92,7 @@ export default function Header() {
                   width={40}
                   height={40}
                   className="rounded-full aspect-square"
-                ></SafeImage>
+                />
               </div>
             </HoverCardTrigger>
 
@@ -129,6 +130,7 @@ export default function Header() {
         ) : (
           <div
             className="cursor-pointer text-center"
+            title="Đăng nhập"
             onClick={() =>
               openModal({
                 type: "auth",
@@ -140,8 +142,7 @@ export default function Header() {
               })
             }
           >
-            <i className="bx bxs-user-circle text-4xl"></i>
-            {/* <p className="text-sm text-nowrap">Đăng nhập</p> */}
+            <UserCircle className="size-10 p-2 hover:bg-black/10 rounded-full transition-all duration-500" />
           </div>
         )}
       </div>

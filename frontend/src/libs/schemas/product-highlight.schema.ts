@@ -17,4 +17,13 @@ export const ProductHighlightBaseSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
+
+export const SafeProductHighlightBaseSchema = ProductHighlightBaseSchema.omit({
+  version: true,
+  creatorId: true,
+  modifierId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type ProductHighlight = z.infer<typeof ProductHighlightBaseSchema>;

@@ -13,33 +13,6 @@ import { useQuery } from "@tanstack/react-query";
 import { LucideAlertCircle } from "lucide-react";
 import React from "react";
 
-// const statusItems = {
-//   [OrderStatus.CANCELED]: {
-//     label: "Đã hủy",
-//     className: "bg-red-100 text-red-500 bg-red-500/10",
-//   },
-//   [OrderStatus.PENDING]: {
-//     label: "Chờ xác nhận",
-//     className: "bg-yellow-100 text-yellow-500 bg-yellow-500/10",
-//   },
-//   [OrderStatus.PAID]: {
-//     label: "Đã thanh toán",
-//     className: "bg-green-100 text-green-500 bg-green-500/10",
-//   },
-//   [OrderStatus.PROCESSING]: {
-//     label: "Đang xử lí",
-//     className: "bg-blue-100 text-blue-500 bg-blue-500/10",
-//   },
-//   [OrderStatus.SHIPPING]: {
-//     label: "Đang giao",
-//     className: "bg-indigo-100 text-indigo-500 bg-indigo-500/10",
-//   },
-//   [OrderStatus.DONE]: {
-//     label: "Hoàn thành",
-//     className: "bg-gray-100 text-gray-500 bg-gray-500/10",
-//   },
-// };
-
 interface AdminOrderDetailProps {
   orderId: number;
 }

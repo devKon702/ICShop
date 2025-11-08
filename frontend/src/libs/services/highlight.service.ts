@@ -4,7 +4,10 @@ import {
   CategoryBaseSchema,
   SafeCategoryBaseSchema,
 } from "@/libs/schemas/category.schema";
-import { ProductHighlightBaseSchema } from "@/libs/schemas/product-highlight.schema";
+import {
+  ProductHighlightBaseSchema,
+  SafeProductHighlightBaseSchema,
+} from "@/libs/schemas/product-highlight.schema";
 import {
   ProductBaseSchema,
   SafeProductBaseSchema,
@@ -67,8 +70,10 @@ const highlightService = {
                 HighlightType.BEST_SELL,
               ]),
               list: z.array(
-                SafeProductBaseSchema.extend({
-                  category: SafeCategoryBaseSchema,
+                SafeProductHighlightBaseSchema.extend({
+                  product: SafeProductBaseSchema.omit({ desc: true }).extend({
+                    category: SafeCategoryBaseSchema,
+                  }),
                 })
               ),
             })

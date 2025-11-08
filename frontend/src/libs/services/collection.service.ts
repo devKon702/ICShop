@@ -1,6 +1,9 @@
 import apiAxios from "@/libs/api/api-axios";
 import { apiFetch } from "@/libs/api/api-fetch";
-import { CategoryBaseSchema } from "@/libs/schemas/category.schema";
+import {
+  CategoryBaseSchema,
+  SafeCategoryBaseSchema,
+} from "@/libs/schemas/category.schema";
 import {
   CollectionBaseSchema,
   SafeCollectionBaseSchema,
@@ -100,7 +103,9 @@ const collectionService = {
             SafeCollectionBaseSchema.extend({
               productCollections: z.array(
                 SafeProductCollectionBaseSchema.extend({
-                  product: SafeProductBaseSchema.omit({ desc: true }),
+                  product: SafeProductBaseSchema.omit({ desc: true }).extend({
+                    category: SafeCategoryBaseSchema,
+                  }),
                 })
               ),
             })

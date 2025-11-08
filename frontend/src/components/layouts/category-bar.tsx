@@ -19,7 +19,7 @@ export default function CategoryBar() {
 
   if (!data) return null;
   return (
-    <ul className="flex flex-wrap justify-center space-x-1 py-2 bg-white">
+    <ul className="flex flex-wrap justify-center space-x-1 py-2 bg-white shadow-md">
       {data.data.map((item, idx) => (
         <Popover
           key={item.id}

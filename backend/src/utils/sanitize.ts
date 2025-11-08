@@ -1,3 +1,4 @@
+import { Decimal } from "@prisma/client/runtime/library";
 import createDOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 
@@ -55,6 +56,10 @@ export function sanitizeData<T>(
     if (value instanceof Date) {
       // preserve Date objects (copy to avoid mutation)
       return new Date(value.getTime());
+    }
+    // preserve Decimal objects
+    if (value instanceof Decimal) {
+      return value;
     }
 
     if (value && typeof value === "object") {
