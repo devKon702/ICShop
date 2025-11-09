@@ -62,7 +62,9 @@ class OrderRepository {
         details: {
           include: {
             product: {
-              select: { id: true, posterUrl: true, name: true, slug: true },
+              omit: {
+                desc: true,
+              },
             },
           },
         },

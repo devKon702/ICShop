@@ -65,7 +65,7 @@ export default function UpdateAddressForm({ address }: UpdateAddressFormProps) {
       addressService.update(address.id, data),
     onSuccess: () => {
       toast.success("Cập nhật địa chỉ thành công");
-      queryClient.invalidateQueries({ queryKey: ["address"] });
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
       closeModal();
     },
     onError: (err) => {

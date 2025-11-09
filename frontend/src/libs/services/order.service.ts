@@ -1,9 +1,15 @@
 import { DeliveryType, OrderStatus } from "@/constants/enums";
 import apiAxios from "@/libs/api/api-axios";
-import { OrderDetailSchema } from "@/libs/schemas/order-detail.schema";
+import {
+  OrderDetailSchema,
+  SafeOrderDetailSchema,
+} from "@/libs/schemas/order-detail.schema";
 import { OrderTimelineBaseSchema } from "@/libs/schemas/order-timeline.schema";
 import { OrderBaseSchema } from "@/libs/schemas/order.schema";
-import { ProductBaseSchema } from "@/libs/schemas/product.schema";
+import {
+  ProductBaseSchema,
+  SafeProductBaseSchema,
+} from "@/libs/schemas/product.schema";
 import {
   ApiResponseSchema,
   PaginatedResponseSchema,
@@ -61,7 +67,11 @@ const orderService = {
         apiAxios.get(`/v1/order/${id}`),
         ApiResponseSchema(
           OrderBaseSchema.extend({
-            details: z.array(OrderDetailSchema),
+            details: z.array(
+              SafeOrderDetailSchema.extend({
+                product: SafeProductBaseSchema.omit({ desc: true }),
+              })
+            ),
             timelines: z.array(OrderTimelineBaseSchema),
           })
         )

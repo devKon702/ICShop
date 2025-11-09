@@ -24,6 +24,9 @@ import AddToHighlight from "@/components/features/product/admin/forms/add-to-hig
 import AdminUserOrders from "@/components/features/order/admin/admin-user-orders";
 import CreateCollectionForm from "@/components/features/collection/create-collection-form";
 import AddToCollection from "@/components/features/product/admin/forms/add-to-collection";
+import UserOrderDetail from "@/components/features/order/user/user-order-detail";
+import AddressSelector from "@/components/features/address/address-selector";
+import SelectAddressForm from "@/components/features/address/select-address-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -175,6 +178,21 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Chi tiết đơn hàng" index={index}>
                     <AdminOrderDetail orderId={item.props.orderId} />
+                  </FormModal>
+                );
+              case "userOrderDetail":
+                return (
+                  <FormModal title="Chi tiết đơn hàng" index={index}>
+                    <UserOrderDetail orderId={item.props.orderId} />
+                  </FormModal>
+                );
+              case "selectAddress":
+                return (
+                  <FormModal title="Chọn địa chỉ" index={index} useCloseButton>
+                    <SelectAddressForm
+                      onSelect={item.props.onSelect}
+                      onSubmit={item.props.onSubmit}
+                    />
                   </FormModal>
                 );
               case "changeOrderStatus":

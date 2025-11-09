@@ -38,7 +38,7 @@ class CollectionController {
         "Lấy danh sách bộ sưu tập thành công",
         sanitizeData(collections, {
           useDefault: true,
-          removeFields: ["isActive"],
+          omit: ["isActive"],
         })
       )
     );

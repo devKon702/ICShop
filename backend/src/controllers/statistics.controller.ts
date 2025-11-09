@@ -122,7 +122,7 @@ class StatisticsController {
         StatisticsResponseCode.OK,
         "Lấy thống kê người dùng theo số lượng đơn hàng thành công",
         sanitizeData(result, {
-          removeFields: ["password"],
+          omit: ["password"],
           useDefault: false,
         })
       )

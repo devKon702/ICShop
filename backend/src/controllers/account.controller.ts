@@ -136,7 +136,7 @@ class AccountController {
         "Lọc tài khoản thành công",
         sanitizeData(accounts, {
           useDefault: false,
-          removeFields: ["password"],
+          omit: ["password"],
         }),
         { total: count, page, limit }
       )
@@ -179,7 +179,7 @@ class AccountController {
         isActive ? "Mở khóa tài khoản thành công" : "Khóa tài khoản thành công",
         sanitizeData(result, {
           useDefault: false,
-          removeFields: ["password"],
+          omit: ["password"],
         })
       )
     );

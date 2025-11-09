@@ -21,4 +21,13 @@ export const OrderDetailSchema = z.object({
   createdAt: DateTimeSchema,
   updatedAt: DateTimeSchema,
 });
+
+export const SafeOrderDetailSchema = OrderDetailSchema.omit({
+  creatorId: true,
+  modifierId: true,
+  version: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type OrderDetail = z.infer<typeof OrderDetailSchema>;

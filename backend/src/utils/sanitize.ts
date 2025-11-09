@@ -28,9 +28,9 @@ export function sanitizeHtml(html: string): string {
 
 export function sanitizeData<T>(
   data: T,
-  options: { useDefault?: boolean; removeFields: string[] } = {
+  options: { useDefault?: boolean; omit: string[] } = {
     useDefault: true,
-    removeFields: [],
+    omit: [],
   }
 ): Partial<T> {
   const defaultFields = options.useDefault
@@ -46,7 +46,7 @@ export function sanitizeData<T>(
     : [];
 
   const sensitiveFields = [
-    ...new Set([...defaultFields, ...options.removeFields]),
+    ...new Set([...defaultFields, ...options.omit]),
   ] as const;
 
   function handle(value: any): any {

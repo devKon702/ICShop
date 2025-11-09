@@ -79,6 +79,13 @@ type ModalType =
   | Modal<"addToHighlight", { productId: number }>
   | Modal<"addToCollection", { productId: number }>
   | Modal<
+      "selectAddress",
+      {
+        onSelect?: (addressId: number) => void;
+        onSubmit: (addressId: number) => void;
+      }
+    >
+  | Modal<
       "userOrders",
       {
         user: {

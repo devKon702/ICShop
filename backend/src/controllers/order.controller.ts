@@ -24,6 +24,7 @@ import addressRepository from "../repositories/address.repository";
 import { NotFoundError } from "../errors/not-found-error";
 import productRepository from "../repositories/product.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
+import { sanitizeData } from "../utils/sanitize";
 
 class OrderController {
   // USER
@@ -175,19 +176,21 @@ class OrderController {
     } = getOrderByIdSchema.parse(req);
     const order = await orderRepository.findByIdAndUserId(id, sub);
     if (!order)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        OrderResponseCode.NOT_FOUND,
+      throw new NotFoundError(
         "Không tìm thấy đơn hàng",
-        true
+        OrderResponseCode.NOT_FOUND
       );
+    const responseBody = {
+      ...order,
+      details: sanitizeData(order.details, { omit: ["desc"] }),
+    };
     res
       .status(HttpStatus.OK)
       .json(
         successResponse(
           OrderResponseCode.OK,
           "Lấy thông tin đơn hàng thành công",
-          order
+          responseBody
         )
       );
   };

@@ -129,7 +129,7 @@ export default function OrderTable({ orders, totalPage }: OrderTableProps) {
                       className="p-1 cursor-pointer"
                       onClick={() =>
                         openModal({
-                          type: "adminOrderDetail",
+                          type: "userOrderDetail",
                           props: { orderId: order.id },
                         })
                       }

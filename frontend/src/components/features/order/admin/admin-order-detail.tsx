@@ -84,12 +84,12 @@ export default function AdminOrderDetail({ orderId }: AdminOrderDetailProps) {
                   <p className="text-sm font-semibold opacity-50">
                     {data.data.deliveryType === DeliveryType.SHOP
                       ? "Tại cửa hàng"
-                      : new Array([
+                      : [
                           data.data.detail,
                           data.data.commune,
                           data.data.district,
                           data.data.province,
-                        ]).join(", ")}
+                        ].join(", ")}
                   </p>
                 </div>
               </div>

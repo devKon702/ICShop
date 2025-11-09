@@ -2,6 +2,7 @@
 import ClampText from "@/components/common/clamp-text";
 import CustomInput from "@/components/common/custom-input";
 import SafeImage from "@/components/common/safe-image";
+import AddressSelector from "@/components/features/address/address-selector";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -49,7 +50,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
 
   // Queries
   const { data: addressData } = useQuery({
-    queryKey: ["address"],
+    queryKey: ["addresses"],
     queryFn: () => addressService.getMyAddresses(),
   });
 
@@ -98,7 +99,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
   });
 
   return (
-    <div className="flex p-4">
+    <div className="flex p-4 bg-white">
       <div className="space-y-2 min-w-lg">
         <Select
           value={selectedDeliveryType.toString()}
@@ -121,7 +122,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
         </Select>
         {selectedDeliveryType === DeliveryType.POST ? (
           <div>
-            <Select
+            {/* <Select
               onValueChange={(val) => {
                 setSelectedAddressId(Number(val));
               }}
@@ -148,7 +149,23 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+            </Select> */}
+            <AddressSelector
+              data={
+                addressData?.data.map((item) => ({
+                  id: item.id,
+                  alias: item.alias,
+                  detail: item.detail,
+                  wardName: item.ward.name,
+                  districtName: item.district.name,
+                  provinceName: item.province.name,
+                  receiverName: item.receiverName,
+                  receiverPhone: item.receiverPhone,
+                })) || []
+              }
+              onSelect={setSelectedAddressId}
+              defaultValue={selectedAddressId}
+            />
             <Button
               className="cursor-pointer px-2 py-1 rounded-sm ms-auto w-fit mt-2 flex items-center space-x-1"
               onClick={() => openModal({ type: "createAddress", props: {} })}

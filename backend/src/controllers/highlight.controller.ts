@@ -81,7 +81,7 @@ class HighlightController {
       type: item,
       list: sanitizeData(result[index], {
         useDefault: true,
-        removeFields: ["isActive", "desc"],
+        omit: ["isActive", "desc"],
       }),
     }));
 
