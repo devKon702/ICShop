@@ -76,6 +76,30 @@ const orderService = {
           })
         )
       ),
+    cancel: (orderId: number, desc: string) => {
+      return axiosHandler(
+        apiAxios.patch(`/v1/order/${orderId}/cancel`, { desc }),
+        ApiResponseSchema(
+          OrderBaseSchema.extend({
+            timelines: z.array(OrderTimelineBaseSchema),
+          })
+        )
+      );
+    },
+    updateAddress: (
+      orderId: number,
+      data: {
+        deliveryType: DeliveryType;
+        addressId?: number;
+        receiverName?: string;
+        receiverPhone?: string;
+      }
+    ) => {
+      return axiosHandler(
+        apiAxios.patch(`/v1/order/${orderId}/address`, { ...data }),
+        ApiResponseSchema(OrderBaseSchema)
+      );
+    },
   },
   admin: {
     filter: (params: {

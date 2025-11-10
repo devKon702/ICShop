@@ -15,6 +15,7 @@ import {
   updateTimelineDescSchema,
   getOrdersByProductIdSchema,
   adminGetOrderByUserSchema,
+  changeOrderAddressSchema,
 } from "../schemas/order.schema";
 import { findByIdSchema, idStringSchema } from "../schemas/shared.schema";
 import { get } from "http";
@@ -94,13 +95,22 @@ orderRouter.post(
   orderController.create
 );
 
-// POST /order/:id
-orderRouter.post(
+// PATCH /order/:id/cancel
+orderRouter.patch(
   path + "/:id/cancel",
   verifyAccessToken,
   authorize([Role.USER]),
   validate(cancleOrderSchema),
   orderController.cancelOrder
+);
+
+// PATCH /order/:id/address
+orderRouter.patch(
+  path + "/:id/address",
+  verifyAccessToken,
+  authorize([Role.USER]),
+  validate(changeOrderAddressSchema),
+  orderController.updateOrderAddress
 );
 
 // POST /admin/order/timeline

@@ -8,13 +8,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CircleX, Info, QrCode } from "lucide-react";
+import { CircleX, Info, MoreVertical, QrCode } from "lucide-react";
 import { OrderStatus } from "@/constants/enums";
 import ClampText from "@/components/common/clamp-text";
 import { useModalActions } from "@/store/modal-store";
 import { formatPrice } from "@/utils/price";
 import AppPagination from "@/components/common/app-pagination";
 import { parseAsInteger, useQueryState } from "nuqs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import orderService from "@/libs/services/order.service";
+import { toast } from "sonner";
 
 interface OrderTableProps {
   orders: {
@@ -58,8 +66,21 @@ const statusColor = {
 } as const;
 
 export default function OrderTable({ orders, totalPage }: OrderTableProps) {
-  const { openModal } = useModalActions();
+  const { openModal, closeModal } = useModalActions();
   const [page] = useQueryState("page", parseAsInteger.withDefault(1));
+  const queryClient = useQueryClient();
+  const { mutate: cancelOrderMutate } = useMutation({
+    mutationFn: (data: { orderId: number; desc: string }) =>
+      orderService.user.cancel(data.orderId, data.desc),
+    onSuccess: () => {
+      toast.success("Hủy đơn hàng thành công");
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      closeModal();
+    },
+    onError: (e) => {
+      toast.error(e.message || "Hủy đơn hàng thất bại. Vui lòng thử lại.");
+    },
+  });
   return (
     <div className="w-full overflow-x-auto space-y-2">
       <Table>
@@ -108,40 +129,72 @@ export default function OrderTable({ orders, totalPage }: OrderTableProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-2 items-center">
-                    {order.status === OrderStatus.PENDING && (
-                      <div
-                        className="p-1 hover:bg-primary/20 cursor-pointer rounded-md"
-                        onClick={() => {
-                          openModal({
-                            type: "qrCode",
-                            props: {
-                              qrString: order.code,
-                              amount: order.total,
-                            },
-                          });
-                        }}
-                      >
-                        <QrCode className="text-primary" />
-                      </div>
-                    )}
-                    <div
-                      className="p-1 cursor-pointer"
-                      onClick={() =>
-                        openModal({
-                          type: "userOrderDetail",
-                          props: { orderId: order.id },
-                        })
-                      }
+                  <Popover>
+                    <PopoverTrigger className="p-1 rounded-md hover:bg-background cursor-pointer">
+                      <MoreVertical />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="p-2 w-fit"
+                      side="left"
+                      align="start"
                     >
-                      <Info />
-                    </div>
-                    {order.status === OrderStatus.PENDING && (
-                      <div className="p-1 hover:bg-red-100 cursor-pointer rounded-md">
-                        <CircleX className="text-red-500" />
+                      <div
+                        className="p-2 px-2 cursor-pointer hover:bg-background rounded-md flex space-x-2 items-center"
+                        onClick={() =>
+                          openModal({
+                            type: "userOrderDetail",
+                            props: { orderId: order.id },
+                          })
+                        }
+                      >
+                        <Info />
+                        <span>Chi tiết</span>
                       </div>
-                    )}
-                  </div>
+                      {order.status === OrderStatus.PENDING && (
+                        <div
+                          className="p-2 px-2 hover:bg-primary/20 cursor-pointer rounded-md flex space-x-2 items-center"
+                          onClick={() => {
+                            openModal({
+                              type: "qrCode",
+                              props: {
+                                qrString: order.code,
+                                amount: order.total,
+                              },
+                            });
+                          }}
+                        >
+                          <QrCode className="text-primary" />
+                          <span>Thanh toán</span>
+                        </div>
+                      )}
+                      {order.status === OrderStatus.PENDING && (
+                        <div
+                          className="p-2 hover:bg-red-100 cursor-pointer rounded-md flex space-x-2 items-center"
+                          onClick={() => {
+                            openModal({
+                              type: "prompt",
+                              props: {
+                                title: "Hủy đơn hàng",
+                                maxLength: 100,
+                                placeholder: "Lý do hủy đơn hàng...",
+                                onSubmit: (value: string) => {
+                                  if (confirm("Xác nhận hủy đơn hàng này?")) {
+                                    cancelOrderMutate({
+                                      orderId: order.id,
+                                      desc: value,
+                                    });
+                                  }
+                                },
+                              },
+                            });
+                          }}
+                        >
+                          <CircleX className="text-red-500" />
+                          <span>Hủy đơn hàng</span>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
                 </TableCell>
               </TableRow>
             ))

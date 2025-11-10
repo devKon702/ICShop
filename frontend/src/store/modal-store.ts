@@ -1,3 +1,4 @@
+import { DeliveryType } from "@/constants/enums";
 import { CreateAttributeSchema } from "@/libs/schemas/attribute.schema";
 import {
   CategoryBaseSchema,
@@ -79,10 +80,14 @@ type ModalType =
   | Modal<"addToHighlight", { productId: number }>
   | Modal<"addToCollection", { productId: number }>
   | Modal<
-      "selectAddress",
+      "changeOrderAddress",
       {
-        onSelect?: (addressId: number) => void;
-        onSubmit: (addressId: number) => void;
+        order: {
+          id: number;
+          deliveryType: DeliveryType;
+          receiverName?: string;
+          receiverPhone?: string;
+        };
       }
     >
   | Modal<

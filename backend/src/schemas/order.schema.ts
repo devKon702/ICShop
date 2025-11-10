@@ -106,6 +106,30 @@ export const cancleOrderSchema = z.object({
   }),
 });
 
+export const changeOrderAddressSchema = z.object({
+  params: z.object({
+    id: z.coerce.number().min(1, "ID không hợp lệ"),
+  }),
+  body: z
+    .object({
+      deliveryType: z.nativeEnum(DeliveryType),
+      addressId: idStringSchema.optional(),
+      receiverName: z
+        .string()
+        .regex(vietnameseRegex(), "Tên không hợp lệ")
+        .optional(),
+      receiverPhone: z
+        .string()
+        .regex(phoneRegex(), "Số điện thoại không hợp lệ")
+        .optional(),
+    })
+    .refine((data) => {
+      if (data.deliveryType === DeliveryType.POST) return !!data.addressId;
+      if (data.deliveryType === DeliveryType.SHOP)
+        return data.receiverName && data.receiverPhone;
+    }, "Thiếu thông tin nhận hàng"),
+});
+
 export const seenOrderTimelineSchema = z.object({
   params: z.object({
     id: z.coerce.number().min(1, "ID không hợp lệ"),

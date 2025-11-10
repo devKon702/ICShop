@@ -39,7 +39,7 @@ export default function FormModal({
       >
         <DialogDescription></DialogDescription>
         <DialogHeader>
-          {title && (
+          {title ? (
             <>
               <DialogTitle className="font-bold text-2xl px-4 py-2">
                 {title}
@@ -52,6 +52,8 @@ export default function FormModal({
               </DialogTitle>
               <Separator />
             </>
+          ) : (
+            <DialogTitle></DialogTitle>
           )}
         </DialogHeader>
         {children}

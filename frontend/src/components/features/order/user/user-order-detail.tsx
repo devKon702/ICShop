@@ -9,10 +9,9 @@ import orderService from "@/libs/services/order.service";
 import { useModalActions } from "@/store/modal-store";
 import { formatIsoDateTime } from "@/utils/date";
 import { formatPrice } from "@/utils/price";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
 import React from "react";
-import { toast } from "sonner";
 
 interface Props {
   orderId: number;
@@ -20,19 +19,9 @@ interface Props {
 
 export default function UserOrderDetail({ orderId }: Props) {
   const { openModal } = useModalActions();
-  const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["orders", { id: orderId }],
     queryFn: async () => orderService.user.getById(orderId),
-  });
-
-  const { mutate: changeAddressMutate } = useMutation({
-    mutationFn: (addressId: number) => Promise.resolve(addressId),
-    onSuccess: () => {
-      toast.success("Thay đổi địa chỉ thành công");
-
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
   });
 
   if (!data) return null;
@@ -49,12 +38,15 @@ export default function UserOrderDetail({ orderId }: Props) {
               <Button
                 onClick={() =>
                   openModal({
-                    type: "selectAddress",
+                    type: "changeOrderAddress",
                     props: {
-                      onSubmit: async (addressId: number) => {
-                        if (confirm("Xác nhận thay đổi địa chỉ nhận?")) {
-                          changeAddressMutate(addressId);
-                        }
+                      order: {
+                        id: data.data.id,
+                        deliveryType: data.data.deliveryType,
+                        ...(data.data.deliveryType === DeliveryType.SHOP && {
+                          receiverName: data.data.receiverName,
+                          receiverPhone: data.data.receiverPhone,
+                        }),
                       },
                     },
                   })
@@ -108,9 +100,6 @@ export default function UserOrderDetail({ orderId }: Props) {
                 <p className="text-sm font-semibold opacity-50">
                   {formatIsoDateTime(data.data.createdAt)}
                 </p>
-              </div>
-              <div>
-                <p className="font-semibold">Địa chỉ giao hàng:</p>
               </div>
             </div>
           </div>

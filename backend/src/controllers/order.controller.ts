@@ -12,6 +12,7 @@ import {
   updateTimelineDescSchema,
   getOrdersByProductIdSchema,
   adminGetOrderByUserSchema,
+  changeOrderAddressSchema,
 } from "../schemas/order.schema";
 import wholesaleRepository from "../repositories/wholesale.repository";
 import { AppError } from "../errors/app-error";
@@ -57,7 +58,10 @@ class OrderController {
         ? await addressRepository.findById(addressId, sub)
         : null;
     if (deliveryType === DeliveryType.POST && !address)
-      throw new NotFoundError("Địa chỉ không tồn tại");
+      throw new NotFoundError(
+        OrderResponseCode.ADDRESS_NOT_FOUND,
+        "Không tìm thấy địa chỉ"
+      );
 
     // Get unit price + vat for each product
     const productPrices = await Promise.all(
@@ -202,13 +206,21 @@ class OrderController {
     } = cancleOrderSchema.parse(req);
 
     const order = await orderRepository.findById(id);
+    // Check order exist
     if (!order)
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        OrderResponseCode.NOT_FOUND,
+      throw new NotFoundError(
         "Không tìm thấy đơn hàng",
+        OrderResponseCode.NOT_FOUND
+      );
+    // Check order belong to user
+    if (order.userId !== sub)
+      throw new AppError(
+        HttpStatus.FORBIDDEN,
+        OrderResponseCode.FORBIDDEN,
+        "Không có đủ quyền hạn",
         true
       );
+    // Check order status changeable
     if (order.status !== OrderStatus.PENDING) {
       throw new AppError(
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -217,16 +229,10 @@ class OrderController {
         true
       );
     }
-    if (order.userId !== sub)
-      throw new AppError(
-        HttpStatus.FORBIDDEN,
-        OrderResponseCode.FORBIDDEN,
-        "Không có đủ quyền hạn",
-        true
-      );
     const newOrder = await orderRepository.changeOrderStatus(sub, id, {
       desc,
       status: OrderStatus.CANCELED,
+      isRead: true,
     });
     res
       .status(HttpStatus.OK)
@@ -272,6 +278,67 @@ class OrderController {
           OrderResponseCode.OK,
           "Lấy thông báo thành công",
           timelines
+        )
+      );
+  };
+  public updateOrderAddress = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      params: { id },
+      body: { addressId, deliveryType, receiverName, receiverPhone },
+    } = changeOrderAddressSchema.parse(req);
+    const [order, address] = await Promise.all([
+      orderRepository.findById(id),
+      deliveryType === DeliveryType.POST
+        ? addressRepository.findById(addressId ?? 0, sub)
+        : null,
+    ]);
+    if (deliveryType === DeliveryType.POST && !address) {
+      throw new NotFoundError(
+        OrderResponseCode.ADDRESS_NOT_FOUND,
+        "Không tìm thấy địa chỉ"
+      );
+    }
+    if (!order || order.userId !== sub) {
+      throw new NotFoundError(
+        OrderResponseCode.NOT_FOUND,
+        "Không tìm thấy đơn hàng"
+      );
+    }
+    const updatedOrder = await (deliveryType === DeliveryType.POST
+      ? orderRepository.updateOrderById(id, {
+          modifierId: sub,
+          receiverName: address!.receiverName,
+          receiverPhone: address!.receiverPhone,
+          province: address!.province.name,
+          district: address!.district.name,
+          commune: address!.ward.name,
+          detail: address!.detail,
+          deliveryFee: Decimal(0),
+          earliestReceiveTime: new Date(Date.now()),
+          latestReceiveTime: new Date(Date.now()),
+          total: undefined,
+        })
+      : orderRepository.updateOrderById(id, {
+          modifierId: sub,
+          receiverName: receiverName!,
+          receiverPhone: receiverPhone!,
+          province: "",
+          district: "",
+          commune: "",
+          detail: "",
+          deliveryFee: Decimal(0),
+          earliestReceiveTime: undefined,
+          latestReceiveTime: undefined,
+          total: undefined,
+        }));
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          OrderResponseCode.OK,
+          "Cập nhật địa chỉ giao hàng thành công",
+          updatedOrder
         )
       );
   };

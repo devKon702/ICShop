@@ -190,7 +190,7 @@ class OrderRepository {
   public changeOrderStatus = (
     userId: number,
     id: number,
-    data: { status: OrderStatus; desc: string }
+    data: { status: OrderStatus; desc: string; isRead?: boolean }
   ) => {
     return prisma.order.update({
       where: { id },
@@ -201,7 +201,7 @@ class OrderRepository {
         timelines: {
           create: {
             status: data.status,
-            isRead: false,
+            isRead: data.isRead,
             creatorId: userId,
             modifierId: userId,
             desc: data.desc,
@@ -435,6 +435,42 @@ class OrderRepository {
       }),
       prisma.order.count({ where: { userId } }),
     ]);
+  };
+  public updateOrderById = (
+    id: number,
+    data: {
+      modifierId: number;
+      receiverName?: string;
+      receiverPhone?: string;
+      province?: string;
+      district?: string;
+      commune?: string;
+      detail?: string;
+      deliveryFee?: Decimal;
+      deliveryType?: DeliveryType;
+      earliestReceiveTime?: Date;
+      latestReceiveTime?: Date;
+      total?: Decimal;
+    }
+  ) => {
+    return prisma.order.update({
+      where: { id },
+      data: {
+        receiverName: data.receiverName,
+        receiverPhone: data.receiverPhone,
+        province: data.province,
+        district: data.district,
+        commune: data.commune,
+        detail: data.detail,
+        deliveryFee: data.deliveryFee,
+        deliveryType: data.deliveryType,
+        earliestReceiveTime: data.earliestReceiveTime,
+        latestReceiveTime: data.latestReceiveTime,
+        total: data.total,
+        modifierId: data.modifierId,
+        version: { increment: 1 },
+      },
+    });
   };
 }
 export default new OrderRepository();
