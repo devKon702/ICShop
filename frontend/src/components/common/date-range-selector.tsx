@@ -30,22 +30,20 @@ export default function DateRangeSelector({
 
   return (
     <Popover>
-      <PopoverTrigger>
-        <div
-          className={cn(
-            "border rounded-md bg-white cursor-pointer h-full flex items-center justify-center px-2",
-            className
-          )}
-        >
-          <CalendarDays />
-          <span className="flex-1 text-sm">
-            {dateRange
-              ? `${new Intl.DateTimeFormat("vi-VI").format(
-                  dateRange.from
-                )} - ${new Intl.DateTimeFormat("vi-VI").format(dateRange.to)}`
-              : "Chọn khoảng ngày"}
-          </span>
-        </div>
+      <PopoverTrigger
+        className={cn(
+          "border rounded-md bg-white cursor-pointer h-full flex items-center justify-center px-2",
+          className
+        )}
+      >
+        <CalendarDays />
+        <span className="flex-1 text-sm">
+          {dateRange
+            ? `${new Intl.DateTimeFormat("vi-VI").format(
+                dateRange.from
+              )} - ${new Intl.DateTimeFormat("vi-VI").format(dateRange.to)}`
+            : "Chọn khoảng ngày"}
+        </span>
       </PopoverTrigger>
       <PopoverContent>
         <div>
@@ -71,9 +69,14 @@ export default function DateRangeSelector({
                   type="button"
                   className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm cursor-pointer text-nowrap"
                   onClick={() => {
+                    if (shortcut.days === 0) {
+                      setDateRange(undefined);
+                      onChange?.({ from: undefined, to: undefined });
+                      return;
+                    }
                     const to = new Date();
                     const from = new Date();
-                    from.setDate(from.getDate() - (shortcut.days - 1));
+                    from.setDate(from.getDate() - shortcut.days);
                     const range = { from, to };
                     setDateRange(range);
                     onChange?.(range);

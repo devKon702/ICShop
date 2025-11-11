@@ -14,6 +14,12 @@ const accountService = {
       ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema }))
     ),
 
+  updateMe: async (data: { name: string; phone: string; email: string }) =>
+    axiosHandler(
+      apiAxios.put("/v1/account/me", data),
+      ApiResponseSchema(AccountBaseSchema)
+    ),
+
   filter: async (opts: {
     name?: string;
     email?: string;

@@ -1,6 +1,7 @@
 "use client";
 import CustomInput from "@/components/common/custom-input";
 import SafeImage from "@/components/common/safe-image";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -37,6 +38,7 @@ export default function AccountForm() {
       phone: "",
     },
     mode: "onSubmit",
+    disabled: true,
   });
 
   const {} = useQuery({
@@ -55,7 +57,19 @@ export default function AccountForm() {
 
   return (
     <Form {...form}>
-      <form action="" className="w-full flex space-x-4 pb-8">
+      <form
+        action=""
+        className="w-full flex space-x-4 pb-8"
+        onSubmit={form.handleSubmit((data: z.infer<typeof schema>) => {
+          if (confirm("Xác nhận cập nhật thông tin tài khoản?")) {
+            accountService.updateMe({
+              name: data.name,
+              phone: data.phone,
+              email: data.email,
+            });
+          }
+        })}
+      >
         <FormField
           name="avatarUrl"
           control={form.control}
@@ -69,6 +83,7 @@ export default function AccountForm() {
                   <SafeImage
                     src={`${env.NEXT_PUBLIC_FILE_URL}/${field.value}`}
                     alt="Hình đại diện"
+                    avatarPlaceholderName=""
                     width={200}
                     height={200}
                     className="object-cover size-full"
@@ -167,22 +182,36 @@ export default function AccountForm() {
             )}
           />
           {form.formState.disabled ? (
-            <div
-              className="px-4 py-2 text-primary w-fit rounded-md cursor-pointer ms-auto border-2 border-primary"
+            <Button
+              className="px-4 py-2 text-primary w-fit rounded-md cursor-pointer ms-auto border-2 border-primary bg-transparent hover:bg-transparent"
               onClick={() => {
                 form.control._disableForm(false);
               }}
             >
-              Chỉnh sửa
-            </div>
+              Cập nhật
+            </Button>
           ) : (
-            <div
-              className="px-4 py-2 bg-primary w-fit text-white rounded-md cursor-pointer ms-auto"
-              onClick={() => {
-                form.control._disableForm(true);
-              }}
-            >
-              Xác nhận thay đổi
+            <div className="flex justify-end">
+              <Button
+                className="flex px-4 py-2 bg-primary w-fit text-white rounded-md cursor-pointer ms-auto"
+                disabled={
+                  !form.formState.isDirty || form.formState.isSubmitting
+                }
+                onClick={() => {
+                  form.control._disableForm(true);
+                }}
+              >
+                Xác nhận
+              </Button>
+              <Button
+                variant="outline"
+                className="flex px-4 py-2 w-fit rounded-md cursor-pointer ms-2"
+                onClick={() => {
+                  form.control._disableForm(true);
+                }}
+              >
+                Hủy
+              </Button>
             </div>
           )}
         </div>

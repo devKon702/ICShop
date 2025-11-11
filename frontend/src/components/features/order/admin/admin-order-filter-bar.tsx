@@ -54,7 +54,7 @@ export default function AdminOrderFilterBar() {
   });
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-stretch">
         {/* Order Code */}
         <InputGroup className="px-2 flex-1">
           <InputGroupAddon>
@@ -70,26 +70,28 @@ export default function AdminOrderFilterBar() {
           />
         </InputGroup>
         {/* Create Date Range */}
-        <DateRangeSelector
-          shortcutDays={[
-            { days: 7, label: "1 tuần" },
-            { days: 14, label: "2 tuần" },
-            { days: 30, label: "1 tháng" },
-          ]}
-          defaultRange={{
-            from: query.from,
-            to: query.to,
-          }}
-          onChange={(range) =>
-            setFilter((prev) => ({
-              ...prev,
-              from: range.from || prev.from,
-              to: range.to || prev.to,
-            }))
-          }
-          required
-          className="h-full flex-1"
-        />
+        <div className="flex-1">
+          <DateRangeSelector
+            shortcutDays={[
+              { days: 7, label: "1 tuần" },
+              { days: 14, label: "2 tuần" },
+              { days: 30, label: "1 tháng" },
+            ]}
+            defaultRange={{
+              from: query.from,
+              to: query.to,
+            }}
+            onChange={(range) =>
+              setFilter((prev) => ({
+                ...prev,
+                from: range.from || prev.from,
+                to: range.to || prev.to,
+              }))
+            }
+            required
+            className="size-full"
+          />
+        </div>
         {/* Order Status */}
         <AppSelector
           data={[

@@ -31,48 +31,59 @@ interface Props {
   };
 }
 
-const schema = z.object({
-  post: z
-    .object({
-      addressId: z.number(),
-    })
-    .optional(),
-  shop: z
-    .object({
-      receiverName: z
-        .string({ message: "Tên không được để trống" })
-        .regex(vietnameseRegex(), "Tên không hợp lệ")
-        .max(100, "Tên không được vượt quá 100 kí tự"),
-      receiverPhone: z
-        .string({ message: "Số điện thoại không được để trống" })
-        .regex(phoneRegex(), "Số điện thoại không hợp lệ"),
-    })
-    .optional(),
-});
+const schema = z
+  .object({
+    deliveryType: z.nativeEnum(DeliveryType),
+    addressId: z.number().optional(),
+    receiverName: z
+      .string({ message: "Tên không được để trống" })
+      .nonempty("Tên không được để trống")
+      .regex(vietnameseRegex(), "Tên không hợp lệ")
+      .max(100, "Tên không được vượt quá 100 kí tự")
+      .optional(),
+    receiverPhone: z
+      .string({ message: "Số điện thoại không được để trống" })
+      .regex(phoneRegex(), "Số điện thoại không hợp lệ")
+      .optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.deliveryType === DeliveryType.POST && val.addressId === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Vui lòng chọn địa chỉ nhận hàng",
+        path: ["addressId"],
+      });
+    } else if (val.deliveryType === DeliveryType.SHOP) {
+      if (!val.receiverName) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Vui lòng nhập tên và số điện thoại người nhận",
+          path: ["receiverName"],
+        });
+      } else if (!val.receiverPhone) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Vui lòng nhập số điện thoại người nhận",
+          path: ["receiverPhone"],
+        });
+      }
+    }
+  });
 
 export default function ChangeOrderAddressForm({ order }: Props) {
-  const [type, setType] = React.useState<DeliveryType>(order.deliveryType);
   const { closeModal } = useModalActions();
   const queryClient = useQueryClient();
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      post:
-        order.deliveryType === DeliveryType.POST
-          ? {
-              addressId: undefined,
-            }
-          : undefined,
-      shop:
-        order.deliveryType === DeliveryType.SHOP
-          ? {
-              receiverName: order.receiverName,
-              receiverPhone: order.receiverPhone,
-            }
-          : undefined,
+      deliveryType: order.deliveryType,
+      receiverName: order.receiverName,
+      receiverPhone: order.receiverPhone,
+      addressId: undefined,
     },
     mode: "onSubmit",
   });
+  const deliveryType = form.watch("deliveryType");
 
   const { data: addressData } = useQuery({
     queryKey: ["addresses"],
@@ -104,12 +115,12 @@ export default function ChangeOrderAddressForm({ order }: Props) {
           (data: z.infer<typeof schema>) => {
             if (confirm("Xác nhận thay đổi thông tin nhận hàng?")) {
               changeAddressMutate({
-                deliveryType: type,
-                ...(type === DeliveryType.POST
-                  ? { addressId: data.post?.addressId }
+                deliveryType: deliveryType,
+                ...(deliveryType === DeliveryType.POST
+                  ? { addressId: data.addressId }
                   : {
-                      receiverName: data.shop?.receiverName,
-                      receiverPhone: data.shop?.receiverPhone,
+                      receiverName: data.receiverName,
+                      receiverPhone: data.receiverPhone,
                     }),
               });
             }
@@ -122,31 +133,39 @@ export default function ChangeOrderAddressForm({ order }: Props) {
           toast.error("Thông tin không hợp lệ. Vui lòng kiểm tra lại.");
         }}
       >
-        <AppSelector
-          data={
-            [
-              {
-                label: "Nhận tại cửa hàng",
-                value: `${DeliveryType.SHOP}`,
-              },
-              { label: "Giao hàng", value: `${DeliveryType.POST}` },
-            ] as const
-          }
-          defaultValue={`${order.deliveryType}`}
-          onValueChange={(val) => {
-            if (val === DeliveryType.SHOP.toString())
-              form.setValue("post", undefined);
-            if (val === DeliveryType.POST.toString())
-              form.setValue("shop", undefined);
-            setType(Number(val));
-          }}
-          className="w-full"
+        <FormField
+          control={form.control}
+          name="deliveryType"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel className="font-semibold opacity-50">
+                Hình thức nhận hàng
+              </FormLabel>
+              <AppSelector
+                data={
+                  [
+                    {
+                      label: "Nhận tại cửa hàng",
+                      value: `${DeliveryType.SHOP}`,
+                    },
+                    { label: "Giao hàng", value: `${DeliveryType.POST}` },
+                  ] as const
+                }
+                defaultValue={`${order.deliveryType}`}
+                onValueChange={(value) => field.onChange(Number(value))}
+                className={`w-full ${
+                  fieldState.invalid ? "border-red-500" : ""
+                }`}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        {type === DeliveryType.SHOP ? (
+        {deliveryType === DeliveryType.SHOP ? (
           <>
             <FormField
               control={form.control}
-              name="shop.receiverName"
+              name="receiverName"
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel className="font-semibold opacity-50">
@@ -170,7 +189,7 @@ export default function ChangeOrderAddressForm({ order }: Props) {
             />
             <FormField
               control={form.control}
-              name="shop.receiverPhone"
+              name="receiverPhone"
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel className="font-semibold opacity-50">
@@ -190,7 +209,7 @@ export default function ChangeOrderAddressForm({ order }: Props) {
         ) : (
           <FormField
             control={form.control}
-            name="post.addressId"
+            name="addressId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-semibold opacity-50">

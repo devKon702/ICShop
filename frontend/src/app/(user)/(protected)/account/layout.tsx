@@ -22,7 +22,7 @@ export default function AccountLayout({
   const pathName = usePathname();
   return (
     <div className="flex space-x-2 w-full">
-      <div className="w-1/4 bg-white p-2 shadow-xl rounded-md flex flex-col sticky top-5 h-fit">
+      <div className="w-1/4 bg-white p-2 shadow-xl rounded-md flex flex-col sticky top-30 h-fit">
         {menu.map((item, index) => (
           <Link
             key={index}

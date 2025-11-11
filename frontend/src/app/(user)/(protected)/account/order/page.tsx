@@ -1,5 +1,6 @@
 "use client";
 import AppSelector from "@/components/common/app-selector";
+import DateRangeSelector from "@/components/common/date-range-selector";
 import SetBreadCrump from "@/components/common/set-breadcrump";
 import OrderTable from "@/components/features/order/user/order-table";
 import { DeliveryType, OrderStatus } from "@/constants/enums";
@@ -11,7 +12,7 @@ import {
   parseAsStringLiteral,
   useQueryStates,
 } from "nuqs";
-import React from "react";
+import React, { useEffect } from "react";
 
 const orderOptions = [
   { value: "create_desc", label: "Mới nhất" },
@@ -38,10 +39,6 @@ export default function OrderPage() {
     order: parseAsStringLiteral(
       orderOptions.map((item) => item.value)
     ).withDefault("create_desc"),
-    // from: parseAsIsoDateTime.withDefault(
-    //   new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    // ),
-    // to: parseAsIsoDateTime.withDefault(new Date()),
     from: parseAsIsoDateTime,
     to: parseAsIsoDateTime,
   });
@@ -57,6 +54,14 @@ export default function OrderPage() {
         to: query.to?.toISOString(),
       }),
   });
+  useEffect(() => {
+    setQuery({
+      ...query,
+      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      to: new Date(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div>
       <SetBreadCrump
@@ -73,7 +78,7 @@ export default function OrderPage() {
         ]}
       ></SetBreadCrump>
       <h1 className="font-medium text-2xl mb-4">Đơn hàng</h1>
-      <div className="flex space-x-2 mb-2">
+      <div className="flex space-x-2 mb-4">
         <div className="w-1/4 ms-auto space-y-2">
           <p className="font-semibold text-sm">Trạng thái</p>
           <AppSelector
@@ -93,6 +98,28 @@ export default function OrderPage() {
             }}
             className="w-full"
           ></AppSelector>
+        </div>
+        <div className="w-fit flex flex-col">
+          <p className="font-semibold text-sm">Thời gian</p>
+          <DateRangeSelector
+            defaultRange={{
+              from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+              to: new Date(),
+            }}
+            shortcutDays={[
+              { label: "30 ngày", days: 30 },
+              { label: "90 ngày", days: 90 },
+              { label: "Tất cả", days: 0 },
+            ]}
+            onChange={(range) => {
+              setQuery({
+                ...query,
+                from: range.from || null,
+                to: range.to || null,
+              });
+            }}
+            className="flex-1 mt-2 space-x-2"
+          />
         </div>
         <div className="w-1/4 space-y-2">
           <p className="font-semibold text-sm">Sắp xếp</p>
