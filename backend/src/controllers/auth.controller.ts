@@ -22,6 +22,7 @@ import { logger } from "../utils/logger";
 import { TokenPayload } from "../types/token-payload";
 import { JWTError } from "../errors/jwt-error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
+import redis, { redisKeys } from "../utils/redis";
 
 class AuthController {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -208,9 +209,22 @@ class AuthController {
 
   test(req: Request, res: Response) {
     const payload = res.locals.payload;
+
     res
       .status(HttpStatus.OK)
       .json(successResponse(AuthResponseCode.OK, "Test auth success", payload));
+  }
+
+  async testRedis(req: Request, res: Response) {
+    redis.setValue(redisKeys.otpEmail("nhatkha117@gmail.com"), "312332", 300);
+    const otp = await redis.getValue(
+      redisKeys.otpEmail("nhatkha117@gmail.com")
+    );
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(AuthResponseCode.OK, "Test Redis success", { otp })
+      );
   }
 }
 export default new AuthController();

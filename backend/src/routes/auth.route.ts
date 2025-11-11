@@ -39,4 +39,7 @@ authRouter.post(path + "/refresh", authController.refresh);
 // POST /auth/testToken
 authRouter.get(path + "/testToken", verifyAccessToken, authController.test);
 
+// GET /auth/redis
+authRouter.get(path + "/redis", authController.testRedis);
+
 export default authRouter;
