@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import accountRepository from "../src/repositories/account.repository";
-import { hashPassword } from "../src/utils/bcrypt";
+import { hashString } from "../src/utils/bcrypt";
 import { Role } from "../src/constants/db";
 import { logger } from "../src/utils/logger";
 import {
@@ -16,7 +16,7 @@ async function main() {
   if (!admin) {
     await accountRepository.create(
       "nhatkha117@gmail.com",
-      await hashPassword("123456"),
+      await hashString("123456"),
       "Admin",
       Role.ADMIN
     );

@@ -15,7 +15,7 @@ import {
   createRefreshToken,
   verifyToken,
 } from "../utils/jwt";
-import { comparePassword, hashPassword } from "../utils/bcrypt";
+import { compareString, hashString } from "../utils/bcrypt";
 import { Role } from "../constants/db";
 import { JWTConfig } from "../constants/jwt-config";
 import { logger } from "../utils/logger";
@@ -23,6 +23,7 @@ import { TokenPayload } from "../types/token-payload";
 import { JWTError } from "../errors/jwt-error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import redis, { redisKeys } from "../utils/redis";
+import emailOptService from "../services/email-opt.service";
 
 class AuthController {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -68,7 +69,7 @@ class AuthController {
     // Sai mật khẩu, bao gồm trường hợp password null với google signup
     if (
       !account.password ||
-      !(await comparePassword(password, account.password))
+      !(await compareString(password, account.password))
     ) {
       throw new AppError(
         HttpStatus.UNAUTHORIZED,
@@ -123,7 +124,7 @@ class AuthController {
         true
       );
     // Không trùng
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashString(password);
     const { password: passwordIgnored, ...newAccount } =
       await accountRepository.create(email, hashedPassword, name, phone);
     res
@@ -216,15 +217,20 @@ class AuthController {
   }
 
   async testRedis(req: Request, res: Response) {
-    redis.setValue(redisKeys.otpEmail("nhatkha117@gmail.com"), "312332", 300);
-    const otp = await redis.getValue(
-      redisKeys.otpEmail("nhatkha117@gmail.com")
+    const email = "nhatkha117@gmail.com";
+    const otp = emailOptService.generateOTP(6);
+    const expiredInSeconds = 5 * 60; // 5 minutes
+    await Promise.all([
+      emailOptService.save(email, otp, expiredInSeconds),
+      emailOptService.send(email, otp, expiredInSeconds),
+    ]);
+    const expiredAt = new Date(Date.now() + expiredInSeconds * 1000);
+    res.status(HttpStatus.OK).json(
+      successResponse(AuthResponseCode.OK, "Send OTP success", {
+        email,
+        expiredAt,
+      })
     );
-    res
-      .status(HttpStatus.OK)
-      .json(
-        successResponse(AuthResponseCode.OK, "Test Redis success", { otp })
-      );
   }
 }
 export default new AuthController();

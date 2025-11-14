@@ -7,7 +7,21 @@ class RedisClient {
   private client: Redis;
 
   constructor() {
-    this.client = getRedisClient();
+    this.client = this.getRedisClient();
+  }
+
+  private getRedisClient() {
+    if (!redis) {
+      redis = new Redis(env.REDIS_URL, {
+        retryStrategy: (times) => Math.min(times * 50, 2000), // reconnect delay
+        maxRetriesPerRequest: null,
+        enableReadyCheck: false,
+      });
+
+      redis.on("connect", () => console.log("Redis connected"));
+      redis.on("error", (err) => console.error("Redis error:", err));
+    }
+    return redis;
   }
 
   public async setValue<T>(key: string, value: T, ttlSeconds?: number) {
@@ -20,21 +34,11 @@ class RedisClient {
     const data = await this.client.get(key);
     return data ? (JSON.parse(data) as T) : null;
   }
-}
 
-const getRedisClient = () => {
-  if (!redis) {
-    redis = new Redis(env.REDIS_URL, {
-      retryStrategy: (times) => Math.min(times * 50, 2000), // reconnect delay
-      maxRetriesPerRequest: null,
-      enableReadyCheck: false,
-    });
-
-    redis.on("connect", () => console.log("Redis connected"));
-    redis.on("error", (err) => console.error("Redis error:", err));
+  public async deleteKey(key: string): Promise<void> {
+    await this.client.del(key);
   }
-  return redis;
-};
+}
 
 export const redisKeys = {
   refreshToken: (userId: number) => `refreshToken:user:${userId}`,

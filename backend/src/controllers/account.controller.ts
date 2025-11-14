@@ -13,7 +13,7 @@ import {
 } from "../schemas/account.schema";
 import { UserResponseCode } from "../constants/codes/user.code";
 import { AccountResponseCode } from "../constants/codes/account.code";
-import { comparePassword, hashPassword } from "../utils/bcrypt";
+import { compareString, hashString } from "../utils/bcrypt";
 import { Role } from "../constants/db";
 import { http } from "winston";
 import { sanitizeData } from "../utils/sanitize";
@@ -94,7 +94,7 @@ class AccountController {
     // So sánh mật khẩu cũ
     if (
       !account.password ||
-      !(await comparePassword(oldPassword, account.password))
+      !(await compareString(oldPassword, account.password))
     ) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
@@ -107,7 +107,7 @@ class AccountController {
     accountRepository.changePassword(
       account.id,
       account.user?.id!,
-      await hashPassword(newPassword)
+      await hashString(newPassword)
     );
     res
       .status(HttpStatus.OK)
