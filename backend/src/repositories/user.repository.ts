@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { Role } from "../constants/db";
 import { prisma } from "../prisma";
 
@@ -57,6 +58,18 @@ class UserRepository {
           role: Role.USER,
         },
       },
+    });
+  };
+
+  public update = (
+    userId: number,
+    data: Partial<Pick<User, "name" | "avatarUrl" | "phone" | "modifierId">>
+  ) => {
+    return prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data,
     });
   };
 }

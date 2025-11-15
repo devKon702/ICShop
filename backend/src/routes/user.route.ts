@@ -12,15 +12,16 @@ const path = "/user";
 userRouter.patch(
   path,
   verifyAccessToken,
+  upload.single("avatar"),
   validate(updateUserSchema),
-  userController.updateUser
+  userController.update
 );
 
-userRouter.patch(
-  path + "/upload-avatar",
-  verifyAccessToken,
-  upload.single("avatar"),
-  userController.changeAvatar
-);
+// userRouter.patch(
+//   path + "/upload-avatar",
+//   verifyAccessToken,
+//   upload.single("avatar"),
+//   userController.changeAvatar
+// );
 
 export default userRouter;
