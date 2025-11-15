@@ -2,7 +2,11 @@ import express from "express";
 import authController from "../controllers/auth.controller";
 import { verifyAccessToken } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
-import { loginSchema, signupSchema } from "../schemas/auth.schema";
+import {
+  loginSchema,
+  sendEmailOTPSchema,
+  signupSchema,
+} from "../schemas/auth.schema";
 import { Role } from "../constants/db";
 
 const authRouter = express.Router();
@@ -35,6 +39,14 @@ authRouter.post(path + "/logout", verifyAccessToken, authController.logout);
 
 // POST /auth/refresh
 authRouter.post(path + "/refresh", authController.refresh);
+
+// GET /auth/otp?email=
+authRouter.get(
+  path + "/otp",
+  verifyAccessToken,
+  validate(sendEmailOTPSchema),
+  authController.sendEmailOTP
+);
 
 // POST /auth/testToken
 authRouter.get(path + "/testToken", verifyAccessToken, authController.test);

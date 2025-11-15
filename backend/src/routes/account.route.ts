@@ -7,6 +7,7 @@ import {
   filterAccountSchema,
   getAccountInfoSchema,
   changeAccountStatusSchema,
+  updateMyEmailSchema,
 } from "../schemas/account.schema";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
@@ -54,6 +55,14 @@ accountRouter.patch(
   authorize([Role.ADMIN]),
   validate(changeAccountStatusSchema),
   accountController.changeStatus
+);
+
+// PATCH /account/email
+accountRouter.patch(
+  path + "/email",
+  verifyAccessToken,
+  validate(updateMyEmailSchema),
+  accountController.updateMyEmail
 );
 
 export default accountRouter;

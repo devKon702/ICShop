@@ -6,6 +6,7 @@ import { AuthResponseCode } from "../constants/codes/auth.code";
 import {
   LoginIType,
   loginSchema,
+  sendEmailOTPSchema,
   SignupIType,
   signupSchema,
 } from "../schemas/auth.schema";
@@ -207,6 +208,26 @@ class AuthController {
       throw err;
     }
   };
+
+  public async sendEmailOTP(req: Request, res: Response) {
+    const {
+      query: { email },
+    } = sendEmailOTPSchema.parse(req);
+    const otp = emailOptService.generateOTP(6);
+    const expiredInSeconds = 5 * 60; // 5 minutes
+    // Save and send OTP
+    await Promise.all([
+      emailOptService.save(email, otp, expiredInSeconds),
+      emailOptService.send(email, otp, expiredInSeconds),
+    ]);
+    const expiredAt = new Date(Date.now() + expiredInSeconds * 1000);
+    res.status(HttpStatus.OK).json(
+      successResponse(AuthResponseCode.OK, "Gửi OTP thành công", {
+        email,
+        expiredAt,
+      })
+    );
+  }
 
   test(req: Request, res: Response) {
     const payload = res.locals.payload;

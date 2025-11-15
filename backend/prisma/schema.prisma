@@ -283,6 +283,11 @@ enum Role {
   admin
 }
 
+enum AuthProvider {
+  google
+  local
+}
+
 model Account {
   id            Int       @id @default(autoincrement()) @db.UnsignedInt
   /// Địa chỉ email
@@ -291,10 +296,10 @@ model Account {
   password      String?
   /// Phân quyền của tài khoản
   role          Role      @default(user)
-  /// Tài khoản được đăng ký bằng google hay không
-  isGoogleSigned  Boolean   @default(false)
   /// Tài khoản đã xác thực email
-  isEmailAuth   Boolean   @default(false)
+  emailVerified   Boolean   @default(false)
+  /// Phương thức đăng ký
+  provider     AuthProvider @default(local)
   /// Tài khoản đang khả dụng và có thể đăng nhập
   isActive      Boolean   @default(true)
 

@@ -1,6 +1,7 @@
 import { resourceLimits } from "worker_threads";
 import { z } from "zod";
 import { Role } from "../constants/db";
+import { requestSchema } from "./shared.schema";
 
 export const changePasswordSchema = z.object({
   body: z
@@ -50,6 +51,13 @@ export const changeAccountStatusSchema = z.object({
   body: z.object({
     accountId: z.coerce.number(),
     isActive: z.boolean(),
+  }),
+});
+
+export const updateMyEmailSchema = requestSchema({
+  body: z.object({
+    email: z.string().email("Email không hợp lệ"),
+    otp: z.string().length(6, "Mã OTP gồm 6 ký tự"),
   }),
 });
 

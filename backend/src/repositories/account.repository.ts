@@ -1,6 +1,8 @@
 import { start } from "repl";
 import { Role } from "../constants/db";
 import { prisma } from "../prisma";
+import { Account } from "@prisma/client";
+import { Pick } from "@prisma/client/runtime/library";
 
 class AccountRepository {
   public findFirstAdmin = async () => {
@@ -152,6 +154,25 @@ class AccountRepository {
       },
       where: {
         id: accountId,
+      },
+    });
+  };
+
+  public update = async (
+    accountId: number,
+    modifierId: number,
+    data: Partial<
+      Pick<Account, "email" | "isActive" | "password" | "emailVerified">
+    >
+  ) => {
+    return prisma.account.update({
+      where: {
+        id: accountId,
+      },
+      data: {
+        ...data,
+        modifierId,
+        version: { increment: 1 },
       },
     });
   };

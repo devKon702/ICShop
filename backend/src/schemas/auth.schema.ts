@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { emailRegex, phoneRegex, vietnameseRegex } from "../utils/regex";
+import { requestSchema } from "./shared.schema";
 
 export const loginSchema = z.object({
   body: z.object({
@@ -26,6 +27,12 @@ export const signupSchema = z.object({
         phoneRegex(),
         "Số điện thoại không hợp lệ theo định dạng Việt Nam."
       ),
+  }),
+});
+
+export const sendEmailOTPSchema = requestSchema({
+  query: z.object({
+    email: z.string().trim().email("Email không hợp lệ"),
   }),
 });
 

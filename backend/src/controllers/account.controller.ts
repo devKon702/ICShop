@@ -10,6 +10,7 @@ import {
   filterAccountSchema,
   getAccountInfoSchema,
   changeAccountStatusSchema,
+  updateMyEmailSchema,
 } from "../schemas/account.schema";
 import { UserResponseCode } from "../constants/codes/user.code";
 import { AccountResponseCode } from "../constants/codes/account.code";
@@ -17,6 +18,8 @@ import { compareString, hashString } from "../utils/bcrypt";
 import { Role } from "../constants/db";
 import { http } from "winston";
 import { sanitizeData } from "../utils/sanitize";
+import emailOptService from "../services/email-opt.service";
+import { NotFoundError } from "../errors/not-found-error";
 
 class AccountController {
   public getInfo = async (req: Request, res: Response) => {
@@ -184,6 +187,45 @@ class AccountController {
       )
     );
     return;
+  };
+
+  public updateMyEmail = async (req: Request, res: Response) => {
+    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const {
+      body: { email, otp },
+    } = updateMyEmailSchema.parse(req);
+    const account = await accountRepository.findByUserId(sub);
+    if (!account) {
+      throw new NotFoundError(
+        AccountResponseCode.NOT_FOUND,
+        "Không tìm thấy tài khoản"
+      );
+    }
+    if (account.isActive === false) {
+      throw new AppError(
+        HttpStatus.FORBIDDEN,
+        AccountResponseCode.LOCKED,
+        "Tài khoản đang bị khóa",
+        true
+      );
+    }
+    // Check OTP
+    if (!(await emailOptService.verify(email, otp))) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AccountResponseCode.INVALID_OTP,
+        "Mã OTP không hợp lệ",
+        true
+      );
+    }
+    // Update email
+    const result = await accountRepository.update(account.id, sub, { email });
+
+    res.status(HttpStatus.OK).json(
+      successResponse(AccountResponseCode.OK, "Cập nhật email thành công", {
+        email: result.email,
+      })
+    );
   };
 }
 
