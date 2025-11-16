@@ -11,7 +11,7 @@ export const UserBaseSchema = z.object({
   id: ID,
   accountId: UnsignedInt,
   name: TinyText,
-  avatarUrl: z.string().url().nullable(),
+  avatarUrl: z.string().nullable(),
   phone: z.string().nullable(),
   version: z.number().int(),
   creatorId: UnsignedInt.nullable(),

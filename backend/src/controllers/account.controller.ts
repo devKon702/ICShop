@@ -209,6 +209,16 @@ class AccountController {
         true
       );
     }
+    // Check unique email including this account
+    const existingAccountByEmail = await accountRepository.findByEmail(email);
+    if (existingAccountByEmail) {
+      throw new AppError(
+        HttpStatus.CONFLICT,
+        AccountResponseCode.EMAIL_EXISTS,
+        "Email đã được sử dụng",
+        true
+      );
+    }
     // Check OTP
     if (!(await emailOptService.verify(email, otp))) {
       throw new AppError(

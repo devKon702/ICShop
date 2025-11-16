@@ -63,7 +63,11 @@ class UserController {
     const { sub } = res.locals.tokenPayload as TokenPayload;
     const {
       body: { name, phone },
-    } = updateUserSchema.parse(req.body);
+    } = updateUserSchema.parse(req);
+    const user = await userRepository.findById(sub);
+    if (!user) {
+      throw new Error("User not found");
+    }
     const avatarFile = req.file as Express.Multer.File;
     let newAvatarUrl: string | undefined;
     if (avatarFile) {
@@ -72,7 +76,7 @@ class UserController {
         fn: async (newUrls) => {
           newAvatarUrl = newUrls[0];
         },
-        oldUrls: [],
+        oldUrls: user.avatarUrl ? [user.avatarUrl] : [],
         options: {
           inputField: "avatar",
           maxSize: 512 * 1024,

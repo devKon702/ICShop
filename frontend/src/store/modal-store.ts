@@ -53,7 +53,12 @@ type ModalType =
   | Modal<"productDetail", { productId: number }>
   | Modal<
       "imageCropper",
-      { file: File; onImageComplete: (file: File, previewUrl: string) => void }
+      {
+        file: File;
+        cropAspect?: number;
+        minimizeMB?: number;
+        onImageComplete: (file: File, previewUrl: string) => void;
+      }
     >
   | Modal<"createAddress", unknown>
   | Modal<

@@ -41,3 +41,27 @@ export function getDateBeforeDays(date: Date, days: number): Date {
   d.setDate(d.getDate() - days);
   return d;
 }
+
+export function formatTime(
+  seconds: number,
+  include?: { hours?: boolean; minutes?: boolean; seconds?: boolean }
+): string {
+  const hours = Math.floor(seconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const mins = Math.floor((seconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const secs = (seconds % 60).toString().padStart(2, "0");
+  let result = "";
+  if (include?.hours ?? true) {
+    result += `${hours}:`;
+  }
+  if (include?.minutes ?? true) {
+    result += `${mins}:`;
+  }
+  if (include?.seconds ?? true) {
+    result += `${secs}`;
+  }
+  return result;
+}

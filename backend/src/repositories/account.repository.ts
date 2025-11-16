@@ -9,7 +9,7 @@ class AccountRepository {
     return prisma.account.findFirst({ where: { role: "admin" } });
   };
 
-  public findByEmail = async (email: string, role: Role = Role.USER) => {
+  public findByEmail = async (email: string, role?: Role) => {
     return prisma.account.findUnique({
       where: { email, role },
       include: { user: true },

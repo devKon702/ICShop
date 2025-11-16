@@ -36,6 +36,7 @@
     "decimal.js": "^10.6.0",
     "embla-carousel-react": "^8.6.0",
     "ic-shop": "file:",
+    "input-otp": "^1.4.2",
     "lucide-react": "^0.503.0",
     "nanoid": "^5.1.5",
     "next": "15.3.1",

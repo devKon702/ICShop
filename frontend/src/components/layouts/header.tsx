@@ -85,10 +85,10 @@ export default function Header() {
             <HoverCardTrigger>
               <div className="size-10 cursor-pointer flex flex-col items-center">
                 <SafeImage
-                  src={
-                    user.avatarUrl ||
-                    `https://ui-avatars.com/api/?name=${user.name}`
-                  }
+                  key={user.avatarUrl}
+                  src={user.avatarUrl || undefined}
+                  avatarPlaceholderName={user.name}
+                  appFileBase
                   width={40}
                   height={40}
                   className="rounded-full aspect-square"

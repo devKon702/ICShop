@@ -3,7 +3,7 @@ import { verifyAccessToken } from "../middlewares/jwt.middleware";
 import userController from "../controllers/user.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { updateUserSchema } from "../schemas/user.schema";
-import { singleUpload, upload } from "../utils/multer";
+import { upload } from "../utils/multer";
 
 const userRouter = express.Router();
 

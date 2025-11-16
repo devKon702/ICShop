@@ -6,6 +6,7 @@ import {
 } from "@/libs/schemas/response.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
 import { axiosHandler } from "@/utils/response-handler";
+import { z } from "zod";
 
 const accountService = {
   getMe: async () =>
@@ -14,10 +15,10 @@ const accountService = {
       ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema }))
     ),
 
-  updateMe: async (data: { name: string; phone: string; email: string }) =>
+  updateEmail: async (data: { email: string; otp: string }) =>
     axiosHandler(
-      apiAxios.put("/v1/account/me", data),
-      ApiResponseSchema(AccountBaseSchema)
+      apiAxios.patch("/v1/account/email", data),
+      ApiResponseSchema(z.object({ email: z.string() }))
     ),
 
   filter: async (opts: {

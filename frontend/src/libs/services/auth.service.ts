@@ -49,4 +49,15 @@ export const authService = {
 
   logout: async () =>
     axiosHandler(apiAxios.post("/v1/auth/logout"), ApiResponseSchema(z.null())),
+
+  sendOtp: async ({ email }: { email: string }) => {
+    const query = new URLSearchParams();
+    query.append("email", email);
+    return axiosHandler(
+      apiAxios.get("/v1/auth/otp?" + query.toString()),
+      ApiResponseSchema(
+        z.object({ email: z.string(), expiredAt: z.string().datetime() })
+      )
+    );
+  },
 };
