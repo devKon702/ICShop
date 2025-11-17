@@ -74,15 +74,13 @@ class AccountController {
     res: Response
   ) => {
     const { sub } = res.locals.tokenPayload as TokenPayload;
-    const { oldPassword, newPassword } = req.body;
-    // Tìm tài khoản
+    const { currentPassword, newPassword } = req.body;
+    // Check account existence
     const account = await accountRepository.findByUserId(sub);
     if (!account) {
-      throw new AppError(
-        HttpStatus.NOT_FOUND,
-        UserResponseCode.NOT_FOUND,
-        "Không tìm thấy người dùng",
-        true
+      throw new NotFoundError(
+        AccountResponseCode.NOT_FOUND,
+        "Không tìm thấy tài khoản"
       );
     }
     // Kiểm tra tài khoản bị khóa
@@ -97,12 +95,12 @@ class AccountController {
     // So sánh mật khẩu cũ
     if (
       !account.password ||
-      !(await compareString(oldPassword, account.password))
+      !(await compareString(currentPassword, account.password))
     ) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
         AccountResponseCode.WRONG_PASSWORD,
-        "Không đúng mật khẩu",
+        "Mật khẩu hiện tại không đúng",
         true
       );
     }

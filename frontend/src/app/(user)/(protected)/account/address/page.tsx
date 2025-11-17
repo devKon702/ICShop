@@ -16,10 +16,9 @@ export default function AddressPage() {
             label: "Trang chủ",
             href: "/",
           },
-          { label: "Tài khoản", href: "/account" },
           { label: "Địa chỉ nhận hàng", href: "/account/address" },
         ]}
-      ></SetBreadCrump>
+      />
       <div className="flex items-center justify-between mb-4">
         <h1 className="font-medium text-2xl mb-4">Địa chỉ nhận hàng</h1>
         <Button

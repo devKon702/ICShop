@@ -68,10 +68,6 @@ export default function OrderPage() {
         breadcrumps={[
           { label: "Trang chủ", href: "/" },
           {
-            label: "Tài khoản",
-            href: "/account",
-          },
-          {
             label: "Đơn hàng",
             href: "/account/order",
           },

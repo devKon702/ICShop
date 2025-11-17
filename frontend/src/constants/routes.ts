@@ -6,6 +6,7 @@ export const ROUTE = {
   admin: "/",
   cart: "/cart",
   userAccount: "/account",
+  userChangePassword: "/account/change-password",
   userOrder: "/account/order",
   userAddress: "/account/address",
 

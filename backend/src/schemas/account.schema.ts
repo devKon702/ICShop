@@ -6,10 +6,10 @@ import { requestSchema } from "./shared.schema";
 export const changePasswordSchema = z.object({
   body: z
     .object({
-      oldPassword: z.string(),
+      currentPassword: z.string(),
       newPassword: z.string().min(6, "Mật khẩu tối thiểu 6 kí tự"),
     })
-    .refine((data) => data.newPassword !== data.oldPassword, {
+    .refine((data) => data.newPassword !== data.currentPassword, {
       message: "Mật khẩu mới phải khác mật khẩu cũ",
       path: ["newPassword"],
     }),

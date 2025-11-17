@@ -31,7 +31,7 @@ export const signupSchema = z.object({
 });
 
 export const sendEmailOTPSchema = requestSchema({
-  query: z.object({
+  body: z.object({
     email: z.string().trim().email("Email không hợp lệ"),
   }),
 });

@@ -50,6 +50,15 @@ const accountService = {
       apiAxios.patch(`/v1/account/status`, data),
       ApiResponseSchema(AccountBaseSchema)
     ),
+
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+  }) =>
+    axiosHandler(
+      apiAxios.patch(`/v1/account/password`, data),
+      ApiResponseSchema(z.undefined())
+    ),
 };
 
 export default accountService;

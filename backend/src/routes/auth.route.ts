@@ -41,7 +41,7 @@ authRouter.post(path + "/logout", verifyAccessToken, authController.logout);
 authRouter.post(path + "/refresh", authController.refresh);
 
 // GET /auth/otp?email=
-authRouter.get(
+authRouter.post(
   path + "/otp",
   verifyAccessToken,
   validate(sendEmailOTPSchema),

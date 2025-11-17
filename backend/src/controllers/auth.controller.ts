@@ -211,7 +211,7 @@ class AuthController {
 
   public async sendEmailOTP(req: Request, res: Response) {
     const {
-      query: { email },
+      body: { email },
     } = sendEmailOTPSchema.parse(req);
     const otp = emailOptService.generateOTP(6);
     const expiredInSeconds = 5 * 60; // 5 minutes
