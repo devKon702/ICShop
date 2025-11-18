@@ -38,6 +38,7 @@ export function errorHandler(
 
   // Prisma errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    logger.error(`[${res.locals.requestId}] Prisma Error`, err);
     // Unique constraint
     if (err.code === "P2002") {
       res

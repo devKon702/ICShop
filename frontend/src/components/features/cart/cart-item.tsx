@@ -45,8 +45,7 @@ export default function CartItem({ cartId, product }: CartItemProps) {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
     onError: (error) => {
-      toast.error("Xoá sản phẩm khỏi giỏ hàng thất bại");
-      console.log(error);
+      toast.error(error.message || "Xoá sản phẩm khỏi giỏ hàng thất bại");
     },
   });
   return (
@@ -57,10 +56,8 @@ export default function CartItem({ cartId, product }: CartItemProps) {
           data-checked={selectedProducts.some((p) => p.cartId === cartId)}
           onClick={() => {
             if (selectedProducts.some((p) => p.cartId === cartId)) {
-              console.log("unselect");
               unselectProduct(cartId);
             } else {
-              console.log("select");
               selectProduct({
                 id: product.id,
                 name: product.name,

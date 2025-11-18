@@ -151,7 +151,6 @@ export default function ProductRow({ product }: Props) {
               <div
                 className="flex gap-2 hover:bg-background p-2 rounded-md cursor-pointer"
                 onClick={() => {
-                  console.log("add to highlight");
                   openModal({
                     type: "addToHighlight",
                     props: { productId: product.id },

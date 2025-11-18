@@ -40,7 +40,7 @@ class AuthController {
           httpOnly: true,
           path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
           sameSite: "none",
-          secure: false,
+          secure: true,
           maxAge: JWTConfig.JWT_REFRESH_EXPIRE_USER * 1000,
         });
         break;
@@ -50,7 +50,7 @@ class AuthController {
         res.cookie(JWTConfig.JWT_REFRESH_COOKIE_NAME, token, {
           httpOnly: true,
           sameSite: "none",
-          secure: false,
+          secure: true,
           domain: ".localhost",
           path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
         });
@@ -270,7 +270,6 @@ class AuthController {
     try {
       // Lấy refresh token từ cookie
       const token = req.cookies[JWTConfig.JWT_REFRESH_COOKIE_NAME];
-      console.log(req.cookies);
       // Không có token
       if (!token)
         throw new JWTError(

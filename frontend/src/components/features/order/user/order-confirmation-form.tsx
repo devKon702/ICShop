@@ -84,8 +84,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
       });
     },
     onError: (error) => {
-      toast.error("Tạo đơn hàng thất bại");
-      console.log(error);
+      toast.error(error.message || "Tạo đơn hàng thất bại");
     },
   });
 

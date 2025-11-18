@@ -53,8 +53,7 @@ export default function CreateAddressForm() {
       closeModal();
     },
     onError: (error) => {
-      toast.error("Thêm địa chỉ thất bại");
-      console.log(error);
+      toast.error(error.message || "Thêm địa chỉ thất bại");
     },
   });
 
@@ -63,7 +62,6 @@ export default function CreateAddressForm() {
       <form
         className="space-y-4 rounded-md p-3 bg-white shadow-xl w-3xl max-h-[80dvh] overflow-y-auto"
         onSubmit={form.handleSubmit((data) => {
-          console.log(data);
           let valid = true;
           if (data.provinceId == 0) {
             form.setError("provinceId", {

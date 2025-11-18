@@ -31,8 +31,7 @@ export default function AddressItem({ address }: AddressItemProps) {
       queryClient.invalidateQueries({ queryKey: ["address", "me"] });
     },
     onError: (err) => {
-      toast.error("Xoá địa chỉ thất bại");
-      console.log(err);
+      toast.error(err.message || "Xoá địa chỉ thất bại");
     },
   });
   return (

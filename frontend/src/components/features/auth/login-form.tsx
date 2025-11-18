@@ -187,8 +187,9 @@ export default function LoginForm({
         <div className="w-fit mx-auto">
           <GoogleLogin
             onSuccess={(credentialResponse) => {
-              console.log(credentialResponse);
-              googleLoginMutate(credentialResponse.credential || "");
+              if (credentialResponse.credential)
+                googleLoginMutate(credentialResponse.credential);
+              console.log("No credential returned");
             }}
             onError={() => {
               toast.error("Đăng nhập thất bại, vui lòng thử lại");

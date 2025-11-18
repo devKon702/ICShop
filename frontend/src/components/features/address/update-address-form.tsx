@@ -69,8 +69,7 @@ export default function UpdateAddressForm({ address }: UpdateAddressFormProps) {
       closeModal();
     },
     onError: (err) => {
-      toast.error("Cập nhật địa chỉ thất bại");
-      console.log(err);
+      toast.error(err.message || "Cập nhật địa chỉ thất bại");
     },
   });
   return (
