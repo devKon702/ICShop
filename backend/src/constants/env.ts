@@ -14,6 +14,11 @@ const envSchema = z.object({
   UPLOAD_TYPE: z.string().default("local"),
   STORAGE_PATH: z.string().nonempty("Cần cung cấp địa chỉ lưu file"),
   REDIS_URL: z.string().url(),
+  MAIL_HOST: z.string().nonempty("Cần cung cấp Mail Host"),
+  MAIL_PORT: z.string().nonempty("Cần cung cấp Mail Port"),
+  MAIL_USER: z.string().nonempty("Cần cung cấp Mail User"),
+  MAIL_PASSWORD: z.string().nonempty("Cần cung cấp Mail Password"),
+  GOOGLE_CLIENT_ID: z.string().nonempty("Cần cung cấp Google Client ID"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

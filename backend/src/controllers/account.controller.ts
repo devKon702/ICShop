@@ -92,6 +92,15 @@ class AccountController {
         true
       );
     }
+    // Check if account is local account
+    if (account.provider !== "local") {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AccountResponseCode.WRONG_PASSWORD,
+        "Tài khoản tạo với Google không thể đổi mật khẩu",
+        true
+      );
+    }
     // So sánh mật khẩu cũ
     if (
       !account.password ||

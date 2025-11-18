@@ -27,7 +27,7 @@ export default function CustomInput({
 }: InputProps) {
   return (
     <div
-      className={`w-full flex items-center border-2 rounded-sm ${
+      className={`w-full flex items-center border-2 rounded-sm overflow-hidden ${
         isError && "border-red-400"
       }`}
     >

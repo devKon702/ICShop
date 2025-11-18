@@ -14,7 +14,7 @@ export default function AuthTabs({ onLoginSuccess }: AuthTabsProps) {
     <div className="w-2xl p-2">
       <Tabs
         defaultValue="login"
-        className=""
+        className="flex flex-col"
         value={tab}
         onValueChange={(val) => setTab(val as "login" | "register")}
       >
@@ -34,7 +34,7 @@ export default function AuthTabs({ onLoginSuccess }: AuthTabsProps) {
         </TabsList>
         <TabsContent
           value="login"
-          className="bg-white p-3 rounded-md shadow-xl"
+          className="bg-white p-3 rounded-md shadow-xl flex-1 overflow-y-auto app"
         >
           <LoginForm
             onLoginSuccess={onLoginSuccess}
@@ -43,7 +43,7 @@ export default function AuthTabs({ onLoginSuccess }: AuthTabsProps) {
         </TabsContent>
         <TabsContent
           value="register"
-          className="bg-white p-3 rounded-md shadow-xl max-h-[80dvh] overflow-y-auto"
+          className="bg-white p-3 rounded-md shadow-xl flex-1 overflow-y-auto app"
         >
           <RegisterForm redirectLogin={() => setTab("login")} />
         </TabsContent>

@@ -30,6 +30,17 @@ export const authService = {
       )
     ),
 
+  loginWithGoogle: async (token: string) =>
+    axiosHandler(
+      apiAxios.post("/v1/auth/google", { token }),
+      ApiResponseSchema(
+        z.object({
+          account: AccountBaseSchema.extend({ user: UserBaseSchema }),
+          token: z.string(),
+        })
+      )
+    ),
+
   adminLogin: async (email: string, password: string) =>
     axiosHandler(
       apiAxios.post("/v1/admin/auth/login", { email, password }),

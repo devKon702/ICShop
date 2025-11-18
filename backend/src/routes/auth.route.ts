@@ -4,6 +4,7 @@ import { verifyAccessToken } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   loginSchema,
+  loginWithGoogleSchema,
   sendEmailOTPSchema,
   signupSchema,
 } from "../schemas/auth.schema";
@@ -18,6 +19,13 @@ authRouter.post(
   path + "/login",
   validate(loginSchema),
   authController.login(Role.USER)
+);
+
+// POST /auth/google
+authRouter.post(
+  path + "/google",
+  validate(loginWithGoogleSchema),
+  authController.loginWithGoogle
 );
 
 // POST /admin/auth/login

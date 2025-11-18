@@ -22,7 +22,7 @@ export default function ProductCard({
   return (
     <Link
       href={`${ROUTE.product}/${slug}`}
-      className="flex h-full flex-col space-y-1 rounded-sm cursor-pointer bg-white border hover:border-primary"
+      className="flex h-full flex-col space-y-1 rounded-lg cursor-pointer bg-white border hover:border-primary overflow-hidden"
     >
       <div className="w-full aspect-square overflow-hidden">
         <SafeImage

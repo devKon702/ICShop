@@ -58,6 +58,11 @@ export default function SideAttributeFilter({
         {attributes.map((item) => (
           <AttributeItem key={item.id} attribute={item}></AttributeItem>
         ))}
+        {attributes.length === 0 && (
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            Không có thuộc tính để lọc
+          </div>
+        )}
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ import ModalContainer from "@/components/modals/modal-container";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/libs/tanstack-query/query-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import env from "@/constants/env";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,13 +41,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>
-          <Toaster richColors />
-          <GlobalProvider>
-            <NuqsAdapter>{children}</NuqsAdapter>
-          </GlobalProvider>
-          <ModalContainer />
-        </QueryProvider>
+        <GoogleOAuthProvider clientId={env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
+          <QueryProvider>
+            <Toaster richColors />
+            <GlobalProvider>
+              <NuqsAdapter>{children}</NuqsAdapter>
+            </GlobalProvider>
+            <ModalContainer />
+          </QueryProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

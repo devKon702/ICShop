@@ -6,6 +6,7 @@ import { AuthResponseCode } from "../constants/codes/auth.code";
 import {
   LoginIType,
   loginSchema,
+  loginWithGoogleSchema,
   sendEmailOTPSchema,
   SignupIType,
   signupSchema,
@@ -25,6 +26,10 @@ import { JWTError } from "../errors/jwt-error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import redis, { redisKeys } from "../utils/redis";
 import emailOptService from "../services/email-opt.service";
+import { OAuth2Client } from "google-auth-library";
+import { env } from "../constants/env";
+import { handleImagesUpload } from "../utils/file";
+import storage from "../storage";
 
 class AuthController {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -110,6 +115,100 @@ class AuthController {
     }
   };
 
+  public loginWithGoogle = async (req: Request, res: Response) => {
+    const {
+      body: { token },
+    } = loginWithGoogleSchema.parse(req);
+
+    // Verify google token
+    const googleClient = new OAuth2Client({
+      clientId: env.GOOGLE_CLIENT_ID,
+    });
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload || !payload.email) {
+      throw new AppError(
+        HttpStatus.UNAUTHORIZED,
+        AuthResponseCode.INVALID_GOOGLE_TOKEN,
+        "Token Google không hợp lệ",
+        true
+      );
+    }
+    const { email, name, picture } = payload;
+    let account = await accountRepository.findByEmail(email!);
+    // If existing account is not user
+    if (account && account.role !== Role.USER) {
+      throw new AppError(
+        HttpStatus.FORBIDDEN,
+        AuthResponseCode.FORBIDDEN,
+        "Không thể đăng nhập bằng Google với email này",
+        true
+      );
+    }
+    let isComeback = true;
+    if (!account) {
+      isComeback = false;
+      // Auto signup
+      let avatarUrl: string | undefined = undefined;
+      if (picture) {
+        // Download picture from google and upload to storage
+        const googlePicture = await fetch(picture);
+        const buffer = Buffer.from(await googlePicture.arrayBuffer());
+        avatarUrl = await storage.save(
+          buffer,
+          String(Date.now()),
+          "image/jpeg"
+        );
+      }
+
+      // Create account
+      account = await accountRepository.create({
+        email: email!,
+        password: null,
+        name: name || email!.split("@")[0],
+        avatarUrl,
+        provider: "google",
+        emailVerified: true,
+        role: Role.USER,
+      });
+    }
+    // Check if account is active
+    if (!account.isActive) {
+      throw new AppError(
+        HttpStatus.FORBIDDEN,
+        AuthResponseCode.USER_BLOCKED,
+        "Tài khoản đã bị khóa",
+        true
+      );
+    }
+    const { password, ...publicAccount } = account;
+    // Generate token for new/existing account
+    const accessToken = createAccessToken({
+      sub: account.user!.id,
+      role: Role.USER,
+    });
+    const refreshToken = createRefreshToken(
+      { sub: account.user!.id, role: Role.USER },
+      Role.USER
+    );
+    this.createCookieToken(res, refreshToken, Role.USER);
+
+    res.status(isComeback ? HttpStatus.OK : HttpStatus.CREATED).json(
+      successResponse(
+        isComeback ? AuthResponseCode.OK : AuthResponseCode.SIGN_UP_WITH_GOOGLE,
+        isComeback ? "Đăng nhập thành công" : "Tạo tài khoản thành công",
+        {
+          account: publicAccount,
+          token: accessToken,
+        }
+      )
+    );
+  };
+
   public signup = async (req: Request, res: Response) => {
     const {
       body: { email, name, password, phone },
@@ -127,7 +226,14 @@ class AuthController {
     // Không trùng
     const hashedPassword = await hashString(password);
     const { password: passwordIgnored, ...newAccount } =
-      await accountRepository.create(email, hashedPassword, name, phone);
+      await accountRepository.create({
+        email,
+        password: hashedPassword,
+        name,
+        phone,
+        provider: "local",
+        role: Role.USER,
+      });
     res
       .status(HttpStatus.CREATED)
       .json(

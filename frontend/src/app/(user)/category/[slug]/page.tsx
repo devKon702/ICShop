@@ -85,18 +85,27 @@ export default async function CategoryPage({
             <div className="col-span-3 space-y-4">
               {category.level !== 3 ? (
                 category.children && (
-                  <SideCategoryFilter
-                    data={category.children}
-                  ></SideCategoryFilter>
+                  <SideCategoryFilter data={category.children} />
                 )
               ) : (
-                <SideAttributeFilter
-                  attributes={category.attributes || []}
-                ></SideAttributeFilter>
+                <SideAttributeFilter attributes={category.attributes || []} />
               )}
             </div>
             <div className="col-span-9 space-y-2">
-              <SelectedAttributeValueFilter></SelectedAttributeValueFilter>
+              <SelectedAttributeValueFilter />
+              <div className="flex items-center justify-between">
+                <span className="font-semibold opacity-50 text-sm px-2">
+                  {category.products.length} sản phẩm
+                </span>
+                <OrderSelector
+                  data={[
+                    { value: "price_asc", label: "Giá Thấp Đến Cao" },
+                    { value: "price_desc", label: "Giá Cao Đến Thấp" },
+                  ]}
+                  defaultValue={order}
+                  className="ms-auto"
+                />
+              </div>
               {category.products.length === 0 ? (
                 <div className="w-full h-40 flex flex-col items-center justify-center bg-white rounded-md space-y-2 shadow">
                   <Search strokeWidth={4} className="opacity-50" />
@@ -106,14 +115,6 @@ export default async function CategoryPage({
                 </div>
               ) : (
                 <>
-                  <OrderSelector
-                    data={[
-                      { value: "price_asc", label: "Giá Thấp Đến Cao" },
-                      { value: "price_desc", label: "Giá Cao Đến Thấp" },
-                    ]}
-                    defaultValue={order}
-                    className="ms-auto"
-                  />
                   <ProductPagination
                     page={Number(page)}
                     limit={Number(limit)}

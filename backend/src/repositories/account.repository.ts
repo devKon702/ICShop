@@ -46,21 +46,30 @@ class AccountRepository {
     // });
   };
 
-  public create = async (
-    email: string,
-    password: string,
-    name: string,
-    phone: string,
-    role: Role = Role.USER
-  ) => {
+  public create = async (data: {
+    email: string;
+    password: string | null;
+    name: string;
+    phone?: string;
+    emailVerified?: boolean;
+    provider: "local" | "google";
+    avatarUrl?: string;
+    role: Role;
+  }) => {
     const newAccount = await prisma.account.create({
       data: {
-        email,
-        password,
+        email: data.email,
+        password: data.password,
+        emailVerified: data.emailVerified || false,
+        provider: data.provider,
         user: {
-          create: { name, phone },
+          create: {
+            name: data.name,
+            phone: data.phone,
+            avatarUrl: data.avatarUrl,
+          },
         },
-        role,
+        role: data.role,
       },
       include: { user: true },
     });

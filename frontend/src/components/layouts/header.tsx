@@ -1,5 +1,4 @@
 "use client";
-import SearchInput from "@/components/common/search-input";
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { ROUTE } from "@/constants/routes";
@@ -8,7 +7,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import Image from "next/image";
 import { useAuthActions, useUser } from "@/store/auth-store";
 import { useModalActions } from "@/store/modal-store";
 import { toast } from "sonner";
@@ -16,10 +14,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import accountService from "@/libs/services/account.service";
 import { authService } from "@/libs/services/auth.service";
 import SafeImage from "@/components/common/safe-image";
-import { ShoppingCart, UserCircle } from "lucide-react";
+import { Search, ShoppingCart, UserCircle } from "lucide-react";
 import Separator from "@/components/common/separator";
 import ClampText from "@/components/common/clamp-text";
 import cartService from "@/libs/services/cart.service";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 const accountMenu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -58,17 +61,23 @@ export default function Header() {
   }, [data, setUser]);
 
   return (
-    <div className="flex justify-around items-center p-3 space-x-40 bg-primary shadow-lg">
-      <Link href="/">
-        <Image
+    <div className="flex items-center p-3 bg-primary shadow-lg">
+      <Link href="/" className="text-white font-bold text-2xl px-4">
+        {/* <Image
           className="size-10"
           src="/uploads/ic.jpg"
           alt="avatar"
           width={40}
           height={40}
-        ></Image>
+        /> */}
+        IoT Shop
       </Link>
-      <SearchInput className="flex-1"></SearchInput>
+      <InputGroup className="bg-white w-1/4 mr-auto has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0">
+        <InputGroupAddon align="inline-start">
+          <Search />
+        </InputGroupAddon>
+        <InputGroupInput placeholder="Tìm kiếm..." className="w-full" />
+      </InputGroup>
       <div className="flex space-x-5">
         <Link
           href={ROUTE.cart}

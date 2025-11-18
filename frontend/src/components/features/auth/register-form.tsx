@@ -13,6 +13,7 @@ import { authService } from "@/libs/services/auth.service";
 import { phoneRegex } from "@/utils/regex";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { CheckCheck, Key, Mail, Phone, User } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -76,7 +77,7 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
     <Form {...form}>
       <form
         noValidate
-        className="space-y-4"
+        className="space-y-4 flex-1 app"
         onSubmit={form.handleSubmit((data) => signupMutate(data))}
       >
         <FormField
@@ -89,7 +90,9 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
                 <CustomInput
                   type="text"
                   icon={
-                    <i className="bx bxs-user text-xl text-white bg-black p-3"></i>
+                    <div className="text-white bg-black p-3">
+                      <User />
+                    </div>
                   }
                   isError={fieldState.invalid}
                   placeholder="Nguyễn Văn A"
@@ -110,7 +113,9 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
                 <CustomInput
                   type="email"
                   icon={
-                    <i className="bx bxs-envelope text-xl text-white bg-black p-3"></i>
+                    <div className="text-white bg-black p-3">
+                      <Mail />
+                    </div>
                   }
                   isError={fieldState.invalid}
                   placeholder="Email"
@@ -131,7 +136,9 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
                 <CustomInput
                   type="text"
                   icon={
-                    <i className="bx bxs-phone text-xl text-white bg-black p-3"></i>
+                    <div className="text-white bg-black p-3">
+                      <Phone />
+                    </div>
                   }
                   isError={fieldState.invalid}
                   placeholder="Số điện thoại"
@@ -152,7 +159,9 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
                 <CustomInput
                   type="password"
                   icon={
-                    <i className="bx bxs-lock text-xl text-white bg-black p-3"></i>
+                    <div className="text-white bg-black p-3">
+                      <Key />
+                    </div>
                   }
                   isError={fieldState.invalid}
                   placeholder="example123"
@@ -173,7 +182,9 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
                 <CustomInput
                   type="password"
                   icon={
-                    <i className="bx bx-check-double text-xl text-white bg-black p-3"></i>
+                    <div className="text-white bg-black p-3">
+                      <CheckCheck />
+                    </div>
                   }
                   isError={fieldState.invalid}
                   placeholder="example123"

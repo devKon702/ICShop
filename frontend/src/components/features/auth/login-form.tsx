@@ -27,6 +27,8 @@ import { ApiErrorResponseSchema } from "@/libs/schemas/response.schema";
 import { useAuthActions } from "@/store/auth-store";
 import { toast } from "sonner";
 import { useModalActions } from "@/store/modal-store";
+import { Lock, Mail } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 
 const formSchema = z.object({
   email: z.string().email("Email không đúng định dạng"),
@@ -82,6 +84,28 @@ export default function LoginForm({
     },
   });
 
+  const { mutate: googleLoginMutate } = useMutation({
+    mutationFn: async (token: string) => authService.loginWithGoogle(token),
+    onSuccess: ({ data, message }) => {
+      login(
+        {
+          email: data.account.email,
+          avatarUrl: data.account.user.avatarUrl,
+          name: data.account.user.name,
+          role: data.account.role,
+          phone: data.account.user.phone,
+        },
+        data.token
+      );
+      closeModal();
+      toast.success(message);
+      onLogin?.();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Đăng nhập thất bại, vui lòng thử lại");
+    },
+  });
+
   return (
     <Form {...form}>
       <form
@@ -99,13 +123,16 @@ export default function LoginForm({
               <FormControl>
                 <CustomInput
                   icon={
-                    <i className="bx bxs-envelope text-xl text-white bg-black p-3"></i>
+                    <div className="p-3 bg-black text-white">
+                      <Mail />
+                    </div>
                   }
                   type="email"
                   placeholder="example@gmail.com"
                   isError={!!fieldState.invalid}
                   autoFocus
                   {...field}
+                  className="overflow-hidden"
                 ></CustomInput>
               </FormControl>
               <FormMessage />
@@ -121,7 +148,9 @@ export default function LoginForm({
               <FormControl>
                 <CustomInput
                   icon={
-                    <i className="bx bxs-lock text-xl text-white bg-black p-3"></i>
+                    <div className="p-3 bg-black text-white">
+                      <Lock />
+                    </div>
                   }
                   type="password"
                   placeholder="example123"
@@ -148,8 +177,29 @@ export default function LoginForm({
           </DialogContent>
         </Dialog>
 
-        <div className="w-full rounded-sm bg-white flex items-center justify-center py-2 cursor-pointer border-2 hover:opacity-80 transition-all font-medium">
-          <i className="bx bxl-google me-2"></i>Đăng nhập với Google
+        {/* <div
+          className="w-full rounded-sm bg-white flex items-center justify-center py-2 cursor-pointer border-2 hover:opacity-80 transition-all font-medium space-x-4"
+          onClick={() => googleLogin()}
+        >
+          <Image src="/google-icon.svg" alt="Google" width={24} height={24} />
+          <span>Đăng nhập với Google</span>
+        </div> */}
+        <div className="w-fit mx-auto">
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              console.log(credentialResponse);
+              googleLoginMutate(credentialResponse.credential || "");
+            }}
+            onError={() => {
+              toast.error("Đăng nhập thất bại, vui lòng thử lại");
+            }}
+            width={"100%"}
+            text="continue_with"
+            type="standard"
+            theme="outline"
+            size="large"
+            logo_alignment="left"
+          />
         </div>
         <p className="text-center">
           Bạn chưa có tài khoản?{" "}

@@ -9,6 +9,12 @@ export const loginSchema = z.object({
   }),
 });
 
+export const loginWithGoogleSchema = requestSchema({
+  body: z.object({
+    token: z.string(),
+  }),
+});
+
 export type LoginIType = z.infer<typeof loginSchema>;
 
 export const signupSchema = z.object({
