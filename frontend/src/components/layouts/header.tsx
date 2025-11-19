@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { ROUTE } from "@/constants/routes";
 import {
@@ -31,11 +31,24 @@ const accountMenu = [
 
 export default function Header() {
   const user = useUser();
-  const { setUser, clearAuth } = useAuthActions();
+  const { setUser, setIsAuthenticated, clearAuth } = useAuthActions();
   const { openModal } = useModalActions();
-  const { data } = useQuery({
+  const {} = useQuery({
     queryKey: ["me"],
-    queryFn: accountService.getMe,
+    queryFn: () =>
+      accountService.getMe().then((data) => {
+        setUser({
+          email: data.data.email,
+          name: data.data.user.name,
+          avatarUrl: data.data.user.avatarUrl,
+          role: data.data.role,
+          phone: data.data.user.phone,
+        });
+        setIsAuthenticated(true);
+        return data;
+      }),
+    staleTime: 60 * 1000, // 1 minute
+    enabled: !user,
   });
   const { data: cartData } = useQuery({
     queryKey: ["cart"],
@@ -46,30 +59,13 @@ export default function Header() {
     onSuccess: () => {
       toast.success("Đăng xuất thành công");
       clearAuth();
+      setIsAuthenticated(false);
     },
   });
-  useEffect(() => {
-    if (data?.data) {
-      setUser({
-        email: data.data.email,
-        name: data.data.user.name,
-        avatarUrl: data.data.user.avatarUrl,
-        role: data.data.role,
-        phone: data.data.user.phone,
-      });
-    }
-  }, [data, setUser]);
 
   return (
     <div className="flex items-center p-3 bg-primary shadow-lg">
       <Link href="/" className="text-white font-bold text-2xl px-4">
-        {/* <Image
-          className="size-10"
-          src="/uploads/ic.jpg"
-          alt="avatar"
-          width={40}
-          height={40}
-        /> */}
         IoT Shop
       </Link>
       <InputGroup className="bg-white w-1/4 mr-auto has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0">

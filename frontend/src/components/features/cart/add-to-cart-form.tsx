@@ -1,7 +1,9 @@
 "use client";
 import Counter from "@/components/common/counter";
 import cartService from "@/libs/services/cart.service";
+import { useIsAuthenticated } from "@/store/auth-store";
 import useCartStore from "@/store/cart-store";
+import { useModalActions } from "@/store/modal-store";
 import { cn } from "@/utils/className";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
@@ -26,6 +28,8 @@ export default function AddToCartForm({
   const {
     actions: { addItem },
   } = useCartStore();
+  const { openModal } = useModalActions();
+  const isAuthenticated = useIsAuthenticated();
   const queryClient = useQueryClient();
   const { mutate: addToCartMutate } = useMutation({
     mutationFn: async () => cartService.add(productId),
@@ -56,7 +60,21 @@ export default function AddToCartForm({
       ></Counter>
       <button
         className="bg-primary hover:opacity-90 py-2 cursor-pointer rounded-sm w-full mt-2"
-        onClick={() => addToCartMutate()}
+        onClick={() => {
+          if (!isAuthenticated) {
+            toast.info("Vui lòng đăng nhập để thêm vào giỏ hàng");
+            openModal({
+              type: "auth",
+              props: {
+                onLoginSuccess: () => {
+                  addToCartMutate();
+                },
+              },
+            });
+            return;
+          }
+          addToCartMutate();
+        }}
       >
         <i className="bx bxs-cart me-2 pointer-events-none"></i>
         Thêm vào giỏ hàng

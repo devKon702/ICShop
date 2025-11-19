@@ -9,6 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
 import { formatPrice } from "@/utils/price";
+import tryCatch from "@/utils/try-catch";
 
 export async function generateMetadata({
   params,
@@ -33,51 +34,46 @@ interface ProductPageProps {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const { data: product } = await productService.user.getBySlug(slug);
-  if (!product) notFound();
+  const [product, error] = await tryCatch(productService.user.getBySlug(slug));
+  if (error) notFound();
   return (
     <>
       <SetBreadCrump
         breadcrumps={[
           { label: "Trang chủ", href: ROUTE.home },
           {
-            label: product.category.parent.parent.name || "",
-            href: ROUTE.category + "/" + product.category?.parent?.parent?.slug,
+            label: product.data.category.parent.parent.name || "",
+            href:
+              ROUTE.category +
+              "/" +
+              product.data.category?.parent?.parent?.slug,
           },
           {
-            label: product.category.parent.name || "",
-            href: ROUTE.category + "/" + product.category?.parent?.slug,
+            label: product.data.category.parent.name || "",
+            href: ROUTE.category + "/" + product.data.category?.parent?.slug,
           },
           {
-            label: product.category.name || "",
-            href: ROUTE.category + "/" + product.category?.slug,
+            label: product.data.category.name || "",
+            href: ROUTE.category + "/" + product.data.category?.slug,
           },
           {
-            label: product.name,
-            href: product.slug,
+            label: product.data.name,
+            href: product.data.slug,
           },
         ]}
-      ></SetBreadCrump>
+      />
       <div className="grid grid-cols-12 w-full space-x-2">
         <ProductMediaGallery
           imageUrls={[
-            product.posterUrl || "",
-            ...product.images.map((img) => img.imageUrl),
+            product.data.posterUrl || "",
+            ...product.data.images.map((img) => img.imageUrl),
           ]}
-        ></ProductMediaGallery>
+        />
         <div className="col-span-8 p-2 rounded-md bg-white space-y-2">
-          <p className="text-3xl">{product.name}</p>
-          {/* <div className="space-x-2">
-            <span className="font-bold">Thương hiệu:</span>
-            <span>MicroIO</span>
-          </div>
-          <div className="space-x-2">
-            <span className="font-bold">Mã sản phẩm:</span>
-            <span>CL38X70</span>
-          </div> */}
-          {product.datasheetLink && (
+          <p className="text-3xl">{product.data.name}</p>
+          {product.data.datasheetLink && (
             <Link
-              href={product.datasheetLink}
+              href={product.data.datasheetLink}
               target="_blank"
               className="hover:underline text-primary"
             >
@@ -89,21 +85,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="flex flex-col space-y-2 w-5/12 mt-auto">
               <span className="font-bold">Số lượng:</span>
               <AddToCartForm
-                min={product.wholesale.min_quantity}
-                max={product.wholesale.max_quantity}
-                step={product.wholesale.quantity_step}
-                productId={product.id}
-              ></AddToCartForm>
+                min={product.data.wholesale.min_quantity}
+                max={product.data.wholesale.max_quantity}
+                step={product.data.wholesale.quantity_step}
+                productId={product.data.id}
+              />
             </div>
             <div className="w-5/12">
               <ProductWholesaleTable
-                detail={product.wholesale.details.map((item) => ({
+                detail={product.data.wholesale.details.map((item) => ({
                   min: item.min,
                   price: Number(item.price),
                   desc: item.desc,
                 }))}
-                unit={product.wholesale.unit}
-              ></ProductWholesaleTable>
+                unit={product.data.wholesale.unit}
+              />
             </div>
           </div>
         </div>
@@ -112,21 +108,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <h2 className="font-bold text-xl my-4">Thông số</h2>
         <div>
           <ProductAttributeTable
-            attributes={product.attributes.map((item) => ({
+            attributes={product.data.attributes.map((item) => ({
               id: item.id,
               name: item.attributeValue.attribute.name,
               value: item.attributeValue.value,
             }))}
-          ></ProductAttributeTable>
+          />
         </div>
-        {product.desc && (
+        {product.data.desc && (
           <>
             <h2 className="font-bold text-xl my-4">Mô tả chi tiết</h2>
             <div className="space-y-3">
               <div
                 className="whitespace-pre-line"
                 dangerouslySetInnerHTML={{
-                  __html: product.desc,
+                  __html: product.data.desc,
                 }}
               ></div>
             </div>

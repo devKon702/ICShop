@@ -2,6 +2,7 @@
 import { ROUTE } from "@/constants/routes";
 import { authService } from "@/libs/services/auth.service";
 import { useAuthActions } from "@/store/auth-store";
+import { useMutation } from "@tanstack/react-query";
 import {
   ChartArea,
   CircleArrowLeft,
@@ -76,6 +77,14 @@ const sidebarMenu: {
 export default function AdminSidebar({}) {
   const pathname = usePathname();
   const { clearAuth } = useAuthActions();
+
+  const { mutate: logoutMutate } = useMutation({
+    mutationFn: authService.logout,
+    onSuccess: () => {
+      toast.success("Đăng xuất thành công");
+      clearAuth();
+    },
+  });
   return (
     <ul className="flex flex-col size-full border-r-2">
       <p className="font-medium text-2xl px-4">Admin</p>
@@ -105,15 +114,7 @@ export default function AdminSidebar({}) {
         className="flex space-x-1 justify-start rounded-md p-2 mx-2 cursor-pointer border border-transparent hover:border-background hover:shadow text-sm font-semibold items-center"
         onClick={() => {
           if (confirm("Bạn có muốn đăng xuất không")) {
-            authService
-              .logout()
-              .then(() => {
-                clearAuth();
-                // router.replace(ROUTE.adminLogin);
-              })
-              .catch(() => {
-                toast.error("Lỗi");
-              });
+            logoutMutate();
           }
         }}
       >

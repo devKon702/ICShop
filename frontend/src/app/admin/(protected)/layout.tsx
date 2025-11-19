@@ -4,13 +4,17 @@ import LoadingIcon from "@/components/common/loading-icon";
 import SafeImage from "@/components/common/safe-image";
 import ProtectedLayer from "@/components/features/auth/protected-layer";
 import AdminSidebar from "@/components/layouts/admin-sidebar";
+import { ROLE } from "@/constants/enums";
 import { ROUTE } from "@/constants/routes";
 import accountService from "@/libs/services/account.service";
-import { useAuthActions } from "@/store/auth-store";
+import {
+  useAuthActions,
+  useIsAuthenticated,
+  useUser,
+} from "@/store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
-import React, { ReactNode, useEffect } from "react";
-import { toast } from "sonner";
+import React, { ReactNode } from "react";
 
 const pageTitles = [
   { href: ROUTE.adminDashboard, title: "Thống kê" },
@@ -24,36 +28,34 @@ const pageTitles = [
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { setUser, clearAuth } = useAuthActions();
-  const [allowed, setAllowed] = React.useState(false);
+  const { setUser, clearAuth, setIsAuthenticated } = useAuthActions();
+  const user = useUser();
+  const isAuthenticated = useIsAuthenticated();
   const pathname = usePathname();
-  const { data, isLoading, isError } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["me"],
-    queryFn: accountService.getMe,
-    staleTime: 1000 * 60 * 5,
+    queryFn: () =>
+      accountService
+        .getMe()
+        .then((res) => {
+          setUser({
+            name: res.data.user.name,
+            avatarUrl: res.data.user.avatarUrl,
+            email: res.data.email,
+            role: res.data.role,
+            phone: res.data.user.phone,
+          });
+          setIsAuthenticated(true);
+          return res;
+        })
+        .catch((err) => {
+          clearAuth();
+          return err;
+        }),
+    staleTime: 5 * 60 * 1000, // 5 minutes,
   });
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (isError) {
-      clearAuth();
-      router.replace(ROUTE.adminLogin);
-      return;
-    }
-    if (data) {
-      const user = data.data.user;
-      setUser({
-        name: user.name,
-        avatarUrl: user.avatarUrl,
-        email: data.data.email,
-        role: data.data.role,
-        phone: user.phone,
-      });
-      setAllowed(true);
-    }
-  }, [isLoading, isError, data, clearAuth, router, setUser]);
-
-  if (!allowed)
+  if (isAuthenticated === null || isLoading)
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <LoadingIcon />
@@ -62,11 +64,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <ProtectedLayer
-      role="admin"
+      role={ROLE.ADMIN}
       onUnauthorized={() => {
-        clearAuth();
-        router.push(ROUTE.adminLogin);
-        toast.info("Vui lòng đăng nhập lại");
+        router.replace(ROUTE.adminLogin + "?redirect=" + pathname);
       }}
     >
       <div className="p-6 h-screen">
@@ -80,16 +80,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 {pageTitles.find((item) => item.href == pathname)?.title}
               </h1>
               <div className="flex items-center space-x-2">
-                <span className="font-semibold">{data?.data.user.name}</span>
+                <span className="font-semibold">{user?.name}</span>
                 <SafeImage
-                  key={data?.data.user.avatarUrl}
-                  src={
-                    !!data?.data.user.avatarUrl
-                      ? data?.data.user.avatarUrl
-                      : undefined
-                  }
+                  key={user?.avatarUrl}
+                  src={!!user?.avatarUrl ? user?.avatarUrl : undefined}
                   appFileBase
-                  avatarPlaceholderName={data?.data.user.name}
+                  avatarPlaceholderName={user?.name}
                   alt="Avatar"
                   height={40}
                   width={40}

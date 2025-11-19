@@ -1,3 +1,4 @@
+import { HighlightType, ROLE } from "@/constants/enums";
 import { z } from "zod";
 
 export const ID = z.number().int().nonnegative();
@@ -15,8 +16,6 @@ export const Slug = z.string().min(1);
 export const TinyText = z.string();
 export const Text = z.string();
 
-export const RoleEnum = z.enum(["user", "admin"]);
-export type Role = z.infer<typeof RoleEnum>;
+export const RoleEnum = z.nativeEnum(ROLE);
 
-export const HighlightTypeEnum = z.enum(["new", "hot", "bestsell"]);
-export type HighlightType = z.infer<typeof HighlightTypeEnum>;
+export const HighlightTypeEnum = z.nativeEnum(HighlightType);

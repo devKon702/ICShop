@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/form";
 import { ROUTE } from "@/constants/routes";
 import { authService } from "@/libs/services/auth.service";
-import { useUser, useAuthActions } from "@/store/auth-store";
+import { useAuthActions } from "@/store/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -24,12 +25,15 @@ const formSchema = z.object({
 });
 
 export default function AdminLoginForm() {
-  const { setUser, setToken } = useAuthActions();
-  const user = useUser();
+  const { login } = useAuthActions();
   const router = useRouter();
-  useEffect(() => {
-    if (user?.role === "admin") router.replace(ROUTE.admin);
-  }, [user, router]);
+  const params = useSearchParams();
+  // useEffect(() => {
+  //   if (isAuthenticated && user?.role === "admin") {
+  //     router.replace(ROUTE.admin);
+  //     return;
+  //   }
+  // }, [user, router, isAuthenticated]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,28 +41,39 @@ export default function AdminLoginForm() {
       password: "",
     },
   });
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    authService
-      .adminLogin(values.email, values.password)
-      .then((res) => {
-        toast.success(res.message, { position: "bottom-right" });
-        const account = res.data.account;
-        setUser({
-          avatarUrl: account.user.avatarUrl || null,
-          email: account.email,
-          name: account.user.name,
-          role: account.role,
-          phone: account.user.phone,
-        });
-        setToken(res.data.token);
-      })
-      .catch((e) => {
-        toast.error(e.data.message, { position: "bottom-right" });
-      });
-  }
+
+  const { mutate: adminLoginMutate } = useMutation({
+    mutationFn: async (data: { email: string; password: string }) =>
+      authService.adminLogin(data.email, data.password),
+    onSuccess: ({ data, message }) => {
+      login(
+        {
+          avatarUrl: data.account.user.avatarUrl || null,
+          email: data.account.email,
+          name: data.account.user.name,
+          role: data.account.role,
+          phone: data.account.user.phone,
+        },
+        data.token
+      );
+      toast.success(message);
+      router.replace(params.get("redirect") || ROUTE.admin);
+    },
+    onError: (e) => {
+      toast.error(e.message || "Đăng nhập thất bại, vui lòng thử lại");
+    },
+  });
   return (
     <Form {...form}>
-      <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        className="space-y-5"
+        onSubmit={form.handleSubmit((values) =>
+          adminLoginMutate({
+            email: values.email,
+            password: values.password,
+          })
+        )}
+      >
         <FormField
           control={form.control}
           name="email"

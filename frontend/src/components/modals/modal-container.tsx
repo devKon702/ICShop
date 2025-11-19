@@ -130,7 +130,7 @@ export default function ModalContainer() {
               case "auth":
                 return (
                   <FormModal index={index}>
-                    <AuthTabs />
+                    <AuthTabs {...item.props} />
                   </FormModal>
                 );
               case "createAddress":

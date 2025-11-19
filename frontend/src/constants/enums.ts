@@ -1,6 +1,6 @@
 export enum ROLE {
-  USER,
-  ADMIN,
+  USER = "user",
+  ADMIN = "admin",
 }
 
 export enum DeliveryType {

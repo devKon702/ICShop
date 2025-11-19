@@ -68,9 +68,9 @@ export default function LoginForm({
         },
         data.token
       );
-      closeModal();
-      toast.success("Đăng nhập thành công");
       onLogin?.();
+      toast.success("Đăng nhập thành công");
+      closeModal();
     },
     onError: (error: unknown) => {
       const parsedError = ApiErrorResponseSchema.safeParse(error);
@@ -97,9 +97,9 @@ export default function LoginForm({
         },
         data.token
       );
-      closeModal();
       toast.success(message);
       onLogin?.();
+      closeModal();
     },
     onError: (error) => {
       toast.error(error.message || "Đăng nhập thất bại, vui lòng thử lại");
@@ -189,7 +189,9 @@ export default function LoginForm({
             onSuccess={(credentialResponse) => {
               if (credentialResponse.credential)
                 googleLoginMutate(credentialResponse.credential);
-              console.log("No credential returned");
+              else {
+                console.log("No credential returned");
+              }
             }}
             onError={() => {
               toast.error("Đăng nhập thất bại, vui lòng thử lại");
