@@ -320,21 +320,26 @@ class AuthService {
       sessionId: tokenPayload.sessionId,
       sessionVersion: tokenPayload.version + 1,
     });
-    // Update session in database and redis
-    await Promise.all([
-      sessionRepository.updateById(session.sessionId, {
+    // Update session in database then redis
+    const sessionUpdated = await sessionRepository.updateById(
+      session.sessionId,
+      {
         rtJti: refreshJti,
         version: session.version + 1,
         expiresAt: new Date(refreshExpiresAt),
-      }),
-      redisService.setValue(redisKeys.session(session.sessionId), {
-        sub: session.sub,
+      }
+    );
+    await redisService.setValue(
+      redisKeys.session(sessionUpdated.id),
+      {
+        sub: sessionUpdated.userId,
         role: session.role,
-        jti: refreshJti,
-        sessionId: session.sessionId,
-        version: session.version + 1,
-      }),
-    ]);
+        jti: sessionUpdated.rtJti,
+        sessionId: sessionUpdated.id,
+        version: sessionUpdated.version,
+      },
+      (sessionUpdated.expiresAt.getTime() - Date.now()) / 1000
+    );
     // Tạo nơi lưu trữ refresh token
     this.createCookieToken(res, refreshToken, tokenPayload.role);
     return { accessToken, refreshToken };
