@@ -1,6 +1,9 @@
 import express from "express";
 import authController from "../controllers/auth.controller";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import {
+  verifyAccessToken,
+  jwtMiddleware,
+} from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   loginSchema,

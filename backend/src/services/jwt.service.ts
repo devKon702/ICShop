@@ -55,7 +55,7 @@ class JwtService {
     try {
       const payload = jwt.verify(
         token,
-        env.JWT_ACCESS_KEY!
+        env.JWT_ACCESS_KEY
       ) as AccessTokenPayload;
       return payload;
     } catch (err) {
@@ -74,7 +74,7 @@ class JwtService {
     try {
       const payload = jwt.verify(
         token,
-        env.JWT_REFRESH_KEY!
+        env.JWT_REFRESH_KEY
       ) as RefreshTokenPayload;
       return payload;
     } catch (err) {
@@ -87,38 +87,6 @@ class JwtService {
       }
       throw err;
     }
-  };
-
-  public saveNewRefreshToken = ({
-    sessionId,
-    refreshJti,
-    userId,
-    refreshExpiresAt,
-  }: {
-    sessionId: string;
-    refreshJti: string;
-    userId: number;
-    refreshExpiresAt: Date;
-  }) => {
-    return Promise.all([
-      sessionRepository.create({
-        id: sessionId,
-        rtJti: refreshJti,
-        userId: userId,
-        version: 1,
-        expiresAt: refreshExpiresAt,
-      }),
-      redisService.setValue(
-        redisKeys.session(sessionId),
-        {
-          rtJti: refreshJti,
-          userId: userId,
-          sessionId: sessionId,
-          version: 1,
-        },
-        60 * 60 * 4 // 4 hours
-      ),
-    ]);
   };
 }
 

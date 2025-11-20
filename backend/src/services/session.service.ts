@@ -4,6 +4,37 @@ import { RefreshTokenPayload } from "./jwt.service";
 import redisService, { redisKeys } from "./redis.service";
 
 class SessionService {
+  public saveNewSession = ({
+    sessionId,
+    refreshJti,
+    userId,
+    refreshExpiresAt,
+  }: {
+    sessionId: string;
+    refreshJti: string;
+    userId: number;
+    refreshExpiresAt: Date;
+  }) => {
+    return Promise.all([
+      sessionRepository.create({
+        id: sessionId,
+        rtJti: refreshJti,
+        userId: userId,
+        version: 1,
+        expiresAt: refreshExpiresAt,
+      }),
+      redisService.setValue(
+        redisKeys.session(sessionId),
+        {
+          rtJti: refreshJti,
+          userId: userId,
+          sessionId: sessionId,
+          version: 1,
+        },
+        60 * 60 * 4 // 4 hours
+      ),
+    ]);
+  };
   public getOrLoadSession(
     sessionId: string,
     role: Role

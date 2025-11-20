@@ -38,13 +38,14 @@ export const validateAccessToken = async (
     payload.sessionId,
     payload.role
   );
-  if (!session) {
-    throw new JWTError(
-      JWTResponseCode.TOKEN_REVOKED,
-      "Phiên đăng nhập không còn hiệu lực"
-    );
-  }
-  if (session.version !== payload.sessionVersion) {
+  // if (!session) {
+  //   throw new JWTError(
+  //     JWTResponseCode.TOKEN_REVOKED,
+  //     "Phiên đăng nhập không còn hiệu lực"
+  //   );
+  // }
+  if (session?.version !== payload.sessionVersion) {
+    // Handle use revoked token logic here
     throw new JWTError(JWTResponseCode.TOKEN_REVOKED, "Token đã bị thu hồi");
   }
   next();

@@ -29,10 +29,10 @@ class RedisService {
     return redis;
   }
 
-  public async setValue<T>(key: string, value: T, ttlSeconds?: number) {
+  public async setValue<T>(key: string, value: T, ttlSeconds: number | null) {
     const data = JSON.stringify(value);
-    if (ttlSeconds) await this.client.set(key, data, "EX", ttlSeconds);
-    else await this.client.set(key, data);
+    if (ttlSeconds === null) await this.client.set(key, data);
+    else await this.client.set(key, data, "EX", ttlSeconds);
   }
 
   public async getValue<T>(key: string): Promise<T | null> {

@@ -19,6 +19,7 @@ import emailOptService from "./email-opt.service";
 import sessionRepository from "../repositories/session.repository";
 import redisService, { redisKeys } from "./redis.service";
 import redis from "../utils/redis";
+import sessionService from "./session.service";
 
 class AuthService {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -113,7 +114,7 @@ class AuthService {
         sessionVersion: 1,
       });
     // Save session to database and redis
-    await jwtService.saveNewRefreshToken({
+    await sessionService.saveNewSession({
       sessionId,
       refreshJti,
       userId: account.user!.id,
@@ -210,7 +211,7 @@ class AuthService {
       });
 
     // Save session to database and redis
-    await jwtService.saveNewRefreshToken({
+    await sessionService.saveNewSession({
       sessionId,
       refreshJti,
       userId: account.user!.id,
@@ -273,26 +274,10 @@ class AuthService {
     // Verify token
     const tokenPayload = jwtService.verifyRefreshToken(token);
     // Find session in redis and database
-    const session = await redisService
-      .getValue<RefreshTokenPayload>(redisKeys.session(tokenPayload.sessionId))
-      .then((data) => {
-        if (data) return data;
-        return sessionRepository
-          .findById(tokenPayload.sessionId)
-          .then((session) => {
-            if (!session) return null;
-            const sessionData: RefreshTokenPayload = {
-              sub: session.userId,
-              role: tokenPayload.role,
-              jti: session.rtJti,
-              sessionId: session.id,
-              version: session.version,
-            };
-            // Save to redis for next time
-            redisService.setValue(redisKeys.session(session.id), sessionData);
-            return sessionData;
-          });
-      });
+    const session = await sessionService.getOrLoadSession(
+      tokenPayload.sessionId,
+      tokenPayload.role
+    );
     // Session not found
     if (!session) {
       throw new JWTError(
@@ -302,6 +287,7 @@ class AuthService {
     }
     // JTI mismatch
     if (session.jti !== tokenPayload.jti) {
+      // Handle use revoked token logic here
       throw new JWTError(JWTResponseCode.TOKEN_REVOKED, "Token đã bị thu hồi");
     }
     // Create new tokens and refresh expiredAt
