@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import accountRepository from "../repositories/account.repository";
-import { TokenPayload } from "../types/token-payload";
 import { AppError } from "../errors/app-error";
 import { HttpStatus } from "../constants/http-status";
 import { AuthResponseCode } from "../constants/codes/auth.code";
@@ -12,14 +11,12 @@ import {
   changeAccountStatusSchema,
   updateMyEmailSchema,
 } from "../schemas/account.schema";
-import { UserResponseCode } from "../constants/codes/user.code";
 import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt";
-import { Role } from "../constants/db";
-import { http } from "winston";
 import { sanitizeData } from "../utils/sanitize";
 import emailOptService from "../services/email-opt.service";
 import { NotFoundError } from "../errors/not-found-error";
+import { AccessTokenPayload } from "../services/jwt.service";
 
 class AccountController {
   public getInfo = async (req: Request, res: Response) => {
@@ -48,7 +45,7 @@ class AccountController {
   };
 
   public getMyInformation = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const account = await accountRepository.findByUserId(sub);
     if (!account)
       throw new AppError(
@@ -73,7 +70,7 @@ class AccountController {
     req: Request<any, any, ChangePasswordIType["body"]>,
     res: Response
   ) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const { currentPassword, newPassword } = req.body;
     // Check account existence
     const account = await accountRepository.findByUserId(sub);
@@ -154,7 +151,7 @@ class AccountController {
   };
 
   public changeStatus = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { accountId, isActive },
     } = changeAccountStatusSchema.parse(req);
@@ -197,7 +194,7 @@ class AccountController {
   };
 
   public updateMyEmail = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { email, otp },
     } = updateMyEmailSchema.parse(req);

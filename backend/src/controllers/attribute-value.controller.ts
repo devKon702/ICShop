@@ -11,10 +11,11 @@ import { HttpStatus } from "../constants/http-status";
 import { AttrValResponseCode } from "../constants/codes/attribute-value.code";
 import attributeValueRepository from "../repositories/attribute-value.repository";
 import { successResponse } from "../utils/response";
+import { AccessTokenPayload } from "../services/jwt.service";
 
 class AttributeValueController {
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { attributeId, value },
     } = createAttrValSchema.parse(req);
@@ -42,7 +43,7 @@ class AttributeValueController {
       );
   };
   public update = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { value },
       params: { id },

@@ -22,6 +22,7 @@ import { AddressResponseCode } from "../constants/codes/address.code";
 import { logger } from "../utils/logger";
 import { NotFoundError } from "../errors/not-found-error";
 import { set } from "zod";
+import { AccessTokenPayload } from "../services/jwt.service";
 
 class CategoryController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -149,7 +150,7 @@ class CategoryController {
   };
 
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { name, parentId },
     } = createCategorySchema.parse(req);
@@ -215,7 +216,7 @@ class CategoryController {
       );
   };
   public update = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
       body: { name, parentId },
@@ -288,7 +289,7 @@ class CategoryController {
       );
   };
   public delete = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
     } = deleteCategorySchema.parse(req);

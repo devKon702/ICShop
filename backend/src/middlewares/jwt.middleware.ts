@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { JWTError } from "../errors/jwt-error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import { verifyToken } from "../utils/jwt";
-import { TokenPayload } from "../types/token-payload";
+import { AccessTokenPayload } from "../services/jwt.service";
+import sessionService from "../services/session.service";
 export const verifyAccessToken = (
   req: Request,
   res: Response,
@@ -20,19 +21,33 @@ export const verifyAccessToken = (
   try {
     // Xác thực và lấy payload từ token
     const payload = verifyToken(token, "access");
-
-    // Kiểm tra tài khoản có hiệu lực - kiểm tra blacklist
-    /// ...
-
-    res.locals.tokenPayload = payload;
+    res.locals.auth = payload;
     next();
   } catch (err) {
     next(err);
   }
 };
 
-export const verifyRefreshToken = (
+export const validateAccessToken = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  const payload = res.locals.auth as AccessTokenPayload;
+  const session = await sessionService.getOrLoadSession(
+    payload.sessionId,
+    payload.role
+  );
+  if (!session) {
+    throw new JWTError(
+      JWTResponseCode.TOKEN_REVOKED,
+      "Phiên đăng nhập không còn hiệu lực"
+    );
+  }
+  if (session.version !== payload.sessionVersion) {
+    throw new JWTError(JWTResponseCode.TOKEN_REVOKED, "Token đã bị thu hồi");
+  }
+  next();
+};
+
+export const jwtMiddleware = [verifyAccessToken, validateAccessToken];

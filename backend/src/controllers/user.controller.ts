@@ -7,6 +7,7 @@ import { successResponse } from "../utils/response";
 import { UserResponseCode } from "../constants/codes/user.code";
 import { getFileName, handleImagesUpload, validateFile } from "../utils/file";
 import storage from "../storage";
+import { AccessTokenPayload } from "../services/jwt.service";
 
 class UserController {
   // public updateUser = async (
@@ -14,7 +15,7 @@ class UserController {
   //   res: Response
   // ) => {
   //   try {
-  //     const { sub } = res.locals.tokenPayload as TokenPayload;
+  //     const { sub } = res.locals.auth as AccessTokenPayload;
   //     const { name } = req.body;
   //     const user = await userRepository.updateName(sub, name);
   //     res
@@ -43,7 +44,7 @@ class UserController {
   //     String(Date.now()),
   //     avatarFile.mimetype
   //   );
-  //   const { sub } = res.locals.tokenPayload as TokenPayload;
+  //   const { sub } = res.locals.auth as AccessTokenPayload;
   //   // Xóa file cũ
   //   const user = await userRepository.findById(sub);
   //   if (user && user.avatarUrl) {
@@ -60,7 +61,7 @@ class UserController {
   // };
 
   public update = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { name, phone },
     } = updateUserSchema.parse(req);

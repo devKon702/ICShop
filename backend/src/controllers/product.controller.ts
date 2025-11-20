@@ -32,6 +32,7 @@ import { findByIdSchema } from "../schemas/shared.schema";
 import productAttributeRepository from "../repositories/product-attribute.repository";
 import { ValidateError } from "../errors/validate-error";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
+import { AccessTokenPayload } from "../services/jwt.service";
 
 class ProductController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -142,7 +143,7 @@ class ProductController {
   };
 
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: {
         name,
@@ -212,7 +213,7 @@ class ProductController {
   };
 
   public updatePoster = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
     } = updatePosterSchema.parse(req);
@@ -251,7 +252,7 @@ class ProductController {
   };
 
   public updateInfo = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { datasheetLink, desc, name, weight },
       params: { id },
@@ -280,7 +281,7 @@ class ProductController {
   };
 
   public updateCategory = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { vids, categoryId },
       params: { id },
@@ -328,7 +329,7 @@ class ProductController {
   };
 
   public updateActive = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { isActive },
       params: { id },
@@ -346,7 +347,7 @@ class ProductController {
   };
 
   public updateWholesale = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { details, max_quantity, min_quantity, quantity_step, unit, vat },
       params: { id },

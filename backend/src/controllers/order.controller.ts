@@ -26,11 +26,12 @@ import { NotFoundError } from "../errors/not-found-error";
 import productRepository from "../repositories/product.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
 import { sanitizeData } from "../utils/sanitize";
+import { AccessTokenPayload } from "../services/jwt.service";
 
 class OrderController {
   // USER
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { addressId, deliveryType, products, receiverName, receiverPhone },
     } = createOrderSchema.parse(req);
@@ -150,7 +151,7 @@ class OrderController {
       );
   };
   public filterMyOrders = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       query: { status, page, limit, from, to, order },
     } = filterMyOrdersSchema.parse(req);
@@ -174,7 +175,7 @@ class OrderController {
       );
   };
   public getMyOrderById = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
     } = getOrderByIdSchema.parse(req);
@@ -199,7 +200,7 @@ class OrderController {
       );
   };
   public cancelOrder = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
       body: { desc },
@@ -245,7 +246,7 @@ class OrderController {
       );
   };
   public seenOrderTimeline = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
     } = seenOrderTimelineSchema.parse(req);
@@ -269,7 +270,7 @@ class OrderController {
       );
   };
   public getMyUnseenOrderTimeline = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const timelines = await orderRepository.findMyUnseenTimeline(sub);
     res
       .status(HttpStatus.OK)
@@ -282,7 +283,7 @@ class OrderController {
       );
   };
   public updateOrderAddress = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
       body: { addressId, deliveryType, receiverName, receiverPhone },
@@ -406,7 +407,7 @@ class OrderController {
   };
 
   public adminChangeOrderStatus = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { status, desc, orderId },
     } = createOrderTimelineSchema.parse(req);
@@ -441,7 +442,7 @@ class OrderController {
   };
 
   public adminUpdateTimelineDesc = async (req: Request, res: Response) => {
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       params: { id },
       body: { desc },
