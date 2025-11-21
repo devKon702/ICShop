@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
@@ -18,7 +18,7 @@ const adminPath = "/admin/attribute";
 // GET /admin/attribute/category/:id
 attributeRouter.get(
   adminPath + "/category/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getAttributeByCategoryId),
   attributeController.getByCategoryId
@@ -26,7 +26,7 @@ attributeRouter.get(
 
 attributeRouter.post(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(createAttributeSchema),
   attributeController.create
@@ -34,7 +34,7 @@ attributeRouter.post(
 
 attributeRouter.put(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateAttributeSchema),
   attributeController.update
@@ -42,7 +42,7 @@ attributeRouter.put(
 
 attributeRouter.delete(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(deleteAttributeSchema),
   attributeController.delete

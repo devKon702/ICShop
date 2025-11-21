@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
@@ -18,7 +18,7 @@ const path = "/gallery";
 // POST /gallery
 productImageRouter.post(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(createProductImageSchema),
@@ -28,7 +28,7 @@ productImageRouter.post(
 // DELETE /gallery/:id
 productImageRouter.delete(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(deleteProductImageSchema),
   productImageController.delete
@@ -37,7 +37,7 @@ productImageRouter.delete(
 // PATCH /gallery/position
 productImageRouter.patch(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateProductImagePositionSchema),
   productImageController.updatePosition
@@ -46,7 +46,7 @@ productImageRouter.patch(
 // PATCH /gallery/:id
 productImageRouter.patch(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(updateProductImageSchema),

@@ -2,7 +2,7 @@ import express from "express";
 import collectionController from "../controllers/collection.controller";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   addProductsToCollectionSchema,
@@ -28,7 +28,7 @@ collectionRouter.get(
 // GET /admin/collections
 collectionRouter.get(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   collectionController.adminGetCollections
 );
@@ -36,7 +36,7 @@ collectionRouter.get(
 // GET /admin/collections/products
 collectionRouter.get(
   adminPath + "/products",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   collectionController.adminGetCollectionsWithProducts
 );
@@ -44,7 +44,7 @@ collectionRouter.get(
 // POST /admin/collections
 collectionRouter.post(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(createColectionSchema),
   collectionController.createCollection
@@ -53,7 +53,7 @@ collectionRouter.post(
 // POST /admin/collections/:id
 collectionRouter.post(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(addProductsToCollectionSchema),
   collectionController.addProductToCollection
@@ -62,7 +62,7 @@ collectionRouter.post(
 // PATCH /admin/collections/:id
 collectionRouter.patch(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateCollectionSchema),
   collectionController.updateCollection
@@ -71,7 +71,7 @@ collectionRouter.patch(
 // PATCH /admin/product-collections/:id
 collectionRouter.patch(
   adminProductCollectionPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateProductPositionInCollectionSchema),
   collectionController.updateProductPositionInCollection
@@ -80,7 +80,7 @@ collectionRouter.patch(
 // DELETE /admin/collections/:id
 collectionRouter.delete(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(findByIdSchema),
   collectionController.deleteCollection
@@ -89,7 +89,7 @@ collectionRouter.delete(
 // DELETE /admin/product-collections/:id
 collectionRouter.delete(
   adminProductCollectionPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(findByIdSchema),
   collectionController.removeProductFromCollection

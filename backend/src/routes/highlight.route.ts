@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import highlightController from "../controllers/highlight.controller";
@@ -20,7 +20,7 @@ highlightRouter.get(path, highlightController.getHighlight);
 // GET /admin/highlight
 highlightRouter.get(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   highlightController.adminGetHighlight
 );
@@ -28,7 +28,7 @@ highlightRouter.get(
 // POST /admin/highlight
 highlightRouter.post(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(createHighlightSchema),
   highlightController.create
@@ -37,7 +37,7 @@ highlightRouter.post(
 // PATCH /admin/highlight
 highlightRouter.patch(
   adminPath + "/position",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateHighlightPositionSchema),
   highlightController.updatePosition
@@ -46,7 +46,7 @@ highlightRouter.patch(
 // DELETE /admin/highlight/:id
 highlightRouter.delete(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(deleteHighlightSchema),
   highlightController.delete

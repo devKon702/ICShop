@@ -1,6 +1,6 @@
 import express from "express";
 import addressController from "../controllers/address.controller";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
@@ -17,7 +17,7 @@ const path = "/address";
 // GET /address/me
 addressRouter.get(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   addressController.getMyAddress
 );
@@ -40,7 +40,7 @@ addressRouter.get(
 // POST /address
 addressRouter.post(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(createAddressSchema),
   addressController.createAddress
@@ -49,7 +49,7 @@ addressRouter.post(
 // PATCH /address/:id
 addressRouter.put(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(updateAddressSchema),
   addressController.updateAddress
@@ -58,7 +58,7 @@ addressRouter.put(
 // DELETE /address/:id
 addressRouter.delete(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(deleteAddressSchema),
   addressController.deleteAddress

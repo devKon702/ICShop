@@ -1,6 +1,6 @@
 import express from "express";
 import productController from "../controllers/product.controller";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
@@ -40,7 +40,7 @@ productRouter.get(
 // GET /admin/product/:id
 productRouter.get(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getProductByIdSchema),
   productController.adminGetById
@@ -49,7 +49,7 @@ productRouter.get(
 // GET /admin/product?cid=&name=&active=&page=&limit=&order=
 productRouter.get(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(filterProductSchema),
   productController.adminFilter
@@ -58,7 +58,7 @@ productRouter.get(
 // POST /admin/product
 productRouter.post(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(createProductSchema),
   productController.create
@@ -67,7 +67,7 @@ productRouter.post(
 // PATCH /admin/product/:id/poster
 productRouter.patch(
   adminPath + "/:id/poster",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   upload.single("poster"),
   validate(updatePosterSchema),
@@ -77,7 +77,7 @@ productRouter.patch(
 // PATCH /admin/product/:id/info
 productRouter.patch(
   adminPath + "/:id/info",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateProductSchema),
   productController.updateInfo
@@ -86,7 +86,7 @@ productRouter.patch(
 // PATCH /admin/product/:id/category
 productRouter.patch(
   adminPath + "/:id/category",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateProductCategorySchema),
   productController.updateCategory
@@ -95,7 +95,7 @@ productRouter.patch(
 // PATCH /admin/product/:id/lock
 productRouter.patch(
   adminPath + "/:id/lock",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateActiveProductSchema),
   productController.updateActive
@@ -104,7 +104,7 @@ productRouter.patch(
 // PATCH /admin/product/:id/wholesale
 productRouter.patch(
   adminPath + "/:id/wholesale",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateWholesaleProductSchema),
   productController.updateWholesale
@@ -113,7 +113,7 @@ productRouter.patch(
 // DELETE /admin/product/:id
 productRouter.delete(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(findByIdSchema),
   productController.delete

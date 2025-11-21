@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
@@ -17,7 +17,7 @@ const path = "/statistics";
 
 statisticsRouter.get(
   path + "/product/best-sellers",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getBestSellingProductsSchema),
   statisticsController.getBestSellingProducts
@@ -25,7 +25,7 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   path + "/order/by-status",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(countOrdersByStatusSchema),
   statisticsController.countOrdersByStatus
@@ -33,7 +33,7 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   path + "/order/daily",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(countOrderDailySchema),
   statisticsController.countOrderDaily
@@ -41,7 +41,7 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   path + "/order/top-users",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getTopUsersByOrderCountSchema),
   statisticsController.getTopUsersByOrderCount
@@ -49,7 +49,7 @@ statisticsRouter.get(
 
 statisticsRouter.get(
   path + "/user/count",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(countUsersSchema),
   statisticsController.countUsers

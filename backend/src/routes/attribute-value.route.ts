@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import {
@@ -14,7 +14,7 @@ const path = "/attrval";
 
 attributeValueRouter.post(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(createAttrValSchema),
   attributeValueController.create
@@ -22,7 +22,7 @@ attributeValueRouter.post(
 
 attributeValueRouter.put(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateAttrValSchema),
   attributeValueController.update
@@ -30,7 +30,7 @@ attributeValueRouter.put(
 
 attributeValueRouter.delete(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(deleteAttrValSchema),
   attributeValueController.delete

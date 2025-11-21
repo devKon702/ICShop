@@ -1,7 +1,6 @@
 import express from "express";
 import authController from "../controllers/auth.controller";
 import {
-  verifyAccessToken,
   jwtMiddleware,
 } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -46,7 +45,7 @@ authRouter.post(
 );
 
 // POST /auth/logout
-authRouter.post(path + "/logout", verifyAccessToken, authController.logout);
+authRouter.post(path + "/logout", jwtMiddleware, authController.logout);
 
 // POST /auth/refresh
 authRouter.post(path + "/refresh", authController.refresh);
@@ -54,13 +53,13 @@ authRouter.post(path + "/refresh", authController.refresh);
 // GET /auth/otp?email=
 authRouter.post(
   path + "/otp",
-  verifyAccessToken,
+  jwtMiddleware,
   validate(sendEmailOTPSchema),
   authController.sendEmailOTP
 );
 
 // POST /auth/testToken
-authRouter.get(path + "/testToken", verifyAccessToken, authController.test);
+authRouter.get(path + "/testToken", jwtMiddleware, authController.test);
 
 // GET /auth/redis
 authRouter.get(path + "/redis", authController.testRedis);

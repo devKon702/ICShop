@@ -1,6 +1,6 @@
 import express from "express";
 import orderController from "../controllers/order.controller";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
@@ -27,7 +27,7 @@ const adminPath = "/admin/order";
 // GET /order
 orderRouter.get(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(filterMyOrdersSchema),
   orderController.filterMyOrders
@@ -36,7 +36,7 @@ orderRouter.get(
 // GET /admin/order
 orderRouter.get(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(adminFilterOrdersSchema),
   orderController.adminFilterOrder
@@ -45,7 +45,7 @@ orderRouter.get(
 // GET /order/timeline
 orderRouter.get(
   path + "/timeline",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   orderController.getMyUnseenOrderTimeline
 );
@@ -53,7 +53,7 @@ orderRouter.get(
 // GET /admin/order/product/:productId
 orderRouter.get(
   adminPath + "/product/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getOrdersByProductIdSchema),
   orderController.adminFindByProductId
@@ -62,7 +62,7 @@ orderRouter.get(
 // GET /admin/order/user/:id
 orderRouter.get(
   adminPath + "/user/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(adminGetOrderByUserSchema),
   orderController.adminGetOrderByUser
@@ -71,7 +71,7 @@ orderRouter.get(
 // GET /order/:id
 orderRouter.get(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(getOrderByIdSchema),
   orderController.getMyOrderById
@@ -80,7 +80,7 @@ orderRouter.get(
 // GET /admin/order/:id
 orderRouter.get(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getOrderByIdSchema),
   orderController.adminGetOrderById
@@ -89,7 +89,7 @@ orderRouter.get(
 // POST /order
 orderRouter.post(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(createOrderSchema),
   orderController.create
@@ -98,7 +98,7 @@ orderRouter.post(
 // PATCH /order/:id/cancel
 orderRouter.patch(
   path + "/:id/cancel",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(cancleOrderSchema),
   orderController.cancelOrder
@@ -107,7 +107,7 @@ orderRouter.patch(
 // PATCH /order/:id/address
 orderRouter.patch(
   path + "/:id/address",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(changeOrderAddressSchema),
   orderController.updateOrderAddress
@@ -116,7 +116,7 @@ orderRouter.patch(
 // POST /admin/order/timeline
 orderRouter.post(
   adminPath + "/timeline",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(createOrderTimelineSchema),
   orderController.adminChangeOrderStatus
@@ -125,7 +125,7 @@ orderRouter.post(
 // PATCH /order/timeline/:id
 orderRouter.patch(
   path + "/timeline/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.USER]),
   validate(seenOrderTimelineSchema),
   orderController.seenOrderTimeline
@@ -134,7 +134,7 @@ orderRouter.patch(
 // PATCH /order/timeline/:id/desc
 orderRouter.patch(
   adminPath + "/timeline/:id/desc",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateTimelineDescSchema),
   orderController.adminUpdateTimelineDesc

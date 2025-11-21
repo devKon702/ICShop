@@ -1,6 +1,6 @@
 import express from "express";
 import accountController from "../controllers/account.controller";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   changePasswordSchema,
@@ -18,14 +18,14 @@ const path = "/account";
 // GET /account/me
 accountRouter.get(
   path + "/me",
-  verifyAccessToken,
+  jwtMiddleware,
   accountController.getMyInformation
 );
 
 // GET /account/:id
 accountRouter.get(
   path + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getAccountInfoSchema),
   accountController.getInfo
@@ -34,7 +34,7 @@ accountRouter.get(
 // GET /account?name=&email=&phone=&page=&limit=&role=
 accountRouter.get(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(filterAccountSchema),
   accountController.filter
@@ -43,7 +43,7 @@ accountRouter.get(
 // PATCH /account/password
 accountRouter.patch(
   path + "/password",
-  verifyAccessToken,
+  jwtMiddleware,
   validate(changePasswordSchema),
   accountController.changePassword
 );
@@ -51,7 +51,7 @@ accountRouter.patch(
 // PATCH /account/status
 accountRouter.patch(
   path + "/status",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(changeAccountStatusSchema),
   accountController.changeStatus
@@ -60,7 +60,7 @@ accountRouter.patch(
 // PATCH /account/email
 accountRouter.patch(
   path + "/email",
-  verifyAccessToken,
+  jwtMiddleware,
   validate(updateMyEmailSchema),
   accountController.updateMyEmail
 );

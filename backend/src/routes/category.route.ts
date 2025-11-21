@@ -1,6 +1,6 @@
 import express from "express";
 import categoryController from "../controllers/category.controller";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
@@ -37,7 +37,7 @@ categoryRouter.get(
 // GET /admin/category
 categoryRouter.get(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   categoryController.getAll4Admin
 );
@@ -45,7 +45,7 @@ categoryRouter.get(
 // GET /admin/category/leaf
 categoryRouter.get(
   adminPath + "/leaf",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   categoryController.getLeafCategory
 );
@@ -53,7 +53,7 @@ categoryRouter.get(
 // GET /admin/category/:id
 categoryRouter.get(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   categoryController.getById
 );
@@ -66,7 +66,7 @@ categoryRouter.get(
 // POST /admin/category
 categoryRouter.post(
   adminPath,
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(createCategorySchema),
@@ -76,7 +76,7 @@ categoryRouter.post(
 // PUT /admin/category/:id
 categoryRouter.put(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(udpateCategorySchema),
@@ -86,7 +86,7 @@ categoryRouter.put(
 // DELETE /admin/category/:id
 categoryRouter.delete(
   adminPath + "/:id",
-  verifyAccessToken,
+  jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(deleteAddressSchema),
   categoryController.delete

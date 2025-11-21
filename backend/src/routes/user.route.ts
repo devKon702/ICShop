@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyAccessToken } from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import userController from "../controllers/user.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { updateUserSchema } from "../schemas/user.schema";
@@ -11,7 +11,7 @@ const path = "/user";
 
 userRouter.patch(
   path,
-  verifyAccessToken,
+  jwtMiddleware,
   upload.single("avatar"),
   validate(updateUserSchema),
   userController.update
@@ -19,7 +19,7 @@ userRouter.patch(
 
 // userRouter.patch(
 //   path + "/upload-avatar",
-//   verifyAccessToken,
+//   jwtMiddleware,
 //   upload.single("avatar"),
 //   userController.changeAvatar
 // );
