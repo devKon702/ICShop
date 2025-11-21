@@ -141,7 +141,6 @@ export default function Header() {
                 type: "auth",
                 props: {
                   onLoginSuccess: () => {
-                    toast.success("Đăng nhập thành công");
                   },
                 },
               })

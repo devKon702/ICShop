@@ -4,7 +4,8 @@ import { RefreshTokenPayload } from "./jwt.service";
 import redisService, { redisKeys } from "./redis.service";
 
 class SessionService {
-  public saveNewSession = ({
+  private SESSION_CACHE_TTL_SECONDS = 2 * 60 * 60; // 2 hours
+  public saveNewSession = async ({
     sessionId,
     refreshJti,
     userId,
@@ -15,25 +16,24 @@ class SessionService {
     userId: number;
     refreshExpiresAt: Date;
   }) => {
-    return Promise.all([
-      sessionRepository.create({
-        id: sessionId,
+    const session = await sessionRepository.create({
+      id: sessionId,
+      rtJti: refreshJti,
+      userId: userId,
+      version: 1,
+      expiresAt: refreshExpiresAt,
+    });
+    await redisService.setValue(
+      redisKeys.session(sessionId),
+      {
         rtJti: refreshJti,
         userId: userId,
+        sessionId: sessionId,
         version: 1,
-        expiresAt: refreshExpiresAt,
-      }),
-      redisService.setValue(
-        redisKeys.session(sessionId),
-        {
-          rtJti: refreshJti,
-          userId: userId,
-          sessionId: sessionId,
-          version: 1,
-        },
-        60 * 60 * 4 // 4 hours
-      ),
-    ]);
+      },
+      this.SESSION_CACHE_TTL_SECONDS
+    );
+    return session;
   };
   public getOrLoadSession(
     sessionId: string,
@@ -43,8 +43,10 @@ class SessionService {
       .getValue<RefreshTokenPayload>(redisKeys.session(sessionId))
       .then((data) => {
         if (data) return data;
-        return sessionRepository.findById(sessionId).then((session) => {
-          if (!session) return null;
+        return sessionRepository.findById(sessionId).then(async (session) => {
+          if (!session) {
+            return null;
+          }
           const sessionData: RefreshTokenPayload = {
             jti: session.rtJti,
             sub: session.userId,
@@ -53,15 +55,43 @@ class SessionService {
             version: session.version,
           };
           // Save to redis for next time
-          redisService.setValue(
+          await redisService.setValue(
             redisKeys.session(session.id),
             sessionData,
-            60 * 60 * 4 // 4 hours
+            this.SESSION_CACHE_TTL_SECONDS
           );
           return sessionData;
         });
       });
   }
+  public updateSessionAndSync = async (payload: {
+    sessionId: string;
+    version: number;
+    role: Role;
+    rtJti: string;
+    expiresAt: Date;
+  }) => {
+    // Update session in database then redis
+    const sessionUpdated = await sessionRepository.updateById(
+      payload.sessionId,
+      {
+        rtJti: payload.rtJti,
+        version: payload.version,
+        expiresAt: payload.expiresAt,
+      }
+    );
+    await redisService.setValue(
+      redisKeys.session(sessionUpdated.id),
+      {
+        sub: sessionUpdated.userId,
+        role: payload.role,
+        jti: sessionUpdated.rtJti,
+        sessionId: sessionUpdated.id,
+        version: sessionUpdated.version,
+      },
+      this.SESSION_CACHE_TTL_SECONDS
+    );
+  };
 }
 
 export default new SessionService();

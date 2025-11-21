@@ -106,13 +106,12 @@ class AuthService {
         sessionId: sessionId,
         version: 1,
       });
-    const { token: accessToken, expiresAt: accessExpiresAt } =
-      jwtService.createAccessToken({
-        sub: account.user!.id,
-        role,
-        sessionId: sessionId,
-        sessionVersion: 1,
-      });
+    const { token: accessToken } = jwtService.createAccessToken({
+      sub: account.user!.id,
+      role,
+      sessionId: sessionId,
+      sessionVersion: 1,
+    });
     // Save session to database and redis
     await sessionService.saveNewSession({
       sessionId,
@@ -145,7 +144,7 @@ class AuthService {
       );
     }
     const { email, name, picture } = payload;
-    let account = await accountRepository.findByEmail(email!);
+    let account = await accountRepository.findByEmail(email);
     // If existing account is not user
     if (account && account.role !== Role.USER) {
       throw new AppError(
@@ -162,27 +161,31 @@ class AuthService {
       let avatarUrl: string | undefined = undefined;
       if (picture) {
         // Download picture from google and upload to storage
-        const googlePicture = await fetch(picture);
-        const buffer = Buffer.from(await googlePicture.arrayBuffer());
-        avatarUrl = await storage.save(
-          buffer,
-          String(Date.now()),
-          "image/jpeg"
-        );
+        try {
+          const googlePicture = await fetch(picture);
+          const buffer = Buffer.from(await googlePicture.arrayBuffer());
+          avatarUrl = await storage.save(
+            buffer,
+            String(Date.now()),
+            "image/jpeg"
+          );
+        } catch (error) {
+          logger.error("Failed to fetch/upload google avatar picture", error);
+        }
       }
 
       // Create account
       account = await accountRepository.create({
-        email: email!,
+        email: email,
         password: null,
-        name: name || email!.split("@")[0],
+        name: name || email.split("@")[0],
         avatarUrl,
         provider: "google",
         emailVerified: true,
         role: Role.USER,
       });
     }
-    // Check if account is active
+    // Check if account is active, for checking existing account
     if (!account.isActive) {
       throw new AppError(
         HttpStatus.FORBIDDEN,
@@ -202,13 +205,12 @@ class AuthService {
         sessionId: sessionId,
         version: 1,
       });
-    const { token: accessToken, expiresAt: accessExpiresAt } =
-      jwtService.createAccessToken({
-        sub: account.user!.id,
-        role: Role.USER,
-        sessionId: sessionId,
-        sessionVersion: 1,
-      });
+    const { token: accessToken } = jwtService.createAccessToken({
+      sub: account.user!.id,
+      role: Role.USER,
+      sessionId: sessionId,
+      sessionVersion: 1,
+    });
 
     // Save session to database and redis
     await sessionService.saveNewSession({
@@ -306,29 +308,16 @@ class AuthService {
       sessionId: tokenPayload.sessionId,
       sessionVersion: tokenPayload.version + 1,
     });
-    // Update session in database then redis
-    const sessionUpdated = await sessionRepository.updateById(
-      session.sessionId,
-      {
-        rtJti: refreshJti,
-        version: session.version + 1,
-        expiresAt: new Date(refreshExpiresAt),
-      }
-    );
-    await redisService.setValue(
-      redisKeys.session(sessionUpdated.id),
-      {
-        sub: sessionUpdated.userId,
-        role: session.role,
-        jti: sessionUpdated.rtJti,
-        sessionId: sessionUpdated.id,
-        version: sessionUpdated.version,
-      },
-      (sessionUpdated.expiresAt.getTime() - Date.now()) / 1000
-    );
-    // Tạo nơi lưu trữ refresh token
+    sessionService.updateSessionAndSync({
+      sessionId: session.sessionId,
+      version: session.version + 1,
+      role: session.role,
+      rtJti: refreshJti,
+      expiresAt: new Date(refreshExpiresAt),
+    });
+    // Reset cookie token
     this.createCookieToken(res, refreshToken, tokenPayload.role);
-    return { accessToken, refreshToken };
+    return { accessToken };
   };
 
   public async sendEmailOtp(email: string) {
