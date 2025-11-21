@@ -23,13 +23,14 @@ class SessionService {
       version: 1,
       expiresAt: refreshExpiresAt,
     });
-    await redisService.setValue(
+    await redisService.setValue<RefreshTokenPayload>(
       redisKeys.session(sessionId),
       {
-        rtJti: refreshJti,
-        userId: userId,
+        jti: refreshJti,
+        sub: userId,
         sessionId: sessionId,
         version: 1,
+        role: Role.USER,
       },
       this.SESSION_CACHE_TTL_SECONDS
     );
@@ -55,7 +56,7 @@ class SessionService {
             version: session.version,
           };
           // Save to redis for next time
-          await redisService.setValue(
+          await redisService.setValue<RefreshTokenPayload>(
             redisKeys.session(session.id),
             sessionData,
             this.SESSION_CACHE_TTL_SECONDS
@@ -80,7 +81,7 @@ class SessionService {
         expiresAt: payload.expiresAt,
       }
     );
-    await redisService.setValue(
+    await redisService.setValue<RefreshTokenPayload>(
       redisKeys.session(sessionUpdated.id),
       {
         sub: sessionUpdated.userId,

@@ -303,12 +303,12 @@ class AuthService {
         version: session.version + 1,
       });
     const { token: accessToken } = jwtService.createAccessToken({
-      sub: tokenPayload.sub,
-      role: tokenPayload.role,
-      sessionId: tokenPayload.sessionId,
-      sessionVersion: tokenPayload.version + 1,
+      sub: session.sub,
+      role: session.role,
+      sessionId: session.sessionId,
+      sessionVersion: session.version + 1,
     });
-    sessionService.updateSessionAndSync({
+    await sessionService.updateSessionAndSync({
       sessionId: session.sessionId,
       version: session.version + 1,
       role: session.role,

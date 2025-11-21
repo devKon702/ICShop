@@ -72,7 +72,7 @@ export default function AccountForm() {
         name: res.data.user.name,
         email: res.data.email,
         phone: res.data.user.phone || "",
-        otp: undefined,
+        otp: "",
       })),
     mode: "onSubmit",
   });

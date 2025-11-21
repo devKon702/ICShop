@@ -32,7 +32,7 @@ export async function fetchHandler<T>(
 ): Promise<T> {
   try {
     const res = await request;
-    const contentType = res.headers.get("content-type");
+    const contentType = res.headers.get("Content-Type");
     if (!res.ok) {
       if (contentType === "application/json") {
         const errorData = await res.json();
