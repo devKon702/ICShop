@@ -79,7 +79,6 @@ export default function CartItem({ cartId, product }: CartItemProps) {
         <Link
           href={`${ROUTE.product}/${product.slug}`}
           className="flex space-x-2"
-          target="_blank"
         >
           <SafeImage
             src={`${env.NEXT_PUBLIC_FILE_URL}/${product.posterUrl}`}
@@ -156,13 +155,15 @@ export default function CartItem({ cartId, product }: CartItemProps) {
           )}
         </span>
       </div>
-      <Trash
-        className="p-1 text-red-400 rounded-full hover:bg-red-400/10 cursor-pointer"
+      <div
+        className="p-2 text-red-400 rounded-md hover:bg-red-400/10 cursor-pointer"
         onClick={() => {
           if (confirm("Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?"))
             deleteCartItem();
         }}
-      />
+      >
+        <Trash className="size-5" />
+      </div>
     </div>
   );
 }

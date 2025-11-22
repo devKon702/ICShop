@@ -37,7 +37,7 @@ export default function ProductMediaGallery({
         src={`${env.NEXT_PUBLIC_FILE_URL}/${mainImage}`}
         imageAlt="IC"
         zoom={2}
-      ></ImageMagnifier>
+      />
       <Carousel className="mt-3" setApi={setApi}>
         <CarouselContent className="">
           {imageUrls.map((item, index) => (

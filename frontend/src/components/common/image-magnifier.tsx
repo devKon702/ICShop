@@ -1,9 +1,11 @@
+"use client";
 import SafeImage from "@/components/common/safe-image";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
 
 interface ImageMagnifierProps {
@@ -21,6 +23,19 @@ export default function ImageMagnifier({
   zoom = 2,
   imageAlt = "magnifier",
 }: ImageMagnifierProps) {
+  // Get image file
+  const { data: imageUrl } = useQuery({
+    queryKey: ["image-file", src],
+    queryFn: async () => {
+      if (!src) {
+        return null;
+      }
+      const response = await fetch(src);
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    },
+  });
+
   const [magnifierPosition, setMagnifierPosition] = useState({
     top: 0,
     left: 0,
@@ -69,15 +84,18 @@ export default function ImageMagnifier({
               alt={imageAlt}
               width={400}
               height={400}
-              className="object-cover w-full h-full shadow border"
+              className="object-cover w-full h-full shadow border cursor-zoom-in"
               onMouseMove={handleMouseMove}
               onMouseEnter={() => setShowMagnifier(true)}
               onMouseLeave={() => setShowMagnifier(false)}
+              onClick={() => {
+                if (src) window.open(src, "_blank", "noopener,noreferrer");
+              }}
             />
           )}
           {showMagnifier && (
             <div
-              className="absolute pointer-events-none border border-gray-300 bg-white/20 backdrop-blur-xs rounded"
+              className="absolute border pointer-events-none cursor-zoom-out border-gray-300 bg-white/20 backdrop-blur-xs rounded"
               style={{
                 top: magnifierPosition.top + "px",
                 left: magnifierPosition.left + "px",
@@ -106,11 +124,11 @@ export default function ImageMagnifier({
             <div
               style={{
                 position: "absolute",
-                left: -magnifierPosition.left * zoom,
-                top: -magnifierPosition.top * zoom,
+                // left: -magnifierPosition.left * zoom,
+                // top: -magnifierPosition.top * zoom,
                 width: imageSize.width * zoom,
                 height: imageSize.height * zoom,
-                backgroundImage: `url(${src})`,
+                backgroundImage: `url(${imageUrl})`,
                 backgroundSize: `${imageSize.width * zoom}px ${
                   imageSize.height * zoom
                 }px`,

@@ -242,6 +242,24 @@ const productService = {
         )
       ),
   },
+
+  searchByName: async (data: { name: string; limit: number }) => {
+    const query = new URLSearchParams();
+    query.set("name", data.name);
+    query.set("limit", data.limit.toString());
+    return fetchHandler(
+      apiFetch("/v1/product/search?" + query.toString()),
+      PaginatedResponseSchema(
+        SafeProductBaseSchema.pick({
+          id: true,
+          name: true,
+          posterUrl: true,
+          slug: true,
+          price: true,
+        })
+      )
+    );
+  },
 };
 
 // name: z.string().nonempty(),

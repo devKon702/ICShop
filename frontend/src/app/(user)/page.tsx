@@ -11,8 +11,8 @@ export default async function Home() {
   const [highlightedProducts] = await tryCatch(highlightService.user.getAll());
   return (
     <div>
-      <SetBreadCrump breadcrumps={[]}></SetBreadCrump>
-      <Banner></Banner>
+      <SetBreadCrump breadcrumps={[]} />
+      <Banner />
       <section className="flex flex-col gap-4 my-6">
         {highlightedProducts && (
           <ProductHighlightTabs

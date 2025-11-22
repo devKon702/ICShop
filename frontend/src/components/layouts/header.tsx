@@ -23,6 +23,14 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
+import useDebounce from "@/libs/hooks/useDebouce";
+import productService from "@/libs/services/product.service";
+import { formatPrice } from "@/utils/price";
 
 const accountMenu = [
   { icon: "bx bx-user", title: "Tài khoản của tôi", href: ROUTE.userAccount },
@@ -31,8 +39,12 @@ const accountMenu = [
 
 export default function Header() {
   const user = useUser();
+  const searchInutRef = React.useRef<HTMLDivElement>(null);
   const { setUser, setIsAuthenticated, clearAuth } = useAuthActions();
   const { openModal } = useModalActions();
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const [showSearch, setShowSearch] = React.useState(false);
   const {} = useQuery({
     queryKey: ["me"],
     queryFn: () =>
@@ -50,16 +62,28 @@ export default function Header() {
     staleTime: 60 * 1000, // 1 minute
     enabled: !user,
   });
+
   const { data: cartData } = useQuery({
     queryKey: ["cart"],
     queryFn: () => cartService.getCart(),
   });
+
+  const { data: searchedProducts, isLoading } = useQuery({
+    queryKey: ["products", "search", { name: debouncedSearchTerm.trim() }],
+    queryFn: () =>
+      productService.searchByName({
+        name: debouncedSearchTerm.trim(),
+        limit: 5,
+      }),
+    enabled: debouncedSearchTerm.trim().length > 0,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   const { mutate: logoutMutate } = useMutation({
     mutationFn: authService.logout,
     onSuccess: () => {
       toast.success("Đăng xuất thành công");
       clearAuth();
-      setIsAuthenticated(false);
     },
   });
 
@@ -68,17 +92,97 @@ export default function Header() {
       <Link href="/" className="text-white font-bold text-2xl px-4">
         IoT Shop
       </Link>
-      <InputGroup className="bg-white w-1/4 mr-auto has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0">
-        <InputGroupAddon align="inline-start">
-          <Search />
-        </InputGroupAddon>
-        <InputGroupInput placeholder="Tìm kiếm..." className="w-full" />
-      </InputGroup>
+      <Popover
+        open={showSearch && !!searchedProducts}
+        onOpenChange={setShowSearch}
+      >
+        <PopoverAnchor asChild>
+          <InputGroup
+            className="bg-white w-1/4 mr-auto has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0"
+            ref={searchInutRef}
+          >
+            <InputGroupAddon align="inline-start">
+              <Search />
+            </InputGroupAddon>
+            <InputGroupInput
+              placeholder="Tìm kiếm..."
+              className="w-full"
+              onChange={(e) => {
+                const value = e.currentTarget.value;
+                setSearchTerm(value);
+                if (value.trim().length > 0 !== showSearch) {
+                  setShowSearch(value.trim().length > 0);
+                }
+              }}
+            />
+            {isLoading && (
+              <InputGroupAddon align="inline-end">
+                <div className="border-3 border-blue-400 border-t-transparent rounded-full animate-spin duration-500 size-4"></div>
+              </InputGroupAddon>
+            )}
+          </InputGroup>
+        </PopoverAnchor>
+        <PopoverContent
+          className="min-w-[50dvw] max-h-[40dvh] overflow-y-auto app shadow-lg p-2"
+          align="start"
+          side="bottom"
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+          }}
+        >
+          {searchedProducts && (
+            <div>
+              {searchedProducts.data.total === 0 && (
+                <p className="p-2">Không có sản phẩm nào</p>
+              )}
+              {searchedProducts.data.result.map((product) => (
+                <Link
+                  key={product.id}
+                  href={ROUTE.product + `/${product.slug}`}
+                  className="flex items-center space-x-2 p-2 hover:bg-gray-100"
+                >
+                  <SafeImage
+                    key={product.posterUrl}
+                    src={product.posterUrl || undefined}
+                    appFileBase
+                    width={40}
+                    height={40}
+                    className="rounded-full aspect-square"
+                  />
+                  <div className="flex flex-col space-y-1">
+                    <ClampText
+                      className=""
+                      text={product.name}
+                      lines={1}
+                      showTitle
+                    />
+                    <span className="font-semibold text-sm">
+                      {formatPrice(Number(product.price))} vnđ
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
       <div className="flex space-x-5">
         <Link
           href={ROUTE.cart}
           className="relative cursor-pointer flex flex-col items-center"
           title="Giỏ hàng"
+          onClick={(e) => {
+            if (!user) {
+              toast.info("Vui lòng đăng nhập để xem giỏ hàng");
+              openModal({
+                type: "auth",
+                props: {
+                  onLoginSuccess: () => {},
+                },
+              });
+              e.preventDefault();
+            }
+          }}
         >
           <ShoppingCart className="size-10 p-2 hover:bg-black/10 rounded-full transition-all duration-500" />
           <div className="absolute top-0 right-0 translate-x-1/5 -translate-y-1/5 text-xs bg-red-500 text-white font-bold px-1 rounded-full">
@@ -140,8 +244,7 @@ export default function Header() {
               openModal({
                 type: "auth",
                 props: {
-                  onLoginSuccess: () => {
-                  },
+                  onLoginSuccess: () => {},
                 },
               })
             }

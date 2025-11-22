@@ -324,7 +324,7 @@ export default function AccountForm() {
                 </FormControl>
                 <FormMessage />
                 <FormDescription className="text-sm">
-                  <div className="flex justify-between">
+                  <p className="flex justify-between">
                     {isSendingOtpMutation ? (
                       <span>Đang gửi OTP...</span>
                     ) : (
@@ -342,7 +342,7 @@ export default function AccountForm() {
                         </span>
                       )
                     )}
-                    <div>
+                    <p>
                       {remainingSeconds !== null && remainingSeconds <= 0 && (
                         <span className="text-red-600">OTP đã hết hạn</span>
                       )}
@@ -359,8 +359,8 @@ export default function AccountForm() {
                           giây
                         </span>
                       )}
-                    </div>
-                  </div>
+                    </p>
+                  </p>
                 </FormDescription>
               </FormItem>
             )}
