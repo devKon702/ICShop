@@ -41,7 +41,7 @@ class AuthService {
           httpOnly: true,
           sameSite: "none",
           secure: true,
-          domain: ".localhost",
+          // domain: ".localhost",
           path: JWTConfig.JWT_REFRESH_COOKIE_PATH,
         });
         break;

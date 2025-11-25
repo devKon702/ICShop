@@ -16,7 +16,11 @@ app.use(helmet());
 // Cross-origin
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://admin.localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "http://admin.localhost:3000",
+      "http://localhost",
+    ],
     credentials: true,
   })
 );
