@@ -18,25 +18,24 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]),
 });
 
-const rawEnv =
-  process.env.NODE_ENV === "development"
-    ? {
-        NODE_ENV: "development",
-        NEXT_PUBLIC_API_URL: "http://localhost:3001/api",
-        NEXT_PUBLIC_CLIENT_URL: "http://localhost:3000",
-        NEXT_PUBLIC_ADMIN_URL: "http://admin.localhost:3000",
-        NEXT_PUBLIC_FILE_URL: "http://localhost:3001/uploads",
-        NEXT_PUBLIC_GOOGLE_CLIENT_ID:
-          "262790314940-17ii1agepmjptr2maadt5p523a20ujti.apps.googleusercontent.com",
-      }
-    : {
-        NODE_ENV: process.env.NODE_ENV,
-        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-        NEXT_PUBLIC_CLIENT_URL: process.env.NEXT_PUBLIC_CLIENT_URL,
-        NEXT_PUBLIC_ADMIN_URL: process.env.NEXT_PUBLIC_ADMIN_URL,
-        NEXT_PUBLIC_FILE_URL: process.env.NEXT_PUBLIC_FILE_URL,
-        NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      };
+const isDev = process.env.NODE_ENV === "development";
+
+const rawEnv = {
+  NODE_ENV: isDev ? "development" : process.env.NODE_ENV,
+  NEXT_PUBLIC_API_URL: isDev
+    ? "http://localhost:3001/api"
+    : process.env.NEXT_PUBLIC_API_URL,
+  NEXT_PUBLIC_CLIENT_URL: isDev
+    ? "http://localhost:3000"
+    : process.env.NEXT_PUBLIC_CLIENT_URL,
+  NEXT_PUBLIC_ADMIN_URL: isDev
+    ? "http://admin.localhost:3000"
+    : process.env.NEXT_PUBLIC_ADMIN_URL,
+  NEXT_PUBLIC_FILE_URL: isDev
+    ? "http://localhost:3001/uploads"
+    : process.env.NEXT_PUBLIC_FILE_URL,
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+};
 
 const parsedEnv = envSchema.safeParse(rawEnv);
 

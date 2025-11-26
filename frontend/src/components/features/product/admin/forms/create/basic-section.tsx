@@ -1,3 +1,4 @@
+import AppTextEditor from "@/components/common/app-text-editor";
 import CustomInput from "@/components/common/custom-input";
 import SearchCombobox from "@/components/common/search-combobox";
 import ProductFormLabel from "@/components/features/product/admin/forms/create/product-form-label";
@@ -7,7 +8,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import { CategoryBaseSchema } from "@/libs/schemas/category.schema";
 import { FormProductSchema } from "@/libs/schemas/form.schema";
 import { Blocks } from "lucide-react";
@@ -53,11 +53,12 @@ export default function BasicSection({
             <FormItem>
               <ProductFormLabel>Mô tả</ProductFormLabel>
               <FormControl>
-                <Textarea
+                {/* <Textarea
                   className="w-full border rounded-md p-2"
                   {...field}
                   value={field.value || undefined}
-                />
+                /> */}
+                <AppTextEditor onChange={field.onChange} />
               </FormControl>
               <FormMessage className="text-end" />
             </FormItem>
