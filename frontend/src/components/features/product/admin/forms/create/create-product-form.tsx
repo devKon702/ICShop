@@ -127,25 +127,25 @@ export default function CreateProductForm({
       >
         <div className="space-y-2 max-h-96 overflow-y-scroll app px-4 mt-2">
           {/* Basics */}
-          <BasicSection categories={categories}></BasicSection>
+          <BasicSection categories={categories} />
           {/* Attributes */}
           <AttributeSection
             attributes={
               isAttributeLoading || !attributes?.data ? [] : attributes.data
             }
-          ></AttributeSection>
+          />
 
           {/* Wholesale */}
           <WholesaleSection
             fields={details}
             onAdd={detailsAppend}
             onRemove={detailsRemove}
-          ></WholesaleSection>
+          />
           {/* Ảnh */}
           <ImageSection
             onPosterChange={(file) => setPoster(file)}
             onGalleryChange={(files) => setGallery(files)}
-          ></ImageSection>
+          />
         </div>
         <Separator />
         <Button

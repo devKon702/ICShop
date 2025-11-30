@@ -1,3 +1,4 @@
+import AppTextEditor from "@/components/common/app-text-editor";
 import CustomInput from "@/components/common/custom-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +9,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import productService from "@/libs/services/product.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -85,7 +85,7 @@ export default function UpdateBasicForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => updateBasicMutate(data))}
-        className="w-full space-y-4 bg-white p-4 rounded-lg shadow"
+        className="space-y-4 bg-white p-4 rounded-lg shadow w-fit"
       >
         <p className="font-semibold flex space-x-1 mb-3">
           <Blocks /> <span>Cơ bản</span>
@@ -121,12 +121,10 @@ export default function UpdateBasicForm({
             <FormItem>
               <FormLabel className="opacity-50 mt-2">Mô tả</FormLabel>
               <FormControl>
-                <Textarea
-                  className="w-full border rounded-md p-2"
-                  {...field}
-                  value={field.value || undefined}
-                  onChange={(e) => {
-                    field.onChange(e);
+                <AppTextEditor
+                  defaultValue={desc || undefined}
+                  onChange={(val) => {
+                    field.onChange(val);
                     setEnable(true);
                   }}
                 />

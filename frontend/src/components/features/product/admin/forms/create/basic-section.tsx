@@ -53,12 +53,7 @@ export default function BasicSection({
             <FormItem>
               <ProductFormLabel>Mô tả</ProductFormLabel>
               <FormControl>
-                {/* <Textarea
-                  className="w-full border rounded-md p-2"
-                  {...field}
-                  value={field.value || undefined}
-                /> */}
-                <AppTextEditor onChange={field.onChange} />
+                <AppTextEditor onChange={field.onChange} maxLength={100} />
               </FormControl>
               <FormMessage className="text-end" />
             </FormItem>

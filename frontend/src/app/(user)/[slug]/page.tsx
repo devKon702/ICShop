@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import React from "react";
 import { formatPrice } from "@/utils/price";
 import tryCatch from "@/utils/try-catch";
+import { sanitizeHtml } from "@/utils/sanitize";
 
 export async function generateMetadata({
   params,
@@ -120,9 +121,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <h2 className="font-bold text-xl my-4">Mô tả chi tiết</h2>
             <div className="space-y-3">
               <div
-                className="whitespace-pre-line"
+                className="whitespace-pre-line tiptap"
                 dangerouslySetInnerHTML={{
-                  __html: product.data.desc,
+                  __html: sanitizeHtml(product.data.desc || ""),
                 }}
               ></div>
             </div>
