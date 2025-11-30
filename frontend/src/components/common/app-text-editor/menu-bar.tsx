@@ -242,9 +242,9 @@ function getMenuOptions(editor: Editor): {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             className="lucide lucide-text-align-start-icon lucide-text-align-start size-4"
           >
             <path d="M21 5H3" />
@@ -267,9 +267,9 @@ function getMenuOptions(editor: Editor): {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             className="lucide lucide-text-align-center-icon lucide-text-align-center size-4"
           >
             <path d="M21 5H3" />
@@ -292,9 +292,9 @@ function getMenuOptions(editor: Editor): {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             className="lucide lucide-text-align-end-icon lucide-text-align-end size-4"
           >
             <path d="M21 5H3" />
@@ -317,9 +317,9 @@ function getMenuOptions(editor: Editor): {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             className="lucide lucide-text-align-justify-icon lucide-text-align-justify size-4"
           >
             <path d="M3 5h18" />

@@ -28,7 +28,7 @@ export default function FormModal({
   return (
     <Dialog open={true} onOpenChange={(o) => !o && removeModalAt(index)}>
       <DialogContent
-        className="p-0 gap-0 max-h-[90dvh] overflow-y-auto app"
+        className="p-0 gap-0 max-h-[90dvh] overflow-y-auto app animate-fade-in"
         showCloseButton={false}
         {...(useCloseButton
           ? {

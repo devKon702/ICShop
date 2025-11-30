@@ -39,20 +39,19 @@ export default function EditorButton({
   }, [editor, checkActive, checkDisabled]);
   if (!editor) return null;
   return (
-    <button
-      type="button"
+    <div
       onClick={() => {
         onClick();
       }}
-      disabled={disabled}
+      data-disabled={disabled}
       data-state={active}
       className={cn(
-        "data-[state=true]:text-white data-[state=true]:bg-primary cursor-pointer transition-all duration-200 rounded-md p-2 hover:bg-primary/10 disabled:opacity-20 disabled:cursor-default",
+        "data-[state=true]:text-white data-[state=true]:bg-primary cursor-pointer transition-all duration-200 rounded-md p-2 hover:bg-primary/10 data-[disabled=true]:opacity-20 data-[disabled=true]:cursor-default data-[disabled=true]:pointer-events-none",
         className
       )}
       title={title}
     >
       {content}
-    </button>
+    </div>
   );
 }

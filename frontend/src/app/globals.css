@@ -183,6 +183,22 @@ input[type=number] {
 }
 
 /* Animations */
+@keyframes fade-in {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in-out forwards;
+}
+
 @keyframes scale-up {
   0% {
     opacity: 0.5;
@@ -212,7 +228,6 @@ input[type=number] {
 }
 
 /* Tiptap */
-/* Heading styles */
 .tiptap {
   :first-child {
     margin-top: 0;
