@@ -1,8 +1,6 @@
 import express from "express";
 import authController from "../controllers/auth.controller";
-import {
-  jwtMiddleware,
-} from "../middlewares/jwt.middleware";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
   loginSchema,
@@ -11,6 +9,12 @@ import {
   signupSchema,
 } from "../schemas/auth.schema";
 import { Role } from "../constants/db";
+import {
+  loginLimiter,
+  refreshTokenLimiter,
+  sendOtpLimiter,
+  signupLimiter,
+} from "../middlewares/limiter.middleware";
 
 const authRouter = express.Router();
 const path = "/auth";
@@ -19,6 +23,7 @@ const adminPath = "/admin/auth";
 // POST /auth/login
 authRouter.post(
   path + "/login",
+  loginLimiter,
   validate(loginSchema),
   authController.login(Role.USER)
 );
@@ -26,6 +31,7 @@ authRouter.post(
 // POST /auth/google
 authRouter.post(
   path + "/google",
+  loginLimiter,
   validate(loginWithGoogleSchema),
   authController.loginWithGoogle
 );
@@ -33,6 +39,7 @@ authRouter.post(
 // POST /admin/auth/login
 authRouter.post(
   adminPath + "/login",
+  loginLimiter,
   validate(loginSchema),
   authController.login(Role.ADMIN)
 );
@@ -40,6 +47,7 @@ authRouter.post(
 // POST /auth/signup
 authRouter.post(
   path + "/signup",
+  signupLimiter,
   validate(signupSchema),
   authController.signup
 );
@@ -48,11 +56,12 @@ authRouter.post(
 authRouter.post(path + "/logout", jwtMiddleware, authController.logout);
 
 // POST /auth/refresh
-authRouter.post(path + "/refresh", authController.refresh);
+authRouter.post(path + "/refresh", refreshTokenLimiter, authController.refresh);
 
 // GET /auth/otp?email=
 authRouter.post(
   path + "/otp",
+  sendOtpLimiter,
   jwtMiddleware,
   validate(sendEmailOTPSchema),
   authController.sendEmailOTP

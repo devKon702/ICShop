@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/input-group";
 import { OrderStatus } from "@/constants/enums";
 import { ORDER_STATUS_OPTIONS } from "@/constants/enum-options";
-import { getDaysAgo, getStartOfDay } from "@/utils/date";
+import { getDateAgo, getEndOfDay, getStartOfDay } from "@/utils/date";
 import { Filter, Mail, NotepadText, Phone } from "lucide-react";
 import {
   parseAsBoolean,
@@ -26,8 +26,8 @@ export default function AdminOrderFilterBar() {
     code: parseAsString,
     receiverPhone: parseAsString,
     email: parseAsString,
-    from: parseAsIsoDate.withDefault(getDaysAgo(30)),
-    to: parseAsIsoDate.withDefault(getStartOfDay(new Date())),
+    from: parseAsIsoDate.withDefault(getStartOfDay(getDateAgo("1m"))),
+    to: parseAsIsoDate.withDefault(getEndOfDay(new Date())),
     sortBy: parseAsStringLiteral(["create_asc", "create_desc"]).withDefault(
       "create_desc"
     ),
@@ -72,10 +72,13 @@ export default function AdminOrderFilterBar() {
         {/* Create Date Range */}
         <div className="flex-1">
           <DateRangeSelector
-            shortcutDays={[
-              { days: 7, label: "1 tuần" },
-              { days: 14, label: "2 tuần" },
-              { days: 30, label: "1 tháng" },
+            shortcuts={[
+              { value: "1w", label: "1 tuần" },
+              { value: "2w", label: "2 tuần" },
+              { value: "1m", label: "1 tháng" },
+              { value: "3m", label: "3 tháng" },
+              { value: "6m", label: "6 tháng" },
+              { value: "1y", label: "1 năm" },
             ]}
             defaultRange={{
               from: query.from,
@@ -84,8 +87,8 @@ export default function AdminOrderFilterBar() {
             onChange={(range) =>
               setFilter((prev) => ({
                 ...prev,
-                from: range.from || prev.from,
-                to: range.to || prev.to,
+                from: range.from ? getStartOfDay(range.from) : prev.from,
+                to: range.to ? getEndOfDay(range.to) : prev.to,
               }))
             }
             required

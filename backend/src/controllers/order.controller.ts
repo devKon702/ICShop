@@ -414,7 +414,10 @@ class OrderController {
 
     const order = await orderRepository.findById(orderId);
     if (!order) {
-      throw new NotFoundError("Không tìm thấy đơn hàng");
+      throw new NotFoundError(
+        OrderResponseCode.NOT_FOUND,
+        "Không tìm thấy đơn hàng"
+      );
     }
     if (order.status === status) {
       throw new AppError(
@@ -499,7 +502,7 @@ class OrderController {
       params: { id },
       query: { page, limit, sortBy },
     } = adminGetOrderByUserSchema.parse(req);
-    const [orders, total] = await orderRepository.findByUserId(id, {
+    const [orders, total] = await orderRepository.findManyByUserId(id, {
       page,
       limit,
       sortBy,

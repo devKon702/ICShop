@@ -5,6 +5,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/utils/className";
+import { getDateAgo } from "@/utils/date";
 import { CalendarDays } from "lucide-react";
 import React from "react";
 import { DateRange } from "react-day-picker";
@@ -12,15 +13,18 @@ import { DateRange } from "react-day-picker";
 interface Props {
   defaultRange?: { from: Date; to: Date };
   onChange?: (range: { from: Date | undefined; to: Date | undefined }) => void;
-  shortcutDays?: { days: number; label: string }[];
-  required?: true;
+  shortcuts?: {
+    value: number | `${number}${"d" | "m" | "y" | "w"}` | null;
+    label: string;
+  }[];
+  required?: boolean;
   className?: string;
 }
 
 export default function DateRangeSelector({
   defaultRange,
   onChange,
-  shortcutDays,
+  shortcuts,
   required,
   className,
 }: Props) {
@@ -63,20 +67,23 @@ export default function DateRangeSelector({
             required={required}
           />
           <ul className="flex gap-2 mt-3 flex-wrap w-full">
-            {shortcutDays?.map((shortcut) => (
-              <li key={shortcut.days}>
+            {shortcuts?.map((shortcut) => (
+              <li key={shortcut.value}>
                 <button
                   type="button"
                   className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm cursor-pointer text-nowrap"
                   onClick={() => {
-                    if (shortcut.days === 0) {
+                    if (shortcut.value === 0 || shortcut.value === null) {
                       setDateRange(undefined);
                       onChange?.({ from: undefined, to: undefined });
                       return;
                     }
                     const to = new Date();
-                    const from = new Date();
-                    from.setDate(from.getDate() - shortcut.days);
+                    const from = getDateAgo(
+                      typeof shortcut.value === "number"
+                        ? `${shortcut.value}d`
+                        : shortcut.value
+                    );
                     const range = { from, to };
                     setDateRange(range);
                     onChange?.(range);

@@ -1,8 +1,32 @@
-export function getDaysAgo(days: number): Date {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(0, 0, 0, 0);
-  return d;
+export function getDateAgo(value: `${number}${"d" | "m" | "y" | "w"}`): Date {
+  const amount = parseInt(value.slice(0, -1), 10);
+  const unit = value.slice(-1);
+  const date = new Date();
+  const day = date.getDate();
+
+  switch (unit) {
+    case "d":
+      date.setDate(date.getDate() - amount);
+      break;
+    case "w":
+      date.setDate(date.getDate() - amount * 7);
+      break;
+    case "m":
+      date.setMonth(date.getMonth() - amount);
+      // Handle month overflow -> e.g., March 31 - 1 month = February 28/29
+      if (date.getDate() < day) {
+        date.setDate(0);
+      }
+      break;
+    case "y":
+      // Handle year overflow -> e.g., February 29, 2020 - 1 year = February 28, 2019
+      if (date.getDate() < day) {
+        date.setDate(0);
+      }
+      date.setFullYear(date.getFullYear() - amount);
+      break;
+  }
+  return date;
 }
 
 export function getStartOfDay(date: Date): Date {

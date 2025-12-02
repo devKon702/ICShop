@@ -6,9 +6,9 @@ import { requestLogger } from "./middlewares/logger.middleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
+import { globalLimiter } from "./middlewares/limiter.middleware";
 
 const app = express();
-app.use(express.json());
 
 // Helmet
 app.use(helmet());
@@ -25,8 +25,17 @@ app.use(
   })
 );
 
+// Body parser
+app.use(express.json());
+
 // Cookie
 app.use(cookieParser());
+
+// Logger
+app.use(requestLogger);
+
+// Rate Limiter
+app.use(globalLimiter);
 
 // Static route
 app.use(
@@ -37,9 +46,6 @@ app.use(
   }),
   express.static(env.STORAGE_PATH)
 );
-
-// Log
-app.use(requestLogger);
 
 // Routes
 app.use("/api", router);

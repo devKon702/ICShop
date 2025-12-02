@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { DeliveryType, OrderStatus } from "@/constants/enums";
 import orderService from "@/libs/services/order.service";
-import { getDaysAgo, getStartOfDay } from "@/utils/date";
+import { getDateAgo, getEndOfDay, getStartOfDay } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import {
   parseAsBoolean,
@@ -30,8 +30,8 @@ export default function AdminOrderTable() {
     code: parseAsString,
     receiverPhone: parseAsString,
     email: parseAsString,
-    from: parseAsIsoDate.withDefault(getDaysAgo(30)),
-    to: parseAsIsoDate.withDefault(getStartOfDay(new Date())),
+    from: parseAsIsoDate.withDefault(getStartOfDay(getDateAgo("1m"))),
+    to: parseAsIsoDate.withDefault(getEndOfDay(new Date())),
     sortBy: parseAsStringLiteral(["create_asc", "create_desc"]).withDefault(
       "create_desc"
     ),

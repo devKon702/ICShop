@@ -57,9 +57,7 @@ export const filterMyOrdersSchema = z.object({
       .optional(),
     from: z.string().optional(),
     to: z.string().optional(),
-    order: z
-      .enum(["create_asc", "create_desc", "update_asc", "update_desc"])
-      .default("create_desc"),
+    order: z.enum(["create_asc", "create_desc"]).default("create_desc"),
   }),
 });
 

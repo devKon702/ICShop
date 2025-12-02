@@ -5,6 +5,7 @@ import SetBreadCrump from "@/components/common/set-breadcrump";
 import OrderTable from "@/components/features/order/user/order-table";
 import { DeliveryType, OrderStatus } from "@/constants/enums";
 import orderService from "@/libs/services/order.service";
+import { getEndOfDay, getStartOfDay } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import {
   parseAsInteger,
@@ -72,7 +73,7 @@ export default function OrderPage() {
             href: "/account/order",
           },
         ]}
-      ></SetBreadCrump>
+      />
       <h1 className="font-medium text-2xl mb-4">Đơn hàng</h1>
       <div className="flex space-x-2 mb-4">
         <div className="w-1/4 ms-auto space-y-2">
@@ -102,16 +103,16 @@ export default function OrderPage() {
               from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
               to: new Date(),
             }}
-            shortcutDays={[
-              { label: "30 ngày", days: 30 },
-              { label: "90 ngày", days: 90 },
-              { label: "Tất cả", days: 0 },
+            shortcuts={[
+              { label: "1 tháng", value: "1m" },
+              { label: "3 tháng", value: "3m" },
+              { label: "Tất cả", value: null },
             ]}
             onChange={(range) => {
               setQuery({
                 ...query,
-                from: range.from || null,
-                to: range.to || null,
+                from: range.from ? getStartOfDay(range.from) : null,
+                to: range.to ? getEndOfDay(range.to) : null,
               });
             }}
             className="flex-1 mt-2 space-x-2"

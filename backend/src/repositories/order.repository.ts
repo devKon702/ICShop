@@ -10,7 +10,7 @@ class OrderRepository {
       limit: number;
       from?: Date;
       to?: Date;
-      order: "create_asc" | "create_desc" | "update_asc" | "update_desc";
+      order: "create_asc" | "create_desc";
       status?: OrderStatus;
     }
   ) => {
@@ -33,12 +33,6 @@ class OrderRepository {
         break;
       case "create_desc":
         orderBy.createdAt = "desc";
-        break;
-      case "update_asc":
-        orderBy.updatedAt = "asc";
-        break;
-      case "update_desc":
-        orderBy.updatedAt = "desc";
         break;
     }
     return Promise.all([
@@ -415,7 +409,7 @@ class OrderRepository {
     });
   };
 
-  public findByUserId = (
+  public findManyByUserId = (
     userId: number,
     filter: { page: number; limit: number; sortBy: "asc" | "desc" }
   ) => {
