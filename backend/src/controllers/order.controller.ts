@@ -27,6 +27,7 @@ import productRepository from "../repositories/product.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
 import { sanitizeData } from "../utils/sanitize";
 import { AccessTokenPayload } from "../services/jwt.service";
+import { ProductResponseCode } from "../constants/codes/product.code";
 
 class OrderController {
   // USER
@@ -472,18 +473,22 @@ class OrderController {
   public adminFindByProductId = async (req: Request, res: Response) => {
     const {
       params: { id },
-      query: { page, limit, from, to },
+      query: { page, limit, from, to, sortBy },
     } = getOrdersByProductIdSchema.parse(req);
     const product = await productRepository.findById(id);
     if (!product) {
-      throw new NotFoundError("Không tìm thấy sản phẩm");
+      throw new NotFoundError(
+        ProductResponseCode.NOT_FOUND,
+        "Không tìm thấy sản phẩm"
+      );
     }
 
-    const orders = await orderRepository.findByProductId(id, {
+    const [orders, total] = await orderRepository.findManyByProductId(id, {
       page,
       limit,
       from,
       to,
+      sortBy,
     });
 
     res
@@ -492,7 +497,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Lấy đơn hàng theo sản phẩm thành công",
-          orders
+          sanitizeData(orders, { omit: ["password"] }),
+          { page, limit, total }
         )
       );
   };

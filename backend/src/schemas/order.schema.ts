@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { phoneRegex, vietnameseRegex } from "../utils/regex";
 import { DeliveryType, OrderStatus } from "../constants/db";
-import { ppid } from "process";
 import { idStringSchema, requestSchema } from "./shared.schema";
-import orderController from "../controllers/order.controller";
 
 export const createOrderSchema = z.object({
   body: z
@@ -79,7 +77,6 @@ export const getOrdersByProductIdSchema = requestSchema({
       .datetime()
       .transform((val) => {
         const d = new Date(val);
-        d.setHours(0, 0, 0, 0);
         return d;
       })
       .optional(),
@@ -88,10 +85,10 @@ export const getOrdersByProductIdSchema = requestSchema({
       .datetime()
       .transform((val) => {
         const d = new Date(val);
-        d.setHours(23, 59, 59, 999);
         return d;
       })
       .optional(),
+    sortBy: z.enum(["asc", "desc"]).default("desc"),
   }),
 });
 

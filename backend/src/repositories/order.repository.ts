@@ -285,33 +285,50 @@ class OrderRepository {
     ]);
   };
 
-  public findByProductId = (
+  public findManyByProductId = (
     productId: number,
     filter: {
       page: number;
       limit: number;
       from: Date | undefined;
       to: Date | undefined;
+      sortBy: "asc" | "desc";
     }
   ) => {
-    return prisma.order.findMany({
-      where: {
-        details: {
-          some: {
-            productId,
+    return Promise.all([
+      prisma.order.findMany({
+        where: {
+          details: {
+            some: {
+              productId,
+            },
+          },
+          createdAt: {
+            gte: filter.from,
+            lte: filter.to,
           },
         },
-        createdAt: {
-          gte: filter.from,
-          lte: filter.to,
+        take: filter.limit,
+        skip: filter.limit * (filter.page - 1),
+        orderBy: { createdAt: filter.sortBy },
+        include: {
+          user: { include: { account: true } },
         },
-      },
-      take: filter.limit,
-      skip: filter.limit * (filter.page - 1),
-      include: {
-        user: { include: { account: true } },
-      },
-    });
+      }),
+      prisma.order.count({
+        where: {
+          details: {
+            some: {
+              productId,
+            },
+          },
+          createdAt: {
+            gte: filter.from,
+            lte: filter.to,
+          },
+        },
+      }),
+    ]);
   };
 
   public findBestSellingProducts = async (

@@ -1,5 +1,6 @@
 import { DeliveryType, OrderStatus } from "@/constants/enums";
 import apiAxios from "@/libs/api/api-axios";
+import { AccountBaseSchema } from "@/libs/schemas/account.schema";
 import {
   OrderDetailSchema,
   SafeOrderDetailSchema,
@@ -192,6 +193,40 @@ const orderService = {
         PaginatedResponseSchema(
           OrderBaseSchema.extend({
             _count: z.object({ details: z.number() }),
+          })
+        )
+      );
+    },
+
+    getByProductId: (
+      productId: number,
+      filter: {
+        page: number;
+        limit: number;
+        sortBy: "asc" | "desc";
+        from?: Date;
+        to?: Date;
+      }
+    ) => {
+      const query = new URLSearchParams();
+      query.append("page", filter.page.toString());
+      query.append("limit", filter.limit.toString());
+      query.append("sortBy", filter.sortBy);
+      if (filter.from) {
+        query.append("from", filter.from.toISOString());
+      }
+      if (filter.to) {
+        query.append("to", filter.to.toISOString());
+      }
+      return axiosHandler(
+        apiAxios.get(
+          `/v1/admin/order/product/${productId}?${query.toString()}`
+        ),
+        PaginatedResponseSchema(
+          OrderBaseSchema.extend({
+            user: UserBaseSchema.extend({
+              account: AccountBaseSchema,
+            }),
           })
         )
       );

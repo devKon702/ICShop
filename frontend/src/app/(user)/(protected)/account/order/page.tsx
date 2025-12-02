@@ -5,7 +5,7 @@ import SetBreadCrump from "@/components/common/set-breadcrump";
 import OrderTable from "@/components/features/order/user/order-table";
 import { DeliveryType, OrderStatus } from "@/constants/enums";
 import orderService from "@/libs/services/order.service";
-import { getEndOfDay, getStartOfDay } from "@/utils/date";
+import { getDateAgo, getEndOfDay, getStartOfDay } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import {
   parseAsInteger,
@@ -56,10 +56,11 @@ export default function OrderPage() {
       }),
   });
   useEffect(() => {
+    if (query.from && query.to) return;
     setQuery({
       ...query,
-      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      to: new Date(),
+      from: getStartOfDay(getDateAgo("1m")),
+      to: getEndOfDay(new Date()),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -94,15 +95,16 @@ export default function OrderPage() {
               });
             }}
             className="w-full"
-          ></AppSelector>
+          />
         </div>
         <div className="w-fit flex flex-col">
           <p className="font-semibold text-sm">Thời gian</p>
           <DateRangeSelector
             defaultRange={{
-              from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-              to: new Date(),
+              from: getStartOfDay(getDateAgo("1m")),
+              to: getEndOfDay(new Date()),
             }}
+            placeholder="Tất cả"
             shortcuts={[
               { label: "1 tháng", value: "1m" },
               { label: "3 tháng", value: "3m" },
@@ -115,7 +117,7 @@ export default function OrderPage() {
                 to: range.to ? getEndOfDay(range.to) : null,
               });
             }}
-            className="flex-1 mt-2 space-x-2"
+            className="flex-1 mt-2 space-x-2 min-w-[200px]"
           />
         </div>
         <div className="w-1/4 space-y-2">

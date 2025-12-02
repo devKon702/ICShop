@@ -1,3 +1,4 @@
+"use client";
 import AppSelector from "@/components/common/app-selector";
 import DateRangeSelector from "@/components/common/date-range-selector";
 import { Button } from "@/components/ui/button";
@@ -8,12 +9,12 @@ import {
 } from "@/components/ui/input-group";
 import { OrderStatus } from "@/constants/enums";
 import { ORDER_STATUS_OPTIONS } from "@/constants/enum-options";
-import { getDateAgo, getEndOfDay, getStartOfDay } from "@/utils/date";
+import { getEndOfDay, getStartOfDay } from "@/utils/date";
 import { Filter, Mail, NotepadText, Phone } from "lucide-react";
 import {
   parseAsBoolean,
   parseAsInteger,
-  parseAsIsoDate,
+  parseAsIsoDateTime,
   parseAsNumberLiteral,
   parseAsString,
   parseAsStringLiteral,
@@ -26,8 +27,8 @@ export default function AdminOrderFilterBar() {
     code: parseAsString,
     receiverPhone: parseAsString,
     email: parseAsString,
-    from: parseAsIsoDate.withDefault(getStartOfDay(getDateAgo("1m"))),
-    to: parseAsIsoDate.withDefault(getEndOfDay(new Date())),
+    from: parseAsIsoDateTime,
+    to: parseAsIsoDateTime,
     sortBy: parseAsStringLiteral(["create_asc", "create_desc"]).withDefault(
       "create_desc"
     ),
@@ -52,6 +53,7 @@ export default function AdminOrderFilterBar() {
     status: query.status,
     sortBy: query.sortBy,
   });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-4 items-stretch">
@@ -79,19 +81,21 @@ export default function AdminOrderFilterBar() {
               { value: "3m", label: "3 tháng" },
               { value: "6m", label: "6 tháng" },
               { value: "1y", label: "1 năm" },
+              { value: null, label: "Tất cả" },
             ]}
-            defaultRange={{
-              from: query.from,
-              to: query.to,
-            }}
+            defaultRange={
+              query.from && query.to
+                ? { from: query.from, to: query.to }
+                : undefined
+            }
+            placeholder="Tất cả"
             onChange={(range) =>
               setFilter((prev) => ({
                 ...prev,
-                from: range.from ? getStartOfDay(range.from) : prev.from,
-                to: range.to ? getEndOfDay(range.to) : prev.to,
+                from: range.from ? getStartOfDay(range.from) : null,
+                to: range.to ? getEndOfDay(range.to) : null,
               }))
             }
-            required
             className="size-full"
           />
         </div>

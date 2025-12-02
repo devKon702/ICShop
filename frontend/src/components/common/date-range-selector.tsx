@@ -19,6 +19,7 @@ interface Props {
   }[];
   required?: boolean;
   className?: string;
+  placeholder?: string;
 }
 
 export default function DateRangeSelector({
@@ -27,6 +28,7 @@ export default function DateRangeSelector({
   shortcuts,
   required,
   className,
+  placeholder,
 }: Props) {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
     defaultRange
@@ -40,13 +42,13 @@ export default function DateRangeSelector({
           className
         )}
       >
-        <CalendarDays />
+        <CalendarDays className="p-1" />
         <span className="flex-1 text-sm">
-          {dateRange
+          {dateRange?.from && dateRange?.to
             ? `${new Intl.DateTimeFormat("vi-VI").format(
                 dateRange.from
               )} - ${new Intl.DateTimeFormat("vi-VI").format(dateRange.to)}`
-            : "Chọn khoảng ngày"}
+            : placeholder || "Chọn khoảng ngày"}
         </span>
       </PopoverTrigger>
       <PopoverContent>
