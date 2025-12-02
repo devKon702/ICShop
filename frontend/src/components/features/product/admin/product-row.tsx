@@ -21,6 +21,7 @@ import {
   MoreVertical,
   Pencil,
   Shapes,
+  SquareMenu,
   Star,
   Trash,
 } from "lucide-react";
@@ -157,7 +158,7 @@ export default function ProductRow({ product }: Props) {
                   });
                 }}
               >
-                <Star />
+                <Star className="p-1" />
                 Thêm vào nổi bật
               </div>
               <div
@@ -169,8 +170,26 @@ export default function ProductRow({ product }: Props) {
                   });
                 }}
               >
-                <Shapes />
+                <Shapes className="p-1" />
                 Thêm vào bộ sưu tập
+              </div>
+              <div
+                className="flex gap-2 hover:bg-background p-2 rounded-md cursor-pointer"
+                onClick={() => {
+                  openModal({
+                    type: "productOrders",
+                    props: {
+                      product: {
+                        id: product.id,
+                        name: product.name,
+                        posterUrl: product.posterUrl ?? null,
+                      },
+                    },
+                  });
+                }}
+              >
+                <SquareMenu className="p-1" />
+                Danh sách đơn hàng
               </div>
             </PopoverContent>
           </Popover>

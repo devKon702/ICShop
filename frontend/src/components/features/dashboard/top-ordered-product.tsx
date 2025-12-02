@@ -5,6 +5,7 @@ import env from "@/constants/env";
 import statisticsService from "@/libs/services/statistics.service";
 import { useModalActions } from "@/store/modal-store";
 import { useQuery } from "@tanstack/react-query";
+import { CheckIcon } from "lucide-react";
 import React from "react";
 
 export default function TopOrderedProduct() {
@@ -43,8 +44,23 @@ export default function TopOrderedProduct() {
                   })
                 }
               />
-              <span className="text-sm text-muted-foreground ml-auto hover:underline cursor-pointer">
-                {`${item.totalQuantity}/${item.totalOrder} đơn hàng`}{" "}
+              <span
+                className="text-sm text-muted-foreground ml-auto hover:underline cursor-pointer flex items-center gap-1"
+                onClick={() =>
+                  openModal({
+                    type: "productOrders",
+                    props: {
+                      product: {
+                        id: item.product.id,
+                        name: item.product.name,
+                        posterUrl: item.product.posterUrl ?? null,
+                      },
+                    },
+                  })
+                }
+              >
+                <CheckIcon className="p-1" />
+                {`${item.totalQuantity} sản phẩm / ${item.totalOrder} đơn hoàn thành`}
               </span>
             </div>
           </div>

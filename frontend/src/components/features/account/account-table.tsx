@@ -8,7 +8,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import SafeImage from "@/components/common/safe-image";
-import env from "@/constants/env";
 import { cn } from "@/utils/className";
 import { Button } from "@/components/ui/button";
 import { formatIsoDateTime } from "@/utils/date";
@@ -17,8 +16,8 @@ import accountService from "@/libs/services/account.service";
 import { toast } from "sonner";
 import { Lock, LockOpen, SquareMenu } from "lucide-react";
 import { useModalActions } from "@/store/modal-store";
-import Link from "next/link";
-import { getMailLinkFromEmail, getZaloLinkFromPhone } from "@/utils/string";
+import MailLink from "@/components/common/mail-link";
+import ZaloLink from "@/components/common/zalo-link";
 interface Props {
   accounts: {
     id: number;
@@ -74,11 +73,9 @@ export default function AccountTable({ accounts }: Props) {
             <TableRow key={account.id}>
               <TableCell>
                 <SafeImage
-                  src={
-                    account.user.avatarUrl
-                      ? env.NEXT_PUBLIC_FILE_URL + account.user.avatarUrl
-                      : "https://ui-avatars.com/api/?name=" + account.user.name
-                  }
+                  src={account.user.avatarUrl ?? undefined}
+                  appFileBase
+                  avatarPlaceholderName={account.user.name}
                   width={50}
                   height={50}
                   className="w-10 h-10 rounded-full"
@@ -86,26 +83,26 @@ export default function AccountTable({ accounts }: Props) {
                 />
               </TableCell>
               <TableCell>
-                <Link
-                  href={getMailLinkFromEmail(account.email) ?? "#"}
+                <MailLink
+                  email={account.email}
                   className="hover:underline cursor-pointer"
                   title={`Mail: ${account.email}`}
                   target="_blank"
                 >
                   {account.email}
-                </Link>
+                </MailLink>
               </TableCell>
               <TableCell>{account.user.name}</TableCell>
               <TableCell>
                 {account.user.phone ? (
-                  <Link
+                  <ZaloLink
+                    phone={account.user.phone}
                     className="hover:underline cursor-pointer"
                     title={`Zalo: ${account.user.phone}`}
-                    href={getZaloLinkFromPhone(account.user.phone) ?? "#"}
                     target="_blank"
                   >
                     {account.user.phone}
-                  </Link>
+                  </ZaloLink>
                 ) : (
                   "-"
                 )}

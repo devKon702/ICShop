@@ -107,6 +107,16 @@ type ModalType =
         };
       }
     >
+  | Modal<
+      "productOrders",
+      {
+        product: {
+          id: number;
+          name: string;
+          posterUrl: string | null;
+        };
+      }
+    >
   | Modal<"createCollection", { onSuccess?: () => void }>;
 
 interface modalState {

@@ -47,16 +47,18 @@ export default function TopOrderUser() {
             <div className="flex flex-col flex-1">
               <span className="font-medium">{item.user.name}</span>
               <div className="flex space-x-2 items-center">
-                <div className="text-sm text-muted-foreground flex items-center">
-                  <Mail className="p-1" />
-                  <span>{item.user.account.email}</span>
-                </div>
-                <div className="text-sm text-muted-foreground flex items-center">
-                  <Phone className="p-1" />
-                  <span>{item.user.phone ?? "-"}</span>
+                <div className="flex-1 flex flex-wrap gap-1">
+                  <div className="text-sm text-muted-foreground flex items-center">
+                    <Mail className="p-1" />
+                    <span>{item.user.account.email}</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground flex items-center">
+                    <Phone className="p-1" />
+                    <span>{item.user.phone ?? "-"}</span>
+                  </div>
                 </div>
                 <div
-                  className="ml-auto text-sm text-muted-foreground hover:underline cursor-pointer"
+                  className="text-sm text-muted-foreground hover:underline cursor-pointer"
                   onClick={() => {
                     openModal({
                       type: "userOrders",
@@ -72,7 +74,7 @@ export default function TopOrderUser() {
                     });
                   }}
                 >
-                  <span>{item.orderCount} đơn</span>
+                  <span>{item.orderCount} đơn hoàn thành</span>
                 </div>
               </div>
             </div>

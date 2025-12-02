@@ -1,4 +1,5 @@
-import SafeImage from "@/components/common/safe-image";
+import orderService from "@/libs/services/order.service";
+import { useQuery } from "@tanstack/react-query";
 import AdminOrderRow from "@/components/features/order/admin/admin-order-row";
 import {
   Table,
@@ -8,57 +9,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DeliveryType } from "@/constants/enums";
-import orderService from "@/libs/services/order.service";
-import { useQuery } from "@tanstack/react-query";
-import { Mail, Phone } from "lucide-react";
 import React from "react";
+import SafeImage from "@/components/common/safe-image";
+import { DeliveryType } from "@/constants/enums";
 
 interface Props {
-  user: {
+  product: {
     id: number;
     name: string;
-    email: string;
-    phone: string | null;
-    avatarUrl: string | null;
+    posterUrl: string | null;
   };
 }
 
-export default function AdminUserOrders({ user }: Props) {
-  const { data } = useQuery({
-    queryKey: ["orders", { userId: user.id }],
+export default function AdminProductOrders({ product }: Props) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["orders", { productId: product.id }],
     queryFn: async () =>
-      orderService.admin.getByUserId(user.id, {
+      orderService.admin.getByProductId(product.id, {
         page: 1,
         limit: 100,
         sortBy: "desc",
       }),
   });
+  if (isLoading) return <div>Loading...</div>;
   return (
     <div className="p-4">
       {/* User info */}
       <div className="flex items-center gap-4 mb-4 min-w-[50dvw]">
         <SafeImage
-          src={user.avatarUrl ?? undefined}
-          avatarPlaceholderName={user.name}
+          src={product.posterUrl ?? undefined}
           appFileBase
           width={50}
           height={50}
-          className="rounded-full"
+          className="rounded-md"
         />
-        <div>
-          <div className="font-semibold text-lg">{user.name}</div>
-          <div className="flex items-center space-x-4 text-xs font-semibold opacity-50">
-            <p className="flex items-center ">
-              <Mail className="p-1" />
-              <span>{user.email}</span>
-            </p>
-            <p className="flex items-center">
-              <Phone className="p-1" />
-              <span>{user.phone || "-"}</span>
-            </p>
-          </div>
-        </div>
+        <div className="font-semibold text-lg">{product.name}</div>
       </div>
       {/* Orders list */}
       <p className="flex w-fit ml-auto font-semibold opacity-50">
@@ -97,13 +82,12 @@ export default function AdminUserOrders({ user }: Props) {
                   total: Number(order.total),
                   status: order.status,
                   user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    phone: user.phone || "",
+                    id: order.user.id,
+                    name: order.user.name,
+                    email: order.user.account.email,
+                    phone: order.user.phone || "",
                   },
                 }}
-                showUser={false}
               />
             ))
           ) : (

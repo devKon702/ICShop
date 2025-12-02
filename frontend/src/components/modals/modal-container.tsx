@@ -26,6 +26,7 @@ import CreateCollectionForm from "@/components/features/collection/create-collec
 import AddToCollection from "@/components/features/product/admin/forms/add-to-collection";
 import UserOrderDetail from "@/components/features/order/user/user-order-detail";
 import ChangeOrderAddressForm from "@/components/features/address/change-order-address-form";
+import AdminProductOrders from "@/components/features/order/admin/admin-product-orders";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -204,6 +205,12 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Đơn hàng người dùng" index={index}>
                     <AdminUserOrders user={item.props.user} />
+                  </FormModal>
+                );
+              case "productOrders":
+                return (
+                  <FormModal title="Đơn hàng sản phẩm" index={index}>
+                    <AdminProductOrders product={item.props.product} />
                   </FormModal>
                 );
               case "createCollection":
