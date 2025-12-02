@@ -13,6 +13,7 @@ import env from "@/constants/env";
 import productService from "@/libs/services/product.service";
 import { formatIsoDateTime } from "@/utils/date";
 import { formatPrice } from "@/utils/price";
+import { sanitizeHtml } from "@/utils/sanitize";
 import { useQuery } from "@tanstack/react-query";
 import {
   Blocks,
@@ -84,7 +85,21 @@ export default function ProductDetail({ productId }: Props) {
             />
           </div>
           <div>
-            <ProductField label="Mô Tả" value={data.data.desc} />
+            <ProductField
+              label="Mô Tả"
+              value={
+                data.data.desc ? (
+                  <div
+                    className="tiptap max-h-48 overflow-auto w-full"
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeHtml(data.data.desc),
+                    }}
+                  />
+                ) : (
+                  "-"
+                )
+              }
+            />
           </div>
         </ProductSection>
         {/* Attributes */}
