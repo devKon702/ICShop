@@ -473,7 +473,7 @@ class OrderController {
   public adminFindByProductId = async (req: Request, res: Response) => {
     const {
       params: { id },
-      query: { page, limit, from, to, sortBy },
+      query: { page, limit, from, to, sortBy, status },
     } = getOrdersByProductIdSchema.parse(req);
     const product = await productRepository.findById(id);
     if (!product) {
@@ -489,6 +489,7 @@ class OrderController {
       from,
       to,
       sortBy,
+      status,
     });
 
     res
@@ -506,12 +507,15 @@ class OrderController {
   public adminGetOrderByUser = async (req: Request, res: Response) => {
     const {
       params: { id },
-      query: { page, limit, sortBy },
+      query: { page, limit, sortBy, status, from, to },
     } = adminGetOrderByUserSchema.parse(req);
     const [orders, total] = await orderRepository.findManyByUserId(id, {
+      status,
       page,
       limit,
       sortBy,
+      from,
+      to,
     });
 
     res

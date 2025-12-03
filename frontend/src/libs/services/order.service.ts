@@ -182,12 +182,28 @@ const orderService = {
 
     getByUserId: (
       userId: number,
-      filter: { page: number; limit: number; sortBy: "asc" | "desc" }
+      filter: {
+        page: number;
+        limit: number;
+        sortBy: "asc" | "desc";
+        status?: OrderStatus;
+        from?: Date;
+        to?: Date;
+      }
     ) => {
       const query = new URLSearchParams();
       query.append("page", filter.page.toString());
       query.append("limit", filter.limit.toString());
       query.append("sortBy", filter.sortBy);
+      if (filter.from) {
+        query.append("from", filter.from.toISOString());
+      }
+      if (filter.to) {
+        query.append("to", filter.to.toISOString());
+      }
+      if (filter.status !== undefined) {
+        query.append("status", filter.status.toString());
+      }
       return axiosHandler(
         apiAxios.get(`/v1/admin/order/user/${userId}?${query.toString()}`),
         PaginatedResponseSchema(
@@ -204,6 +220,7 @@ const orderService = {
         page: number;
         limit: number;
         sortBy: "asc" | "desc";
+        status?: OrderStatus;
         from?: Date;
         to?: Date;
       }
@@ -217,6 +234,9 @@ const orderService = {
       }
       if (filter.to) {
         query.append("to", filter.to.toISOString());
+      }
+      if (filter.status !== undefined) {
+        query.append("status", filter.status.toString());
       }
       return axiosHandler(
         apiAxios.get(

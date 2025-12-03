@@ -89,6 +89,13 @@ export const getOrdersByProductIdSchema = requestSchema({
       })
       .optional(),
     sortBy: z.enum(["asc", "desc"]).default("desc"),
+    status: z.coerce
+      .number()
+      .refine(
+        (val) => Object.values(OrderStatus).includes(val),
+        "Trạng thái đơn hàng không hợp lệ"
+      )
+      .optional(),
   }),
 });
 
@@ -107,7 +114,12 @@ export const changeOrderAddressSchema = z.object({
   }),
   body: z
     .object({
-      deliveryType: z.nativeEnum(DeliveryType),
+      deliveryType: z.coerce
+        .number()
+        .refine(
+          (val) => Object.values(DeliveryType).includes(val),
+          "Loại giao hàng không hợp lệ"
+        ),
       addressId: idStringSchema.optional(),
       receiverName: z
         .string()
@@ -203,8 +215,25 @@ export const adminGetOrderByUserSchema = requestSchema({
     id: z.coerce.number().min(1, "ID người dùng không hợp lệ"),
   }),
   query: z.object({
+    status: z.coerce
+      .number()
+      .refine(
+        (val) => Object.values(OrderStatus).includes(val),
+        "Trạng thái đơn hàng không hợp lệ"
+      )
+      .optional(),
     page: z.coerce.number().min(1).default(1),
     limit: z.coerce.number().min(1).default(10),
     sortBy: z.enum(["asc", "desc"]).default("desc"),
+    from: z
+      .string()
+      .datetime()
+      .transform((val) => new Date(val))
+      .optional(),
+    to: z
+      .string()
+      .datetime()
+      .transform((val) => new Date(val))
+      .optional(),
   }),
 });

@@ -292,12 +292,14 @@ class OrderRepository {
       limit: number;
       from: Date | undefined;
       to: Date | undefined;
+      status?: OrderStatus;
       sortBy: "asc" | "desc";
     }
   ) => {
     return Promise.all([
       prisma.order.findMany({
         where: {
+          status: filter.status,
           details: {
             some: {
               productId,
@@ -317,6 +319,7 @@ class OrderRepository {
       }),
       prisma.order.count({
         where: {
+          status: filter.status,
           details: {
             some: {
               productId,
@@ -428,11 +431,22 @@ class OrderRepository {
 
   public findManyByUserId = (
     userId: number,
-    filter: { page: number; limit: number; sortBy: "asc" | "desc" }
+    filter: {
+      status?: OrderStatus;
+      page: number;
+      limit: number;
+      from?: Date;
+      to?: Date;
+      sortBy: "asc" | "desc";
+    }
   ) => {
     return Promise.all([
       prisma.order.findMany({
-        where: { userId },
+        where: {
+          userId,
+          status: filter.status,
+          createdAt: { gte: filter.from, lte: filter.to },
+        },
         orderBy: { createdAt: filter.sortBy },
         include: {
           _count: {
@@ -444,7 +458,13 @@ class OrderRepository {
         take: filter.limit,
         skip: filter.limit * (filter.page - 1),
       }),
-      prisma.order.count({ where: { userId } }),
+      prisma.order.count({
+        where: {
+          userId,
+          status: filter.status,
+          createdAt: { gte: filter.from, lte: filter.to },
+        },
+      }),
     ]);
   };
   public updateOrderById = (
