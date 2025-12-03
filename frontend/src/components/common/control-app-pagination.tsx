@@ -9,28 +9,18 @@ import {
   PaginationLink,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { parseAsInteger, useQueryStates } from "nuqs";
 
 interface Props {
   currentPage: number;
   totalPage: number;
-  isClientSide?: boolean;
+  onPageChange: (page: number) => void;
 }
 
-export default function AppPagination({
+export default function ControlAppPagination({
   currentPage,
   totalPage,
-  isClientSide = true,
+  onPageChange,
 }: Props) {
-  const [query, setQuery] = useQueryStates(
-    {
-      page: parseAsInteger.withDefault(1),
-    },
-    {
-      shallow: isClientSide,
-    }
-  );
-
   const generatePages = () => {
     const pages: (number | "...")[] = [];
 
@@ -56,7 +46,7 @@ export default function AppPagination({
           <PaginationPrevious
             onClick={() => {
               if (currentPage <= 1) return;
-              setQuery({ ...query, page: Math.max(currentPage - 1, 1) });
+              onPageChange(currentPage - 1);
             }}
           />
         </PaginationItem>
@@ -71,7 +61,7 @@ export default function AppPagination({
                 isActive={item === currentPage}
                 onClick={() => {
                   if (item === currentPage) return;
-                  setQuery({ ...query, page: item });
+                  onPageChange(item);
                 }}
               >
                 {item}
@@ -85,7 +75,7 @@ export default function AppPagination({
             className="cursor-pointer"
             onClick={() => {
               if (currentPage >= totalPage) return;
-              setQuery({ ...query, page: currentPage + 1 });
+              onPageChange(currentPage + 1);
             }}
           />
         </PaginationItem>

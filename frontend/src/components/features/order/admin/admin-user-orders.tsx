@@ -1,3 +1,4 @@
+import ControlAppPagination from "@/components/common/control-app-pagination";
 import SafeImage from "@/components/common/safe-image";
 import AdminOrderRow from "@/components/features/order/admin/admin-order-row";
 import {
@@ -25,17 +26,22 @@ interface Props {
 }
 
 export default function AdminUserOrders({ user }: Props) {
+  const [filter, setFilter] = React.useState({
+    page: 1,
+    limit: 10,
+    sortBy: "desc" as "asc" | "desc",
+  });
   const { data } = useQuery({
-    queryKey: ["orders", { userId: user.id }],
+    queryKey: ["orders", { userId: user.id, ...filter }],
     queryFn: async () =>
       orderService.admin.getByUserId(user.id, {
-        page: 1,
-        limit: 100,
-        sortBy: "desc",
+        page: filter.page,
+        limit: filter.limit,
+        sortBy: filter.sortBy,
       }),
   });
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white">
       {/* User info */}
       <div className="flex items-center gap-4 mb-4 min-w-[50dvw]">
         <SafeImage
@@ -115,6 +121,15 @@ export default function AdminUserOrders({ user }: Props) {
           )}
         </TableBody>
       </Table>
+      {data?.data.total && (
+        <ControlAppPagination
+          currentPage={filter.page}
+          totalPage={Math.ceil((data?.data.total || 0) / filter.limit)}
+          onPageChange={(page) => {
+            setFilter({ ...filter, page });
+          }}
+        />
+      )}
     </div>
   );
 }

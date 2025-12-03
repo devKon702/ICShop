@@ -7,10 +7,15 @@ interface ZaloLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   children?: React.ReactNode;
 }
 
-export default function ZaloLink({ phone, ...props }: ZaloLinkProps) {
+export default function ZaloLink({ phone, children, ...props }: ZaloLinkProps) {
   return (
-    <Link href={getZaloLinkFromPhone(phone) ?? "#"} {...props}>
-      {props.children}
+    <Link
+      href={getZaloLinkFromPhone(phone) ?? "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      {...props}
+    >
+      {children}
     </Link>
   );
 }

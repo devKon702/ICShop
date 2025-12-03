@@ -12,6 +12,8 @@ import { useModalActions } from "@/store/modal-store";
 import { formatPrice } from "@/utils/price";
 import { Info } from "lucide-react";
 import React from "react";
+import ZaloLink from "@/components/common/zalo-link";
+import MailLink from "@/components/common/mail-link";
 
 interface AdminOrderRowProps {
   order: {
@@ -54,18 +56,36 @@ export default function AdminOrderRow({
         <TableCell>
           <div className="flex flex-col items-start">
             <div className="font-semibold">
-              {order.user.name}, {order.user.phone}
+              {order.user.name},{" "}
+              <ZaloLink
+                phone={order.user.phone}
+                className="hover:underline"
+                title={`Zalo: ${order.user.phone}`}
+              >
+                {order.user.phone}
+              </ZaloLink>
             </div>
-            <div className="text-xs font-semibold opacity-50">
+            <MailLink
+              email={order.user.email}
+              className="text-xs font-semibold opacity-50 hover:underline"
+              title={`Email: ${order.user.email}`}
+            >
               {order.user.email}
-            </div>
+            </MailLink>
           </div>
         </TableCell>
       )}
       <TableCell>
         <div className="flex flex-col items-start">
           <div className="font-semibold">
-            {order.receiverName}, {order.receiverPhone}
+            {order.receiverName},{" "}
+            <ZaloLink
+              phone={order.receiverPhone}
+              className="hover:underline"
+              title={`Zalo: ${order.receiverPhone}`}
+            >
+              {order.receiverPhone}
+            </ZaloLink>
           </div>
           <div className="text-xs font-semibold opacity-50">
             <ClampText text={order.receiverAddress} lines={1} showTitle />

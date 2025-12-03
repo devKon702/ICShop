@@ -10,7 +10,12 @@ interface MailLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
 
 export default function MailLink({ email, children, ...props }: MailLinkProps) {
   return (
-    <Link href={getMailLinkFromEmail(email) ?? "#"} {...props}>
+    <Link
+      href={getMailLinkFromEmail(email) ?? "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      {...props}
+    >
       {children}
     </Link>
   );

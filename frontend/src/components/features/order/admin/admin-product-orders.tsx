@@ -12,6 +12,7 @@ import {
 import React from "react";
 import SafeImage from "@/components/common/safe-image";
 import { DeliveryType } from "@/constants/enums";
+import ControlAppPagination from "@/components/common/control-app-pagination";
 
 interface Props {
   product: {
@@ -22,18 +23,23 @@ interface Props {
 }
 
 export default function AdminProductOrders({ product }: Props) {
+  const [filter, setFilter] = React.useState({
+    page: 1,
+    limit: 10,
+    sortBy: "desc" as "asc" | "desc",
+  });
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", { productId: product.id }],
+    queryKey: ["orders", { productId: product.id, ...filter }],
     queryFn: async () =>
       orderService.admin.getByProductId(product.id, {
-        page: 1,
-        limit: 100,
-        sortBy: "desc",
+        page: filter.page,
+        limit: filter.limit,
+        sortBy: filter.sortBy,
       }),
   });
   if (isLoading) return <div>Loading...</div>;
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white">
       {/* User info */}
       <div className="flex items-center gap-4 mb-4 min-w-[50dvw]">
         <SafeImage
@@ -53,6 +59,7 @@ export default function AdminProductOrders({ product }: Props) {
         <TableHeader>
           <TableRow>
             <TableHead>Mã</TableHead>
+            <TableHead>Người tạo</TableHead>
             <TableHead>Địa chỉ nhận</TableHead>
             <TableHead>Tổng</TableHead>
             <TableHead>Trạng thái</TableHead>
@@ -88,6 +95,7 @@ export default function AdminProductOrders({ product }: Props) {
                     phone: order.user.phone || "",
                   },
                 }}
+                showUser
               />
             ))
           ) : (
@@ -99,6 +107,15 @@ export default function AdminProductOrders({ product }: Props) {
           )}
         </TableBody>
       </Table>
+      {data?.data.total && (
+        <ControlAppPagination
+          currentPage={filter.page}
+          totalPage={Math.ceil((data?.data.total || 0) / filter.limit)}
+          onPageChange={(page) => {
+            setFilter({ ...filter, page });
+          }}
+        />
+      )}
     </div>
   );
 }
