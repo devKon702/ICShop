@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Kiểu response chung khi thành công (không phân trang)
+// Generic API response schema
 export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
     message: z.string(),
@@ -8,7 +8,7 @@ export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
     data: dataSchema,
   });
 
-// Kiểu response với phân trang
+// Paginated response schema
 export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(
   itemSchema: T
 ) =>
@@ -23,9 +23,16 @@ export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(
     }),
   });
 
-// Kiểu response khi thất bại
+// API error response schema
 export const ApiErrorResponseSchema = z.object({
   message: z.string(),
   code: z.string(),
-  errors: z.record(z.any()).optional(), // hoặc z.array(z.string()) tùy bạn muốn backend trả thế nào
+  errors: z
+    .array(
+      z.object({
+        field: z.string(),
+        message: z.string(),
+      })
+    )
+    .optional(),
 });

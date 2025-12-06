@@ -1,3 +1,4 @@
+import ApiError, { ApiErrorType } from "@/libs/errors/ApiError";
 import { ApiErrorResponseSchema } from "@/libs/schemas/response.schema";
 import { AxiosError, AxiosResponse } from "axios";
 import { ZodSchema } from "zod";
@@ -9,19 +10,45 @@ export async function axiosHandler<T>(
   try {
     const res = await request;
     const parsed = schema.safeParse(res.data);
+    // If response data does not match the schema, throw an validation error
     if (!parsed.success) {
       console.error("Response data validation failed");
-      throw parsed.error;
+      throw new ApiError({
+        type: "API",
+        message: "Response data validation failed",
+      });
     }
     return parsed.data;
   } catch (err) {
+    console.error(err);
+    // Handle Axios errors specifically
     if (err instanceof AxiosError) {
       const parsedError = ApiErrorResponseSchema.safeParse(err.response?.data);
+      // If the error response is from API, throw an API Error
       if (parsedError.success) {
-        throw parsedError.data;
+        throw new ApiError({
+          type: "API",
+          message: parsedError.data.message,
+          code: parsedError.data.code,
+          errors: parsedError.data.errors,
+        });
+      }
+      // If not, check for network or timeout errors
+      switch (err.code) {
+        case "ECONNABORTED":
+          throw new ApiError({
+            type: "TIMEOUT",
+            message: "Yêu cầu đã hết thời gian chờ",
+          });
+        case "ERR_NETWORK":
+          throw new ApiError({
+            type: "NETWORK",
+            message: "Lỗi mạng",
+          });
+        default:
+          break;
       }
     }
-    console.error(err);
     throw err;
   }
 }
@@ -37,22 +64,72 @@ export async function fetchHandler<T>(
       if (contentType === "application/json") {
         const errorData = await res.json();
         const parsedError = ApiErrorResponseSchema.safeParse(errorData);
+        // If the error response is from API, throw an API Error
         if (parsedError.success) {
-          throw parsedError.data;
+          throw new ApiError({
+            type: "API",
+            message: parsedError.data.message,
+            code: parsedError.data.code,
+            errors: parsedError.data.errors,
+          });
         }
       }
-      throw new Error(`HTTP error! status: ${res.status} ${res.statusText} `);
+      throw new ApiError({
+        type: "API",
+        message: `${res.status} ${res.statusText}`,
+      });
     }
-
+    // If successful, parse and validate the response data
     const data = await res.json();
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
-      console.error("Response data validation failed");
-      throw parsed.error;
+      // If response data does not match the schema, throw a validation error
+      throw new ApiError({
+        type: "API",
+        message: "Response data validation failed",
+      });
     }
     return parsed.data;
   } catch (err) {
     console.error(err);
+    if (err instanceof TypeError) {
+      throw new ApiError({
+        type: "NETWORK",
+        message: err.message,
+      });
+    }
     throw err;
   }
+}
+
+export function createErrorHandler(
+  handlers: {
+    code: string;
+    handler: (
+      message: string,
+      details?: { field: string; message: string }[]
+    ) => void;
+  }[],
+  options?: { type: ApiErrorType; handler: (message: string) => void }[]
+): (code: string, details: { field: string; message: string }[]) => void {
+  return (error: ApiError | unknown) => {
+    if (error instanceof ApiError) {
+      if (error.type === "API") {
+        const matchedHandler = handlers.find(
+          (h) => h.code === error.code
+        )?.handler;
+        if (matchedHandler) {
+          matchedHandler(error.message, error.errors);
+          return;
+        }
+      }
+      // Check error type to see if it matches any provided options
+      const option = options?.find((option) => option.type === error.type);
+      if (option) {
+        option.handler(error.message);
+        return;
+      }
+    }
+    console.error("Unhandled error:", error);
+  };
 }
