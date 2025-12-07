@@ -10,20 +10,58 @@ import { Clock, SquareMenu, Truck, User } from "lucide-react";
 import React from "react";
 import TopOrderedProduct from "@/components/features/dashboard/top-ordered-product";
 import TopOrderUser from "@/components/features/dashboard/top-order-user";
+import DateRangeSelector from "@/components/common/date-range-selector";
+import { getDateAgo, getEndOfDay, getStartOfDay } from "@/utils/date";
 
 export default function AdminPage() {
+  const [range, setRange] = React.useState<{
+    from: Date;
+    to: Date;
+  }>({
+    from: getStartOfDay(getDateAgo("1m")),
+    to: getEndOfDay(new Date()),
+  });
   const { data: userCount } = useQuery({
     queryKey: ["statistics", "user", "count"],
     queryFn: async () => statisticsService.getUserCount(),
   });
 
   const { data: orderCountsByStatus } = useQuery({
-    queryKey: ["statistics", "order", "by-status"],
-    queryFn: async () => statisticsService.getOrderCountsByStatus(),
+    queryKey: ["statistics", "order", "by-status", { ...range }],
+    queryFn: async () =>
+      statisticsService.getOrderCountsByStatus({
+        from: range.from,
+        to: range.to,
+      }),
   });
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <DateRangeSelector
+          defaultRange={{
+            from: getStartOfDay(getDateAgo("1m")),
+            to: getEndOfDay(new Date()),
+          }}
+          onChange={(range) => {
+            if (range.from && range.to) {
+              setRange({ from: range.from, to: range.to });
+            }
+          }}
+          placeholder="Tất cả"
+          shortcuts={[
+            { label: "1 tuần", value: "1w" },
+            { label: "2 tuần", value: "2w" },
+            { label: "1 tháng", value: "1m" },
+            { label: "3 tháng", value: "3m" },
+            { label: "6 tháng", value: "6m" },
+            { label: "1 năm", value: "1y" },
+            { label: "2 năm", value: "2y" },
+          ]}
+          required
+          className="py-1 w-56"
+        />
+      </div>
       <section className="grid grid-cols-4 space-x-4">
         <SummaryCard
           icon={
@@ -39,7 +77,7 @@ export default function AdminPage() {
                   .toString()
               : "-"
           }
-        ></SummaryCard>
+        />
         <SummaryCard
           icon={
             <div className="bg-orange-50 rounded-md p-2">
@@ -54,7 +92,7 @@ export default function AdminPage() {
                   ?.count.toString() || "0"
               : "-"
           }
-        ></SummaryCard>
+        />
         <SummaryCard
           icon={
             <div className="bg-slate-100 rounded-md p-2">
@@ -69,7 +107,7 @@ export default function AdminPage() {
                   ?.count.toString() || "0"
               : "-"
           }
-        ></SummaryCard>
+        />
         <SummaryCard
           icon={
             <div className="bg-green-50 rounded-md p-2">
@@ -78,17 +116,17 @@ export default function AdminPage() {
           }
           title="Người dùng"
           value={userCount ? userCount.data.count.toString() : "-"}
-        ></SummaryCard>
+        />
       </section>
       <section className="flex space-x-4">
         <div className="w-7/12 flex flex-col space-y-4">
-          <OrderCountChart />
-          <TopOrderUser />
+          <OrderCountChart dateRange={range} />
+          <TopOrderUser dateRange={range} />
           <div className="space-x-4"></div>
         </div>
         <div className="w-5/12 space-y-4">
-          <OrderTypeChart />
-          <TopOrderedProduct />
+          <OrderTypeChart dateRange={range} />
+          <TopOrderedProduct dateRange={range} />
         </div>
       </section>
     </div>

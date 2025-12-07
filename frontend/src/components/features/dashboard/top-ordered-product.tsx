@@ -8,11 +8,23 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckIcon } from "lucide-react";
 import React from "react";
 
-export default function TopOrderedProduct() {
+interface Props {
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
+}
+
+export default function TopOrderedProduct({ dateRange }: Props) {
   const { openModal } = useModalActions();
   const { data } = useQuery({
-    queryKey: ["statistics", "product", "best-sellers"],
-    queryFn: async () => statisticsService.getBestSellingProducts({ limit: 5 }),
+    queryKey: ["statistics", "product", "best-sellers", { ...dateRange }],
+    queryFn: async () =>
+      statisticsService.getBestSellingProducts({
+        limit: 5,
+        from: dateRange.from,
+        to: dateRange.to,
+      }),
   });
   return (
     <Card>

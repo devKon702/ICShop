@@ -7,13 +7,25 @@ import { useQuery } from "@tanstack/react-query";
 import { Mail, Phone } from "lucide-react";
 import React from "react";
 
-export default function TopOrderUser() {
+interface Props {
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
+}
+
+export default function TopOrderUser({ dateRange }: Props) {
   const { openModal } = useModalActions();
 
   const { data } = useQuery({
-    queryKey: ["statistics", "order", "top-users"],
+    queryKey: ["statistics", "order", "top-users", { ...dateRange }],
     queryFn: async () =>
-      statisticsService.getTopUsersByOrders({ limit: 5, sortBy: "desc" }),
+      statisticsService.getTopUsersByOrders({
+        limit: 5,
+        sortBy: "desc",
+        from: dateRange.from,
+        to: dateRange.to,
+      }),
   });
   return (
     <Card>

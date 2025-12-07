@@ -37,7 +37,7 @@ const statisticsService = {
     );
   },
 
-  getOrderCountsByStatus: (opts?: { from: Date; to: Date }) => {
+  getOrderCountsByStatus: (opts?: { from?: Date; to?: Date }) => {
     const query = new URLSearchParams();
     if (opts?.from) query.append("from", opts.from.toISOString());
     if (opts?.to) query.append("to", opts.to.toISOString());

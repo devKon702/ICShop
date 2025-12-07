@@ -15,12 +15,20 @@ import statisticsService from "@/libs/services/statistics.service";
 import AppDonutChart from "@/components/common/app-donut-chart";
 import { ORDER_STATUS_OPTIONS } from "@/constants/enum-options";
 
-export const description = "A donut chart with text";
-
-export function OrderTypeChart() {
+interface Props {
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
+}
+export function OrderTypeChart({ dateRange }: Props) {
   const { data: orderCountsByStatus } = useQuery({
-    queryKey: ["statistics", "order", "by-status"],
-    queryFn: async () => statisticsService.getOrderCountsByStatus(),
+    queryKey: ["statistics", "order", "by-status", { ...dateRange }],
+    queryFn: async () =>
+      statisticsService.getOrderCountsByStatus({
+        from: dateRange.from,
+        to: dateRange.to,
+      }),
   });
 
   return (

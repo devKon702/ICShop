@@ -9,31 +9,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import statisticsService from "@/libs/services/statistics.service";
-import {
-  formatIsoDateTime,
-  getDateBeforeDays,
-  getEndOfDay,
-  getStartOfDay,
-} from "@/utils/date";
+import { formatIsoDateTime } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import AppAreaChart from "@/components/common/app-area-chart";
-import { useState } from "react";
-import AppSelector from "@/components/common/app-selector";
 
 export const description = "An area chart with axes";
 
-const dateOptions = [
-  { value: "7", label: "7 ngày" },
-  { value: "30", label: "30 ngày" },
-  { value: "90", label: "90 ngày" },
-  { value: "365", label: "365 ngày" },
-] as const;
+interface Props {
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
+}
 
-export function OrderCountChart() {
-  const [dateRange, setDateRange] = useState({
-    from: getStartOfDay(getDateBeforeDays(new Date(), 7)),
-    to: getEndOfDay(new Date()),
-  });
+export function OrderCountChart({ dateRange }: Props) {
   const { data: orderCountDaily } = useQuery({
     queryKey: ["statistics", "order", "daily", { ...dateRange }],
     queryFn: async () => statisticsService.getOrderCountDaily(dateRange),
@@ -43,19 +32,6 @@ export function OrderCountChart() {
       <CardHeader>
         <CardTitle className="flex items-center">
           Số đơn hàng theo ngày
-          <AppSelector
-            data={dateOptions}
-            defaultValue="7"
-            onValueChange={(value) => {
-              setDateRange({
-                from: getStartOfDay(
-                  getDateBeforeDays(new Date(), Number(value))
-                ),
-                to: getEndOfDay(new Date()),
-              });
-            }}
-            className="ml-auto"
-          />
         </CardTitle>
         <CardDescription>
           Biểu đồ số lượng đơn hàng được tạo hàng ngày
@@ -83,9 +59,6 @@ export function OrderCountChart() {
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
-            {/* <div className="flex items-center gap-2 leading-none font-medium">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-            </div> */}
             <div className="text-muted-foreground flex items-center gap-2 leading-none">
               {`${formatIsoDateTime(dateRange.from, {
                 date: true,

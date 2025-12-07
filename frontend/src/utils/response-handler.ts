@@ -12,7 +12,6 @@ export async function axiosHandler<T>(
     const parsed = schema.safeParse(res.data);
     // If response data does not match the schema, throw an validation error
     if (!parsed.success) {
-      console.error("Response data validation failed");
       throw new ApiError({
         type: "API",
         message: "Response data validation failed",
@@ -103,7 +102,7 @@ export async function fetchHandler<T>(
 }
 
 export function createErrorHandler(
-  handlers: {
+  apiHandlers: {
     code: string;
     handler: (
       message: string,
@@ -115,7 +114,7 @@ export function createErrorHandler(
   return (error: ApiError | unknown) => {
     if (error instanceof ApiError) {
       if (error.type === "API") {
-        const matchedHandler = handlers.find(
+        const matchedHandler = apiHandlers.find(
           (h) => h.code === error.code
         )?.handler;
         if (matchedHandler) {
