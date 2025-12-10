@@ -14,6 +14,7 @@ export default function CategoryBar() {
   const { data } = useQuery({
     queryKey: ["categoryTree"],
     queryFn: () => categoryService.getTree(),
+    staleTime: 1000 * 60 * 60, // 1 hour
   });
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 

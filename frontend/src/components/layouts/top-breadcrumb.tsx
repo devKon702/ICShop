@@ -3,12 +3,12 @@ import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useUserContext } from "@/libs/contexts/UserContext";
+import Link from "next/link";
 
 export default function TopBreadcrump() {
   const { breadcrump } = useUserContext();
@@ -24,13 +24,13 @@ export default function TopBreadcrump() {
                 className="flex gap-2 items-center flex-shrink-0"
               >
                 <BreadcrumbItem>
-                  <BreadcrumbLink
+                  <Link
                     href={item.href}
-                    className="truncate max-w-56"
+                    className="truncate max-w-56 cursor-pointer hover:text-primary"
                     title={item.label}
                   >
                     {item.label}
-                  </BreadcrumbLink>
+                  </Link>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
               </div>

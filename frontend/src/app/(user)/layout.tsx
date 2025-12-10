@@ -40,13 +40,13 @@ export default function UserLayout({
     <UserProvider>
       <>
         <div className="sticky top-0 z-50">
-          <Header></Header>
-          <CategoryBar></CategoryBar>
+          <Header />
+          <CategoryBar />
         </div>
-        <TopBreadcrump></TopBreadcrump>
+        <TopBreadcrump />
         <div className="mx-24 my-2">{children}</div>
-        <Footer></Footer>
-        <FloatButton></FloatButton>
+        <Footer />
+        <FloatButton />
       </>
     </UserProvider>
   );
