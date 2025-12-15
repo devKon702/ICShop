@@ -2,6 +2,22 @@ import rateLimit from "express-rate-limit";
 import { failResponse } from "../utils/response";
 import { AuthResponseCode } from "../constants/codes/auth.code";
 
+export const createLimiter = (options: {
+  windowMs: number;
+  max: number;
+  message?: any;
+}) => {
+  return rateLimit({
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: failResponse(
+      "TOO_MANY_REQUESTS",
+      "Quá nhiều yêu cầu, vui lòng thử lại sau."
+    ),
+    ...options,
+  });
+};
+
 export const globalLimiter = rateLimit({
   windowMs: 2 * 60 * 1000, // 2 minutes
   max: 100, // limit each IP to 100 requests per windowMs

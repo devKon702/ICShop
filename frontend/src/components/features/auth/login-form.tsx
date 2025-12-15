@@ -12,15 +12,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import CustomInput from "@/components/common/custom-input";
-import SendToEmailForm from "@/components/features/auth/send-to-email-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { DialogTitle } from "@radix-ui/react-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { authService } from "@/libs/services/auth.service";
 import { ApiErrorResponseSchema } from "@/libs/schemas/response.schema";
@@ -45,7 +36,7 @@ export default function LoginForm({
   onRegisterClick,
 }: LoginFormProps) {
   const { login } = useAuthActions();
-  const { closeModal } = useModalActions();
+  const { closeModal, openModal } = useModalActions();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -162,28 +153,15 @@ export default function LoginForm({
             </FormItem>
           )}
         />
-        <Dialog>
-          <DialogTrigger className="cursor-pointer text-blue-500 hover:underline">
-            Quên mật khẩu?
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Quên mật khẩu</DialogTitle>
-              <DialogDescription>
-                Nhập email để lấy lại mật khẩu
-              </DialogDescription>
-            </DialogHeader>
-            <SendToEmailForm></SendToEmailForm>
-          </DialogContent>
-        </Dialog>
-
-        {/* <div
-          className="w-full rounded-sm bg-white flex items-center justify-center py-2 cursor-pointer border-2 hover:opacity-80 transition-all font-medium space-x-4"
-          onClick={() => googleLogin()}
+        <span
+          className="cursor-pointer text-blue-500 hover:underline"
+          onClick={() => {
+            openModal({ type: "forgotPassword", props: {} });
+          }}
         >
-          <Image src="/google-icon.svg" alt="Google" width={24} height={24} />
-          <span>Đăng nhập với Google</span>
-        </div> */}
+          Quên mật khẩu
+        </span>
+
         <div className="w-fit mx-auto">
           <GoogleLogin
             onSuccess={(credentialResponse) => {

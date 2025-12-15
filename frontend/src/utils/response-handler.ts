@@ -110,7 +110,7 @@ export function createErrorHandler(
     ) => void;
   }[],
   options?: { type: ApiErrorType; handler: (message: string) => void }[]
-): (code: string, details: { field: string; message: string }[]) => void {
+) {
   return (error: ApiError | unknown) => {
     if (error instanceof ApiError) {
       if (error.type === "API") {

@@ -6,7 +6,6 @@ import { AppError } from "../errors/app-error";
 import accountRepository from "../repositories/account.repository";
 import { compareString, hashString } from "../utils/bcrypt";
 import jwtService, { RefreshTokenPayload } from "./jwt.service";
-import { createRefreshToken } from "../utils/jwt";
 import { JWTConfig } from "../constants/jwt-config";
 import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
@@ -15,11 +14,12 @@ import storage from "../storage";
 import { logger } from "../utils/logger";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import { JWTError } from "../errors/jwt-error";
-import emailOptService from "./email-opt.service";
+import otpService from "./opt.service";
 import sessionRepository from "../repositories/session.repository";
 import redisService, { redisKeys } from "./redis.service";
-import redis from "../utils/redis";
 import sessionService from "./session.service";
+import crypto, { hash } from "crypto";
+import mailService from "./mail.service";
 
 class AuthService {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -321,15 +321,181 @@ class AuthService {
   };
 
   public async sendEmailOtp(email: string) {
-    const otp = emailOptService.generateOTP(6);
+    const otp = otpService.generateOTP(6);
     const expiredInSeconds = 5 * 60; // 5 minutes
     // Save and send OTP
     await Promise.all([
-      emailOptService.save(email, otp, expiredInSeconds),
-      emailOptService.send(email, otp, expiredInSeconds),
+      otpService.save(email, otp, expiredInSeconds),
+      otpService.send(email, otp, expiredInSeconds),
     ]);
-    const expiredAt = new Date(Date.now() + expiredInSeconds * 1000);
-    return { expiredAt };
+    const expiresAt = new Date(Date.now() + expiredInSeconds * 1000);
+    return { expiresAt };
+  }
+
+  public async forgotPassword(email: string) {
+    // Check if account exists
+    const account = await accountRepository.findByEmail(email, Role.USER);
+    if (!account) {
+      return;
+    }
+    const token = crypto.randomBytes(32).toString("hex");
+    const config = {
+      resetLink: `${env.APP_BASE_URL}/reset-password?token=${token}&email=${email}`,
+      appName: env.APP_NAME,
+      expiredInSeconds: 15 * 60,
+    };
+    // Save token to redis
+    await redisService.setValue(
+      redisKeys.passwordReset(email),
+      await hashString(token),
+      config.expiredInSeconds
+    );
+    // Send email
+    const html = `
+<!DOCTYPE html>
+<html lang="en" style="margin:0; padding:0;">
+  <head>
+  	<meta charset="UTF-8" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="supported-color-schemes" content="light only" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đặt lại mật khẩu</title>
+  </head>
+
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f5f6f8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      style="background-color: #f5f6f8; padding: 40px 0;"
+    >
+      <tr>
+        <td align="center">
+          <table
+            role="presentation"
+            width="480"
+            cellspacing="0"
+            cellpadding="0"
+            border="0"
+            style="background: #ffffff; border-radius: 10px; padding: 40px;"
+          >
+            <tr>
+              <td style="font-size: 24px; font-weight: bold; color: #111;">
+                Đặt lại mật khẩu
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-top: 20px; font-size: 15px; color: #444;">
+                Ai đó đã gửi yêu cầu để đặt lại mật khẩu cho tài khoản ${
+                  config.appName
+                } của bạn.
+                </td>
+            </tr>
+            <tr>
+              <td style="padding-top: 10px; font-size: 15px; color: #444;">
+                Nhấn vào nút bên dưới để chuyển đến trang đặt lại mật khẩu cho tài khoản của bạn.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-top: 10px; font-size: 15px; color: #444;">
+                Thao tác có hiệu lực trong <strong>${Math.floor(
+                  config.expiredInSeconds / 60
+                )} phút.</strong>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding-top: 30px; padding-bottom: 30px;">
+                <a
+                  href="${config.resetLink}"
+                  style="
+                    background-color: #007bff;
+                    color: white;
+                    text-decoration: none;
+                    padding: 12px 22px;
+                    border-radius: 6px;
+                    font-size: 16px;
+                    display: inline-block;
+                  "
+                >
+                  Chuyển tiếp
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; color: #555;">
+                Nếu bạn không phải người gửi yêu cầu, hãy bỏ qua thư này.
+              </td>
+            </tr>
+          </table>
+          <div
+            style="
+              font-size: 12px;
+              color: #999;
+              margin-top: 20px;
+              text-align: center;
+            "
+          >
+            © ${new Date().getFullYear()} ${
+      config.appName
+    }. All rights reserved.
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`;
+    await mailService.send({
+      to: email,
+      subject: `${env.APP_NAME} - Đặt lại mật khẩu`,
+      html,
+    });
+  }
+
+  public async resetPassword(
+    email: string,
+    token: string,
+    newPassword: string
+  ) {
+    // Verify token
+    const savedHashedToken = await redisService.getValue<string>(
+      redisKeys.passwordReset(email)
+    );
+    if (!savedHashedToken || !(await compareString(token, savedHashedToken))) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AuthResponseCode.INVALID_RESET_TOKEN,
+        "Token không hợp lệ hoặc đã hết hạn",
+        true
+      );
+    }
+    // Update new password
+    const hashedPassword = await hashString(newPassword);
+    const account = await accountRepository.findByEmail(email, Role.USER);
+    if (!account) {
+      throw new AppError(
+        HttpStatus.NOT_FOUND,
+        AuthResponseCode.NOT_FOUND,
+        "Không tìm thấy tài khoản",
+        true
+      );
+    }
+
+    await accountRepository.changePassword(
+      account.id,
+      account.user!.id,
+      hashedPassword
+    );
   }
 }
 

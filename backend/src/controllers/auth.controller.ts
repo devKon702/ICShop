@@ -3,13 +3,15 @@ import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response";
 import { AuthResponseCode } from "../constants/codes/auth.code";
 import {
+  forgotPasswordSchema,
   loginSchema,
   loginWithGoogleSchema,
+  resetPasswordSchema,
   sendEmailOTPSchema,
   signupSchema,
 } from "../schemas/auth.schema";
 import { Role } from "../constants/db";
-import emailOptService from "../services/email-opt.service";
+import emailOptService from "../services/opt.service";
 import authService from "../services/auth.service";
 
 class AuthController {
@@ -104,14 +106,45 @@ class AuthController {
       body: { email },
     } = sendEmailOTPSchema.parse(req);
     // Service
-    const { expiredAt } = await authService.sendEmailOtp(email);
+    const { expiresAt } = await authService.sendEmailOtp(email);
     // Response
     res.status(HttpStatus.OK).json(
       successResponse(AuthResponseCode.OK, "Gửi OTP thành công", {
         email,
-        expiredAt,
+        expiresAt,
       })
     );
+  }
+
+  public async forgotPassword(req: Request, res: Response) {
+    const {
+      body: { email },
+    } = forgotPasswordSchema.parse(req);
+    // Service
+    await authService.forgotPassword(email);
+    // Response
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AuthResponseCode.OK,
+          "Nếu email tồn tại, mã đặt lại mật khẩu đã được gửi"
+        )
+      );
+  }
+
+  public async resetPassword(req: Request, res: Response) {
+    const {
+      body: { email, token, newPassword },
+    } = resetPasswordSchema.parse(req);
+    // Service
+    await authService.resetPassword(email, token, newPassword);
+    // Response
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(AuthResponseCode.OK, "Đặt lại mật khẩu thành công")
+      );
   }
 
   test(req: Request, res: Response) {

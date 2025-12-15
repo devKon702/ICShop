@@ -3,13 +3,16 @@ import authController from "../controllers/auth.controller";
 import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
+  forgotPasswordSchema,
   loginSchema,
   loginWithGoogleSchema,
+  resetPasswordSchema,
   sendEmailOTPSchema,
   signupSchema,
 } from "../schemas/auth.schema";
 import { Role } from "../constants/db";
 import {
+  createLimiter,
   loginLimiter,
   refreshTokenLimiter,
   sendOtpLimiter,
@@ -58,13 +61,35 @@ authRouter.post(path + "/logout", jwtMiddleware, authController.logout);
 // POST /auth/refresh
 authRouter.post(path + "/refresh", refreshTokenLimiter, authController.refresh);
 
-// GET /auth/otp?email=
+// POST /auth/otp
 authRouter.post(
   path + "/otp",
   sendOtpLimiter,
   jwtMiddleware,
   validate(sendEmailOTPSchema),
   authController.sendEmailOTP
+);
+
+// POST /auth/forgot-password
+authRouter.post(
+  path + "/forgot-password",
+  createLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
+  }),
+  validate(forgotPasswordSchema),
+  authController.forgotPassword
+);
+
+// POST /auth/reset-password
+authRouter.post(
+  path + "/reset-password",
+  createLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
+  }),
+  validate(resetPasswordSchema),
+  authController.resetPassword
 );
 
 // POST /auth/testToken

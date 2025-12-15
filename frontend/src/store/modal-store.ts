@@ -117,7 +117,8 @@ type ModalType =
         };
       }
     >
-  | Modal<"createCollection", { onSuccess?: () => void }>;
+  | Modal<"createCollection", { onSuccess?: () => void }>
+  | Modal<"forgotPassword", unknown>;
 
 interface modalState {
   modal: ModalType[];

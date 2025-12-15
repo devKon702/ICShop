@@ -84,7 +84,7 @@ export default function AccountForm() {
       mutationFn: (email: string) => authService.sendOtp({ email }),
       onSuccess: (data) => {
         toast.success(`Đã gửi OTP đến email ${data.data.email}`);
-        setOtpExpiredAt(new Date(data.data.expiredAt));
+        setOtpExpiredAt(new Date(data.data.expiresAt));
       },
       onError: () => {
         toast.error("Gửi OTP thất bại. Vui lòng thử lại.");

@@ -7,6 +7,7 @@ export const redisKeys = {
   session: (sessionId: string) => `rt:${sessionId}`,
   otpEmail: (email: string) => `otp:email:${email}`,
   otpPhone: (phone: string) => `otp:phone:${phone}`,
+  passwordReset: (email: string) => `pwdreset:${email}`,
 } as const;
 
 class RedisService {

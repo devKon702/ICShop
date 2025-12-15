@@ -14,7 +14,7 @@ import {
 import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt";
 import { sanitizeData } from "../utils/sanitize";
-import emailOptService from "../services/email-opt.service";
+import emailOptService from "../services/opt.service";
 import { NotFoundError } from "../errors/not-found-error";
 import { AccessTokenPayload } from "../services/jwt.service";
 

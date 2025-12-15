@@ -42,4 +42,18 @@ export const sendEmailOTPSchema = requestSchema({
   }),
 });
 
+export const forgotPasswordSchema = requestSchema({
+  body: z.object({
+    email: z.string().trim().email("Email không hợp lệ"),
+  }),
+});
+
+export const resetPasswordSchema = requestSchema({
+  body: z.object({
+    email: z.string().trim().email("Email không hợp lệ"),
+    token: z.string(),
+    newPassword: z.string().min(6, "Mật khẩu tối thiểu 6 kí tự"),
+  }),
+});
+
 export type SignupIType = z.infer<typeof signupSchema>;

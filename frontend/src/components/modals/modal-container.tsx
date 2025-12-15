@@ -27,6 +27,7 @@ import AddToCollection from "@/components/features/product/admin/forms/add-to-co
 import UserOrderDetail from "@/components/features/order/user/user-order-detail";
 import ChangeOrderAddressForm from "@/components/features/address/change-order-address-form";
 import AdminProductOrders from "@/components/features/order/admin/admin-product-orders";
+import ForgotPasswordForm from "@/components/features/auth/forgot-password-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -217,6 +218,12 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Tạo bộ sưu tập" index={index}>
                     <CreateCollectionForm {...item.props} />
+                  </FormModal>
+                );
+              case "forgotPassword":
+                return (
+                  <FormModal title="Quên mật khẩu" index={index}>
+                    <ForgotPasswordForm />
                   </FormModal>
                 );
               default:

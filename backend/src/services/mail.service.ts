@@ -16,7 +16,7 @@ class MailService {
     });
   }
 
-  async send(options: {
+  public async send(options: {
     to: string;
     subject: string;
     text?: string;

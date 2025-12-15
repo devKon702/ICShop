@@ -65,8 +65,26 @@ export const authService = {
     return axiosHandler(
       apiAxios.post("/v1/auth/otp", { email }),
       ApiResponseSchema(
-        z.object({ email: z.string(), expiredAt: z.string().datetime() })
+        z.object({ email: z.string(), expiresAt: z.string().datetime() })
       )
+    );
+  },
+
+  forgotPassword: async (email: string) => {
+    return axiosHandler(
+      apiAxios.post("/v1/auth/forgot-password", { email }),
+      ApiResponseSchema(z.undefined())
+    );
+  },
+
+  resetPassword: async (data: {
+    token: string;
+    email: string;
+    password: string;
+  }) => {
+    return axiosHandler(
+      apiAxios.post("/v1/auth/reset-password", data),
+      ApiResponseSchema(z.undefined())
     );
   },
 };
