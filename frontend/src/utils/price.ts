@@ -1,7 +1,9 @@
 export function formatPrice(price: number | undefined): string {
   // const str = price.toLocaleString("vi-VN");
   // return str;
-  return !!price ? price.toLocaleString("vi-VN") : "0";
+  const priceStr: string = price === undefined ? "0" : String(price);
+  // return !!price ? price.toLocaleString("vi-VN") : "0";
+  return priceStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export function getUnitPrice(

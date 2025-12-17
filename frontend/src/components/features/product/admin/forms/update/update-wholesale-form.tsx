@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/form";
 import { FormProductSchema } from "@/libs/schemas/form.schema";
 import productService from "@/libs/services/product.service";
+import { formatPrice } from "@/utils/price";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash, Wallet } from "lucide-react";
@@ -256,19 +257,25 @@ export default function UpdateWholesaleForm({ productId, wholesale }: Props) {
                 <FormItem className="flex-1">
                   <FormControl>
                     <CustomInput
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       isError={false}
                       placeholder="Giá"
                       min="0"
                       {...field}
+                      value={formatPrice(Number(field.value))}
                       icon={
                         <span className="px-4 border-l-2 shrink-0">VND</span>
                       }
                       iconAlign="end"
                       onChange={(e) => {
+                        const onlyNumber = e.currentTarget.value.replace(
+                          /\D/g,
+                          ""
+                        );
                         form.setValue(
                           `wholesale.details.${index}.price`,
-                          Number(e.currentTarget.value)
+                          Number(onlyNumber)
                         );
                         setEnable(true);
                       }}

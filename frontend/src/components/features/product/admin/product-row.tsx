@@ -86,7 +86,10 @@ export default function ProductRow({ product }: Props) {
       <TableCell className="min-w-32">
         <ClampText className="w-fit" lines={1} text={product.category.name} />
       </TableCell>
-      <TableCell>{formatPrice(Number(product.price))}đ</TableCell>
+      <TableCell>
+        {formatPrice(Number(product.price))}
+        <sup> đ</sup>
+      </TableCell>
       <TableCell>
         {product.isActive ? (
           <Check

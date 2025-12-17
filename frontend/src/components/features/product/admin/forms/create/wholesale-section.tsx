@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { FormProductSchema } from "@/libs/schemas/form.schema";
+import { formatPrice } from "@/utils/price";
 import { Plus, Trash, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -206,18 +207,28 @@ export function WholesaleSection({
               <FormItem className="flex-1">
                 <FormControl>
                   <CustomInput
-                    type="number"
+                    type="text"
                     isError={false}
                     placeholder="Giá"
                     min="0"
                     {...field}
+                    value={formatPrice(Number(field.value))}
                     icon={<span className="px-4 border-l-2 shrink-0">VND</span>}
                     iconAlign="end"
+                    inputMode="numeric"
                     onChange={(e) => {
+                      const onlyNumber = e.currentTarget.value.replace(
+                        /\D/g,
+                        ""
+                      );
                       setValue(
                         `wholesale.details.${index}.price`,
-                        Number(e.currentTarget.value)
+                        Number(onlyNumber)
                       );
+                      // setValue(
+                      //   `wholesale.details.${index}.price`,
+                      //   Number(e.currentTarget.value)
+                      // );
                     }}
                   />
                 </FormControl>
