@@ -414,7 +414,7 @@ class OrderRepository {
       by: ["userId"],
       _count: { id: true },
       where: {
-        status: { notIn: [OrderStatus.CANCELED, OrderStatus.PENDING] },
+        status: OrderStatus.DONE,
         createdAt: {
           gte: opts.from,
           lte: opts.to,
