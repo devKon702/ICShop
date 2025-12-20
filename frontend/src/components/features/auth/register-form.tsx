@@ -3,17 +3,33 @@ import CustomInput from "@/components/common/custom-input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { useInterval } from "@/libs/hooks/useInterval";
 import { ApiErrorResponseSchema } from "@/libs/schemas/response.schema";
 import { authService } from "@/libs/services/auth.service";
-import { phoneRegex } from "@/utils/regex";
+import { formatTime } from "@/utils/date";
+import { emailRegex, phoneRegex } from "@/utils/regex";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { CheckCheck, Key, Mail, Phone, User } from "lucide-react";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import {
+  CheckCheck,
+  Key,
+  Mail,
+  Phone,
+  SendHorizonalIcon,
+  User,
+} from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,19 +38,22 @@ import { z } from "zod";
 const schema = z
   .object({
     name: z
-      .string()
+      .string({ message: "Tên không được để trống" })
       .min(2, "Tên tối thiểu 2 kí tự")
       .max(20, "Tên tối thiểu 20 kí tự"),
     phone: z
-      .string()
+      .string({ message: "Số điện thoại không được để trống" })
       .trim()
       .regex(
         phoneRegex(),
         "Số điện thoại không hợp lệ theo định dạng Việt Nam"
       ),
-    email: z.string().email("Email không đúng định dạng"),
+    email: z
+      .string({ message: "Email không được để trống" })
+      .email("Email không đúng định dạng"),
+    otp: z.string({ message: "OTP không được để trống" }).length(6),
     password: z
-      .string()
+      .string({ message: "Mật khẩu không được để trống" })
       .min(6, "Tối thiểu 6 kí tự")
       .max(100, "Tối đa 100 kí tự"),
     confirm: z.string().optional(),
@@ -49,13 +68,40 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
+  const [remainSeconds, setRemainSeconds] = React.useState<number | null>(null);
+  useInterval(
+    () => {
+      setRemainSeconds((prev) => {
+        if (prev === null) return null;
+        if (prev <= 1) return 0;
+        return prev - 1;
+      });
+    },
+    remainSeconds !== null || remainSeconds == 0 ? 1000 : null
+  );
   const form = useForm({
     resolver: zodResolver(schema),
     mode: "onSubmit",
   });
+  const { mutate: sendOtpMutate, isPending: isSendingOtp } = useMutation({
+    mutationFn: async (email: string) => authService.sendOtp({ email }),
+    onSuccess: (data) => {
+      setRemainSeconds(
+        Math.round(
+          (new Date(data.data.expiresAt).getTime() - new Date().getTime()) /
+            1000
+        )
+      );
+      toast.success(`Đã gửi OTP đến ${data.data.email}`);
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Gửi mã OTP thất bại, vui lòng thử lại");
+    },
+  });
   const { mutate: signupMutate } = useMutation({
     mutationFn: async (data: {
       email: string;
+      otp: string;
       password: string;
       name: string;
       phone: string;
@@ -110,22 +156,100 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <CustomInput
-                  type="email"
-                  icon={
-                    <div className="text-white bg-black p-3">
-                      <Mail />
-                    </div>
-                  }
-                  isError={fieldState.invalid}
-                  placeholder="Email"
-                  {...field}
-                />
+                <div className="flex items-center">
+                  <CustomInput
+                    type="email"
+                    icon={
+                      <div className="text-white bg-black p-3">
+                        <Mail />
+                      </div>
+                    }
+                    isError={fieldState.invalid}
+                    placeholder="Email"
+                    {...field}
+                  />
+                  <button
+                    className="h-full aspect-square text-center rounded-sm bg-primary/10 text-primary ms-2 flex justify-center items-center cursor-pointer hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                    title="Gửi OTP"
+                    disabled={isSendingOtp}
+                    type="button"
+                    onClick={() => {
+                      const emailValue = form.getValues("email");
+                      if (emailRegex().test(emailValue))
+                        sendOtpMutate(emailValue);
+                      else {
+                        form.setError("email", {
+                          type: "manual",
+                          message: "Email không đúng định dạng",
+                        });
+                      }
+                    }}
+                  >
+                    {isSendingOtp ? (
+                      <div className="size-4 rounded-full border-2 border-b-transparent border-primary animate-spin" />
+                    ) : (
+                      <SendHorizonalIcon />
+                    )}
+                  </button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <FormField
+          name="otp"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Mã OTP</FormLabel>
+              <FormDescription>
+                {remainSeconds ? (
+                  <span>
+                    Đã gửi đến email của bạn. Mã hết hạn sau{" "}
+                    <strong className="text-red-400">
+                      {`${formatTime(remainSeconds, {
+                        hours: false,
+                        minutes: true,
+                        seconds: true,
+                      })} giây`}
+                    </strong>
+                    <br />
+                    Nếu không nhận được, hãy kiểm tra thư mục spam hoặc thư mục
+                    rác, sau đó vui lòng gửi lại.
+                  </span>
+                ) : remainSeconds === 0 ? (
+                  "Mã OTP đã hết hạn, vui lòng gửi lại"
+                ) : (
+                  "Nhập email và gửi mã OTP để xác thực email của bạn"
+                )}
+              </FormDescription>
+              <FormControl>
+                <InputOTP
+                  tabIndex={0}
+                  maxLength={6}
+                  value={field.value}
+                  onChange={field.onChange}
+                  pattern={REGEXP_ONLY_DIGITS}
+                  containerClassName="w-5/6"
+                >
+                  <InputOTPGroup className="w-full space-x-2">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <InputOTPSlot
+                        key={index}
+                        index={index}
+                        className="w-10 border flex-1 shadow rounded-md data-[active=true]:ring-0"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           name="phone"
           control={form.control}
@@ -134,6 +258,7 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
               <FormLabel>Số điện thoại</FormLabel>
               <FormControl>
                 <CustomInput
+                  tabIndex={0}
                   type="text"
                   icon={
                     <div className="text-white bg-black p-3">

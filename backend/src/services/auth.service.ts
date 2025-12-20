@@ -150,7 +150,7 @@ class AuthService {
       throw new AppError(
         HttpStatus.FORBIDDEN,
         AuthResponseCode.FORBIDDEN,
-        "Không thể đăng nhập bằng Google với email này",
+        "Không thể đăng nhập với email này",
         true
       );
     }
@@ -229,14 +229,16 @@ class AuthService {
     password,
     name,
     phone,
+    otp,
   }: {
     email: string;
     password: string;
     name: string;
     phone: string;
+    otp: string;
   }) => {
     const existAccount = await accountRepository.findByEmail(email);
-    // Nếu trùng
+    // If email already exists
     if (existAccount)
       throw new AppError(
         HttpStatus.BAD_REQUEST,
@@ -244,7 +246,17 @@ class AuthService {
         "Email đã được sử dụng",
         true
       );
-    // Không trùng
+    // Verify OTP
+    const savedOtp = await otpService.verify(email, otp);
+    if (!savedOtp) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AuthResponseCode.INVALID_OTP,
+        "Mã OTP không hợp lệ hoặc đã hết hạn",
+        true
+      );
+    }
+    // Create new account
     const hashedPassword = await hashString(password);
     const newAccount = await accountRepository.create({
       email,

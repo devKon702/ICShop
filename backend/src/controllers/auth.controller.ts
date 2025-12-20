@@ -60,7 +60,7 @@ class AuthController {
 
   public signup = async (req: Request, res: Response) => {
     const {
-      body: { email, name, password, phone },
+      body: { email, name, password, phone, otp },
     } = signupSchema.parse(req);
     // Service
     const { password: _, ...newAccount } = await authService.signup({
@@ -68,6 +68,7 @@ class AuthController {
       name,
       password,
       phone,
+      otp,
     });
     // Response
     res

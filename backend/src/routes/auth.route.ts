@@ -65,7 +65,7 @@ authRouter.post(path + "/refresh", refreshTokenLimiter, authController.refresh);
 authRouter.post(
   path + "/otp",
   sendOtpLimiter,
-  jwtMiddleware,
+  // jwtMiddleware,
   validate(sendEmailOTPSchema),
   authController.sendEmailOTP
 );

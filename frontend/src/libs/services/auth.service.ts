@@ -49,6 +49,7 @@ export const authService = {
 
   signup: async (data: {
     email: string;
+    otp: string;
     password: string;
     name: string;
     phone: string;

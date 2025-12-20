@@ -26,6 +26,7 @@ export const signupSchema = z.object({
         message: "Tên chỉ gồm kí tự tiếng Việt hoặc email",
       }),
     email: z.string().email(),
+    otp: z.string().length(6, "Mã OTP gồm 6 kí tự"),
     password: z.string().min(6, "Mật khẩu tối thiểu 6 kí tự"),
     phone: z
       .string()
