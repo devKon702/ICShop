@@ -14,12 +14,13 @@ async function main() {
   // Kiểm tra nếu chưa có admin thì tạo mới
   const admin = await accountRepository.findFirstAdmin();
   if (!admin) {
-    await accountRepository.create(
-      "nhatkha117@gmail.com",
-      await hashString("123456"),
-      "Admin",
-      Role.ADMIN
-    );
+    await accountRepository.create({
+      email: "nhatkha117@gmail.com",
+      password: await hashString("123456"),
+      name: "Admin",
+      role: Role.ADMIN,
+      provider: "local",
+    });
   }
 
   // Kiểm tra nếu chưa có location thì tạo mới

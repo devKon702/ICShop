@@ -28,6 +28,7 @@ import { findByIdSchema } from "../schemas/shared.schema";
 import { sanitizeData } from "../utils/sanitize";
 import { AccessTokenPayload } from "../services/jwt.service";
 import { ProductResponseCode } from "../constants/codes/product.code";
+import cartRepository from "../repositories/cart.repository";
 
 class OrderController {
   // USER
@@ -53,6 +54,34 @@ class OrderController {
       productId,
       quantity,
     }));
+    // Check product exist in cart
+    await Promise.all(
+      groupedProducts.map(async (item) => {
+        const cartDetail = await cartRepository.findByUserIdAndProductId(
+          sub,
+          item.productId
+        );
+        if (!cartDetail) {
+          const product = await productRepository.findById(item.productId);
+          if (!product) {
+            throw new AppError(
+              HttpStatus.UNPROCESSABLE_ENTITY,
+              ProductResponseCode.NOT_FOUND,
+              `Sản phẩm không tồn tại`,
+              true
+            );
+          }
+          throw new AppError(
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            OrderResponseCode.FORBIDDEN,
+            `Vui lòng thêm sản phẩm ${product?.name.slice(0, 20).trim()}${
+              product?.name.length > 20 ? "..." : ""
+            } vào giỏ hàng trước khi đặt hàng`,
+            true
+          );
+        }
+      })
+    );
 
     // Check exist address
     const address =
@@ -420,11 +449,34 @@ class OrderController {
         "Không tìm thấy đơn hàng"
       );
     }
-    if (order.status === status) {
+
+    // A list of valid status changes from current status like: {[currentStatus]: [validNewStatus1, validNewStatus2, ...]}
+    const validStatusChanges: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELED],
+      [OrderStatus.PAID]: [
+        OrderStatus.PROCESSING,
+        OrderStatus.PENDING,
+        OrderStatus.CANCELED,
+      ],
+      [OrderStatus.PROCESSING]: [
+        OrderStatus.SHIPPING,
+        OrderStatus.PAID,
+        OrderStatus.CANCELED,
+      ],
+      [OrderStatus.SHIPPING]: [
+        OrderStatus.DONE,
+        OrderStatus.PROCESSING,
+        OrderStatus.CANCELED,
+      ],
+      [OrderStatus.DONE]: [OrderStatus.SHIPPING, OrderStatus.CANCELED],
+      [OrderStatus.CANCELED]: [OrderStatus.PENDING, OrderStatus.PAID],
+    };
+    // Check if the desired status change is valid
+    if (!validStatusChanges[order.status as OrderStatus].includes(status)) {
       throw new AppError(
         HttpStatus.UNPROCESSABLE_ENTITY,
         OrderResponseCode.INVALID_STATUS_CHANGE,
-        "Trạng thái đơn hàng không đổi",
+        `Chuyển đổi trạng thái không hợp lệ`,
         true
       );
     }

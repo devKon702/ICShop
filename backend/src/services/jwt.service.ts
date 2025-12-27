@@ -24,11 +24,15 @@ class JwtService {
   public createAccessToken = (
     payload: AccessTokenPayload
   ): { token: string; expiresAt: number } => {
+    const expiresIn =
+      payload.role === Role.USER
+        ? JWTConfig.JWT_ACCESS_EXPIRE_USER
+        : JWTConfig.JWT_ACCESS_EXPIRE_ADMIN;
     return {
       token: jwt.sign(payload, env.JWT_ACCESS_KEY, {
-        expiresIn: JWTConfig.JWT_ACCESS_EXPIRE,
+        expiresIn,
       }),
-      expiresAt: Date.now() + JWTConfig.JWT_ACCESS_EXPIRE * 1000, // milliseconds
+      expiresAt: Date.now() + expiresIn * 1000, // milliseconds
     };
   };
 

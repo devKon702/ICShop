@@ -1,3 +1,4 @@
+import { CartDetail } from "@prisma/client";
 import { prisma } from "../prisma";
 
 class CartRepository {
@@ -40,7 +41,7 @@ class CartRepository {
     });
   };
 
-  public getCartDetailByProductId = (userId: number, productId: number) => {
+  public findByUserIdAndProductId = (userId: number, productId: number) => {
     return prisma.cartDetail.findFirst({
       where: { userId, productId },
     });
@@ -63,6 +64,12 @@ class CartRepository {
     return prisma.cartDetail.delete({
       where: { id, userId },
       select: { id: true },
+    });
+  };
+
+  public clearCart = (userId: number) => {
+    return prisma.cartDetail.deleteMany({
+      where: { userId },
     });
   };
 }

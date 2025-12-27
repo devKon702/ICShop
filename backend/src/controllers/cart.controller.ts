@@ -29,7 +29,7 @@ class CartController {
     const {
       body: { productId },
     } = createCartSchema.parse(req);
-    const existing = await cartDetailRepository.getCartDetailByProductId(
+    const existing = await cartDetailRepository.findByUserIdAndProductId(
       sub,
       productId
     );

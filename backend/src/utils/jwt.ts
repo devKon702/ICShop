@@ -8,7 +8,7 @@ import { JWTResponseCode } from "../constants/codes/jwt.code";
 
 export const createAccessToken = (payload: TokenPayload) => {
   return jwt.sign(payload, env.JWT_ACCESS_KEY as string, {
-    expiresIn: JWTConfig.JWT_ACCESS_EXPIRE,
+    expiresIn: JWTConfig.JWT_ACCESS_EXPIRE_USER,
   });
 };
 
