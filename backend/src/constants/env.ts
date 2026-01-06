@@ -21,6 +21,9 @@ const envSchema = z.object({
   MAIL_USER: z.string().nonempty("Cần cung cấp Mail User"),
   MAIL_PASSWORD: z.string().nonempty("Cần cung cấp Mail Password"),
   GOOGLE_CLIENT_ID: z.string().nonempty("Cần cung cấp Google Client ID"),
+  TURNSTILE_SECRET_KEY: z
+    .string()
+    .nonempty("Cần cung cấp Turnstile Secret Key"),
 });
 
 const isDev = process.env.NODE_ENV === "development";
@@ -40,6 +43,7 @@ const envVariables = {
   MAIL_USER: process.env.MAIL_USER,
   MAIL_PASSWORD: process.env.MAIL_PASSWORD,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
 };
 
 const parsedEnv = envSchema.safeParse(envVariables);

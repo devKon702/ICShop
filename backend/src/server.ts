@@ -6,7 +6,11 @@ import { requestLogger } from "./middlewares/logger.middleware";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
-import { globalLimiter } from "./middlewares/limiter.middleware";
+import {
+  createRateLimiter,
+  globalLimiter,
+  RateLimitPolicies,
+} from "./middlewares/limiter.middleware";
 
 const app = express();
 
@@ -35,7 +39,8 @@ app.use(cookieParser());
 app.use(requestLogger);
 
 // Rate Limiter
-app.use(globalLimiter);
+// app.use(globalLimiter);
+app.use(createRateLimiter(RateLimitPolicies.GLOBAL));
 
 // Static route
 app.use(

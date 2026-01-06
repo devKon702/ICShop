@@ -8,6 +8,9 @@ export const redisKeys = {
   otpEmail: (email: string) => `otp:email:${email}`,
   otpPhone: (phone: string) => `otp:phone:${phone}`,
   passwordReset: (email: string) => `pwdreset:${email}`,
+  rateLimit: (policyName: string, actor: string) => `rl:${policyName}:${actor}`,
+  captchaPassed: (policyName: string, actor: string) =>
+    `captcha:passed:${policyName}:${actor}`,
 } as const;
 
 class RedisService {
@@ -43,6 +46,23 @@ class RedisService {
 
   public async deleteKey(key: string): Promise<void> {
     await this.client.del(key);
+  }
+
+  public async incrementKey(key: string): Promise<number> {
+    return this.client.incr(key);
+  }
+
+  public async pexpireKey(key: string, ttlMilliseconds: number): Promise<void> {
+    await this.client.pexpire(key, ttlMilliseconds);
+  }
+
+  public async pttlKey(key: string): Promise<number> {
+    return this.client.pttl(key);
+  }
+
+  public async exists(key: string): Promise<boolean> {
+    const result = await this.client.exists(key);
+    return result === 1;
   }
 }
 

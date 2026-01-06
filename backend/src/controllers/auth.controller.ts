@@ -104,10 +104,13 @@ class AuthController {
 
   public async sendEmailOTP(req: Request, res: Response) {
     const {
-      body: { email },
+      body: { email, requireExistence },
     } = sendEmailOTPSchema.parse(req);
     // Service
-    const { expiresAt } = await authService.sendEmailOtp(email);
+    const { expiresAt } = await authService.sendEmailOtp(
+      email,
+      requireExistence
+    );
     // Response
     res.status(HttpStatus.OK).json(
       successResponse(AuthResponseCode.OK, "Gửi OTP thành công", {
@@ -148,7 +151,7 @@ class AuthController {
       );
   }
 
-  test(req: Request, res: Response) {
+  testToken(req: Request, res: Response) {
     const payload = res.locals.payload;
 
     res
@@ -156,21 +159,10 @@ class AuthController {
       .json(successResponse(AuthResponseCode.OK, "Test auth success", payload));
   }
 
-  async testRedis(req: Request, res: Response) {
-    const email = "nhatkha117@gmail.com";
-    const otp = emailOptService.generateOTP(6);
-    const expiredInSeconds = 5 * 60; // 5 minutes
-    await Promise.all([
-      emailOptService.save(email, otp, expiredInSeconds),
-      emailOptService.send(email, otp, expiredInSeconds),
-    ]);
-    const expiredAt = new Date(Date.now() + expiredInSeconds * 1000);
-    res.status(HttpStatus.OK).json(
-      successResponse(AuthResponseCode.OK, "Send OTP success", {
-        email,
-        expiredAt,
-      })
-    );
+  async test(req: Request, res: Response) {
+    res
+      .status(HttpStatus.OK)
+      .json(successResponse(AuthResponseCode.OK, "Test success", {}));
   }
 }
 export default new AuthController();

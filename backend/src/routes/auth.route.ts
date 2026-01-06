@@ -12,11 +12,8 @@ import {
 } from "../schemas/auth.schema";
 import { Role } from "../constants/db";
 import {
-  createLimiter,
-  loginLimiter,
-  refreshTokenLimiter,
-  sendOtpLimiter,
-  signupLimiter,
+  createRateLimiter,
+  RateLimitPolicies,
 } from "../middlewares/limiter.middleware";
 
 const authRouter = express.Router();
@@ -26,7 +23,7 @@ const adminPath = "/admin/auth";
 // POST /auth/login
 authRouter.post(
   path + "/login",
-  loginLimiter,
+  createRateLimiter(RateLimitPolicies.LOGIN),
   validate(loginSchema),
   authController.login(Role.USER)
 );
@@ -34,7 +31,7 @@ authRouter.post(
 // POST /auth/google
 authRouter.post(
   path + "/google",
-  loginLimiter,
+  createRateLimiter(RateLimitPolicies.LOGIN),
   validate(loginWithGoogleSchema),
   authController.loginWithGoogle
 );
@@ -42,7 +39,7 @@ authRouter.post(
 // POST /admin/auth/login
 authRouter.post(
   adminPath + "/login",
-  loginLimiter,
+  createRateLimiter(RateLimitPolicies.LOGIN),
   validate(loginSchema),
   authController.login(Role.ADMIN)
 );
@@ -50,7 +47,7 @@ authRouter.post(
 // POST /auth/signup
 authRouter.post(
   path + "/signup",
-  signupLimiter,
+  createRateLimiter(RateLimitPolicies.REGISTER),
   validate(signupSchema),
   authController.signup
 );
@@ -59,13 +56,12 @@ authRouter.post(
 authRouter.post(path + "/logout", jwtMiddleware, authController.logout);
 
 // POST /auth/refresh
-authRouter.post(path + "/refresh", refreshTokenLimiter, authController.refresh);
+authRouter.post(path + "/refresh", authController.refresh);
 
 // POST /auth/otp
 authRouter.post(
   path + "/otp",
-  sendOtpLimiter,
-  // jwtMiddleware,
+  createRateLimiter(RateLimitPolicies.SENT_OTP),
   validate(sendEmailOTPSchema),
   authController.sendEmailOTP
 );
@@ -73,10 +69,7 @@ authRouter.post(
 // POST /auth/forgot-password
 authRouter.post(
   path + "/forgot-password",
-  createLimiter({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // limit each IP to 5 requests per windowMs
-  }),
+  createRateLimiter(RateLimitPolicies.FORGOT_PASSWORD),
   validate(forgotPasswordSchema),
   authController.forgotPassword
 );
@@ -84,18 +77,23 @@ authRouter.post(
 // POST /auth/reset-password
 authRouter.post(
   path + "/reset-password",
-  createLimiter({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // limit each IP to 5 requests per windowMs
-  }),
   validate(resetPasswordSchema),
   authController.resetPassword
 );
 
 // POST /auth/testToken
-authRouter.get(path + "/testToken", jwtMiddleware, authController.test);
+authRouter.get(path + "/testToken", jwtMiddleware, authController.testToken);
 
 // GET /auth/redis
-authRouter.get(path + "/redis", authController.testRedis);
+authRouter.get(
+  path + "/test",
+  createRateLimiter({
+    name: "TEST",
+    windowMs: 30 * 1000,
+    max: 3,
+    type: "CAPTCHA",
+  }),
+  authController.test
+);
 
 export default authRouter;
