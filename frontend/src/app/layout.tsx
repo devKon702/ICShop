@@ -8,6 +8,7 @@ import QueryProvider from "@/libs/tanstack-query/query-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import env from "@/constants/env";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +51,10 @@ export default function RootLayout({
             <ModalContainer />
           </QueryProvider>
         </GoogleOAuthProvider>
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useModalActions } from "@/store/modal-store";
 import { Lock, Mail } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
+import TurnstileWidget from "@/components/common/turnstile-widget";
 
 const formSchema = z.object({
   email: z.string().email("Email không đúng định dạng"),
@@ -191,6 +192,13 @@ export default function LoginForm({
             Đăng ký
           </span>
         </p>
+        <div className="flex justify-center">
+          <TurnstileWidget
+            onVerify={async (token) => {
+              console.log("Turnstile token:", token);
+            }}
+          />
+        </div>
         <button className="bg-black text-white rounded-sm px-4 py-2 cursor-pointer opacity-80 hover:opacity-100 ms-auto block">
           Đăng nhập
         </button>

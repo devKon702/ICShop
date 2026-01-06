@@ -8,7 +8,6 @@ import cors from "cors";
 import helmet from "helmet";
 import {
   createRateLimiter,
-  globalLimiter,
   RateLimitPolicies,
 } from "./middlewares/limiter.middleware";
 
@@ -24,6 +23,7 @@ app.use(
       "http://localhost:3000",
       "http://admin.localhost:3000",
       "http://localhost",
+      "http://myapp.local:3000",
     ],
     credentials: true,
   })
