@@ -1,7 +1,7 @@
 import ApiError, { ApiErrorType } from "@/libs/errors/ApiError";
 import { ApiErrorResponseSchema } from "@/libs/schemas/response.schema";
 import { AxiosError, AxiosResponse } from "axios";
-import { ZodSchema } from "zod";
+import { z, ZodSchema } from "zod";
 
 export async function axiosHandler<T>(
   request: Promise<AxiosResponse>,
@@ -60,10 +60,11 @@ export async function fetchHandler<T>(
     const res = await request;
     const contentType = res.headers.get("Content-Type");
     if (!res.ok) {
-      if (contentType === "application/json") {
+      if (contentType.includes("application/json")) {
         const errorData = await res.json();
         const parsedError = ApiErrorResponseSchema.safeParse(errorData);
         // If the error response is from API, throw an API Error
+        console.log("Parsed Error:", errorData);
         if (parsedError.success) {
           throw new ApiError({
             type: "API",
@@ -106,7 +107,7 @@ export function createErrorHandler(
     code: string;
     handler: (
       message: string,
-      details?: { field: string; message: string }[]
+      errors?: z.infer<typeof ApiErrorResponseSchema.shape.errors>
     ) => void;
   }[],
   options?: { type: ApiErrorType; handler: (message: string) => void }[]

@@ -1,9 +1,49 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { SECURITY_CODE } from "@/constants/api-code";
+import { authService } from "@/libs/services/auth.service";
+import { useModalActions } from "@/store/modal-store";
+import { createErrorHandler } from "@/utils/response-handler";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { toast } from "sonner";
 
 export default function FloatButton() {
+  const { openModal, closeModal } = useModalActions();
+  const { mutate, isPending } = useMutation({
+    mutationFn: (captchaToken?: string) => authService.test(captchaToken),
+    onSuccess: () => toast.success("Test thành công!"),
+    onError: (error) => {
+      const errorHandler = createErrorHandler(
+        [
+          {
+            code: SECURITY_CODE.TOO_MANY_REQUESTS,
+            handler: () =>
+              openModal({
+                type: "captcha",
+                props: {
+                  onVerify: async (token) => {
+                    mutate(token);
+                    closeModal();
+                  },
+                },
+              }),
+          },
+        ],
+        [
+          {
+            type: "API",
+            handler: (message) => {
+              toast.error(message);
+            },
+          },
+        ]
+      );
+      errorHandler(error);
+    },
+  });
   return (
     <div className="fixed bottom-4 right-4 flex flex-col space-y-6">
       <button
@@ -14,13 +54,14 @@ export default function FloatButton() {
         <i className="bx bxs-up-arrow text-2xl"></i>
       </button>
 
-      <Link
-        href={"#"}
-        target="_blank"
+      <Button
+        // href={"#"}
+        // target="_blank"
         className="size-10 rounded-full overflow-hidden bg-primary grid place-items-center cursor-pointer glow-hover"
-        // onClick={() => {
-        //   window.open(ENV_ZALO_LINK, "_blank");
-        // }}
+        onClick={() => {
+          if (isPending) return;
+          mutate();
+        }}
       >
         <Image
           src="/uploads/zalo.png"
@@ -30,7 +71,7 @@ export default function FloatButton() {
           className="size-full object-cover"
         ></Image>
         {/* <i className="bx bxs-message-rounded-dots text-white text-2xl"></i> */}
-      </Link>
+      </Button>
     </div>
   );
 }

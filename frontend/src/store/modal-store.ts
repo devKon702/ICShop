@@ -118,7 +118,8 @@ type ModalType =
       }
     >
   | Modal<"createCollection", { onSuccess?: () => void }>
-  | Modal<"forgotPassword", unknown>;
+  | Modal<"forgotPassword", unknown>
+  | Modal<"captcha", { onVerify: (token: string) => Promise<void> }>;
 
 interface modalState {
   modal: ModalType[];

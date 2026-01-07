@@ -28,11 +28,17 @@ export const ApiErrorResponseSchema = z.object({
   message: z.string(),
   code: z.string(),
   errors: z
-    .array(
-      z.object({
-        field: z.string(),
-        message: z.string(),
-      })
-    )
+    .object({
+      validateErrors: z
+        .array(
+          z.object({
+            field: z.string(),
+            message: z.string(),
+          })
+        )
+        .optional(),
+      requireCaptcha: z.boolean().optional(),
+      policy: z.string().optional(),
+    })
     .optional(),
 });

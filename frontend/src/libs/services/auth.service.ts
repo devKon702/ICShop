@@ -1,17 +1,20 @@
 import apiAxios from "@/libs/api/api-axios";
+import { apiFetch } from "@/libs/api/api-fetch";
 import { AccountBaseSchema } from "@/libs/schemas/account.schema";
 import { LoginSchema, RefreshSchema } from "@/libs/schemas/auth.schema";
 import { ApiResponseSchema } from "@/libs/schemas/response.schema";
 import { UserBaseSchema } from "@/libs/schemas/user.schema";
-import { axiosHandler } from "@/utils/response-handler";
+import { axiosHandler, fetchHandler } from "@/utils/response-handler";
 import { z } from "zod";
 
 export const authService = {
-  testToken: async () =>
-    apiAxios
-      .get("/v1/auth/testToken")
-      .then((response) => response)
-      .catch((e) => e),
+  test: async (captchaToken?: string) =>
+    fetchHandler(
+      apiFetch("/v1/auth/test", {
+        headers: { "X-Captcha-Token": captchaToken },
+      }),
+      ApiResponseSchema(z.object({}))
+    ),
 
   refresh: async () =>
     axiosHandler(

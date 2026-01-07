@@ -28,6 +28,7 @@ import UserOrderDetail from "@/components/features/order/user/user-order-detail"
 import ChangeOrderAddressForm from "@/components/features/address/change-order-address-form";
 import AdminProductOrders from "@/components/features/order/admin/admin-product-orders";
 import ForgotPasswordForm from "@/components/features/auth/forgot-password-form";
+import TurnstileWidget from "@/components/common/turnstile-widget";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -224,6 +225,18 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Quên mật khẩu" index={index}>
                     <ForgotPasswordForm />
+                  </FormModal>
+                );
+              case "captcha":
+                return (
+                  <FormModal
+                    title="Xác minh captcha"
+                    index={index}
+                    useCloseButton
+                  >
+                    <div className="flex justify-center p-4">
+                      <TurnstileWidget {...item.props} />
+                    </div>
                   </FormModal>
                 );
               default:

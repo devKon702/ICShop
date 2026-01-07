@@ -27,7 +27,9 @@ export function errorHandler(
     if (err instanceof ValidateError) {
       res
         .status(err.htttpCode)
-        .json(failResponse(err.code, err.message, err.errors));
+        .json(
+          failResponse(err.code, err.message, { validateErros: err.errors })
+        );
       return;
     }
 

@@ -14,7 +14,7 @@ export const RateLimitPolicies = {
     name: "GLOBAL",
     windowMs: 2 * 60 * 1000,
     max: 100,
-    type: "CAPTCHA",
+    type: "BLOCK",
   },
   LOGIN: {
     name: "LOGIN",
@@ -40,6 +40,12 @@ export const RateLimitPolicies = {
     max: 5,
     type: "BLOCK",
   },
+  CREATE_ORDER: {
+    name: "CREATE_ORDER",
+    windowMs: 10 * 60 * 1000,
+    max: 10,
+    type: "CAPTCHA",
+  },
 } satisfies Record<
   string,
   { name: string; windowMs: number; max: number; type: "BLOCK" | "CAPTCHA" }
@@ -53,13 +59,22 @@ export const createRateLimiter = (
       (res.locals.tokenPayload as TokenPayload)?.sub ?? req.ip ?? "unknown"
     );
 
+    console.log(`Rate Limiter: [${policy.name}] Actor: ${actor}`);
+
     // If CAPTCHA type policy
     if (
       policy.type === "CAPTCHA" &&
       (await redisService.exists(redisKeys.captchaPassed(policy.name, actor)))
     ) {
       // Check if captcha passed key exists
-      return next();
+      const passedUsageCount = await redisService.incrementKey(
+        redisKeys.captchaPassed(policy.name, actor)
+      ); // Increment usage count
+      if (passedUsageCount <= policy.max) {
+        return next();
+      }
+      // If usage count exceeded max, delete the key
+      await redisService.deleteKey(redisKeys.captchaPassed(policy.name, actor));
     }
 
     // Increment rate limit count
@@ -75,7 +90,7 @@ export const createRateLimiter = (
     if (rlCount > policy.max) {
       // If CAPTCHA type, check for captcha token
       if (policy.type === "CAPTCHA") {
-        const captchaToken = req.headers["X-Captcha-Token"] as
+        const captchaToken = req.headers["x-captcha-token"] as
           | string
           | undefined;
         // Get Turnstile Captcha
@@ -85,8 +100,9 @@ export const createRateLimiter = (
           : false;
         if (verified) {
           // Store captcha passed key with expiration equal to rate limit window
-          await redisService.pexpireKey(
+          await redisService.setValue(
             redisKeys.captchaPassed(policy.name, actor),
+            1,
             policy.windowMs / 1000
           );
           return next();
