@@ -6,7 +6,7 @@ import { ValidateResponseCode } from "../constants/codes/validate.code";
 import {
   ValidateError,
   ValidateErrorDetailType,
-} from "../errors/validate-error";
+} from "../errors/validate.error";
 
 export const validate = (schema: AnyZodObject) => {
   return (req: Request, res: Response, next: NextFunction) => {

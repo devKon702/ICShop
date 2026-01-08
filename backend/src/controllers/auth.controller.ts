@@ -11,22 +11,22 @@ import {
   signupSchema,
 } from "../schemas/auth.schema";
 import { Role } from "../constants/db";
-import emailOptService from "../services/opt.service";
 import authService from "../services/auth.service";
 
 class AuthController {
   public login = (role: Role) => async (req: Request, res: Response) => {
     const {
-      body: { email, password },
+      body: { email, password, captchaToken },
     } = loginSchema.parse(req);
 
     // Service
-    const { accessToken, account } = await authService.login(
+    const { accessToken, account } = await authService.login({
       res,
       email,
       password,
-      role
-    );
+      role,
+      captchaToken,
+    });
     // Response
     const { password: pwd, ...publicAccount } = account;
     res.status(HttpStatus.OK).json(

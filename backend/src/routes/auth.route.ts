@@ -12,6 +12,7 @@ import {
 } from "../schemas/auth.schema";
 import { Role } from "../constants/db";
 import {
+  createFailureLimiter,
   createRateLimiter,
   RateLimitPolicies,
 } from "../middlewares/limiter.middleware";
@@ -39,9 +40,12 @@ authRouter.post(
 // POST /admin/auth/login
 authRouter.post(
   adminPath + "/login",
-  createRateLimiter(RateLimitPolicies.LOGIN),
+  createRateLimiter(RateLimitPolicies.ADMIN_LOGIN),
   validate(loginSchema),
-  authController.login(Role.ADMIN)
+  createFailureLimiter(
+    RateLimitPolicies.ADMIN_LOGIN,
+    authController.login(Role.ADMIN)
+  )
 );
 
 // POST /auth/signup

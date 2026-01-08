@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import accountRepository from "../repositories/account.repository";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { AuthResponseCode } from "../constants/codes/auth.code";
 import { successResponse } from "../utils/response";
@@ -15,7 +15,7 @@ import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt";
 import { sanitizeData } from "../utils/sanitize";
 import emailOptService from "../services/opt.service";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/not-found.error";
 import { AccessTokenPayload } from "../services/jwt.service";
 
 class AccountController {

@@ -1,6 +1,6 @@
 import { ValidateResponseCode } from "../constants/codes/validate.code";
 import { HttpStatus } from "../constants/http-status";
-import { AppError } from "./app-error";
+import { AppError } from "./app.error";
 
 export type ValidateErrorDetailType = { field: string; message: string };
 

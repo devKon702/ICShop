@@ -8,6 +8,8 @@ import {
   TurnstileCaptchaService,
 } from "../services/captcha.service";
 import { SecurityResponseCode } from "../constants/codes/security.code";
+import { AppError } from "../errors/app.error";
+import RateLimitError from "../errors/rate-limit.error";
 
 export const RateLimitPolicies = {
   GLOBAL: {
@@ -20,6 +22,12 @@ export const RateLimitPolicies = {
     name: "LOGIN",
     windowMs: 10 * 60 * 1000,
     max: 10,
+    type: "BLOCK",
+  },
+  ADMIN_LOGIN: {
+    name: "ADMIN_LOGIN",
+    windowMs: 10 * 60 * 1000,
+    max: 5,
     type: "BLOCK",
   },
   REGISTER: {
@@ -108,21 +116,54 @@ export const createRateLimiter = (
           return next();
         }
       }
-      res
-        .status(HttpStatus.TOO_MANY_REQUESTS)
-        .json(
-          failResponse(
-            SecurityResponseCode.TOO_MANY_REQUESTS,
-            policy.type === "BLOCK"
-              ? "Quá nhiều yêu cầu, vui lòng thử lại sau."
-              : "Vui lòng hoàn thành CAPTCHA để tiếp tục.",
-            policy.type === "CAPTCHA"
-              ? { requireCaptcha: true, policy: policy.name }
-              : undefined
-          )
+      if (policy.type === "CAPTCHA") {
+        throw new RateLimitError(
+          { requireCaptcha: true, policy: policy.name },
+          "Vui lòng hoàn thành CAPTCHA để tiếp tục."
         );
-      return;
+      } else {
+        throw new RateLimitError(
+          undefined,
+          "Quá nhiều yêu cầu, vui lòng thử lại sau."
+        );
+      }
+      // res
+      //   .status(HttpStatus.TOO_MANY_REQUESTS)
+      //   .json(
+      //     failResponse(
+      //       SecurityResponseCode.TOO_MANY_REQUESTS,
+      //       policy.type === "BLOCK"
+      //         ? ""
+      //         : "Vui lòng hoàn thành CAPTCHA để tiếp tục.",
+      //       policy.type === "CAPTCHA"
+      //         ? { requireCaptcha: true, policy: policy.name }
+      //         : undefined
+      //     )
+      //   );
+      // return;
     }
     next();
+  };
+};
+
+export const createFailureLimiter = (
+  policy: (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies],
+  controller: (
+    req: Request,
+    res: Response,
+    next?: NextFunction
+  ) => Promise<void>
+) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await controller(req, res, next);
+      // Success
+      // Optionally, reset failure count on success
+    } catch (error) {
+      if (error instanceof AppError) {
+        /// Increment failure rate limit count
+      }
+      next(error);
+    }
   };
 };

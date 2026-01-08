@@ -7,15 +7,15 @@ import {
   updateProductImagePositionSchema,
   updateProductImageSchema,
 } from "../schemas/product-image.schema";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { ProductImageResponseCode } from "../constants/codes/product-image.code";
 import { handleImagesUpload, validateFile } from "../utils/file";
 import storage from "../storage";
 import { successResponse } from "../utils/response";
-import { ValidateError } from "../errors/validate-error";
+import { ValidateError } from "../errors/validate.error";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/not-found.error";
 import { AccessTokenPayload } from "../services/jwt.service";
 
 class ProductImageController {

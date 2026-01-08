@@ -9,7 +9,7 @@ import {
   deleteAddressSchema,
   updateAddressSchema,
 } from "../schemas/address.schema";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { findByIdSchema } from "../schemas/shared.schema";
 import locationRepository from "../repositories/location.repository";
 import { LocationType } from "../constants/db";

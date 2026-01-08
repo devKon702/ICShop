@@ -4,7 +4,7 @@ import locationRepository from "../repositories/location.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
 import { successResponse } from "../utils/response";
 import { LocationResponseCode } from "../constants/codes/location.code";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/not-found.error";
 
 class LocationController {
   public getProvinces = async (req: Request, res: Response) => {

@@ -18,7 +18,7 @@ import {
   updateWholesaleProductSchema,
 } from "../schemas/product.shema";
 import categoryRepository from "../repositories/category.repository";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import attributeRepository from "../repositories/attribute.repository";
 import { handleImagesUpload, validateFile } from "../utils/file";
 import { createSlug } from "../utils/slug";
@@ -26,11 +26,11 @@ import storage from "../storage";
 import { sanitizeHtml } from "../utils/sanitize";
 import attributeValueRepository from "../repositories/attribute-value.repository";
 import wholesaleRepository from "../repositories/wholesale.repository";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/not-found.error";
 import productImageRepository from "../repositories/product-image.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
 import productAttributeRepository from "../repositories/product-attribute.repository";
-import { ValidateError } from "../errors/validate-error";
+import { ValidateError } from "../errors/validate.error";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
 import { AccessTokenPayload } from "../services/jwt.service";
 

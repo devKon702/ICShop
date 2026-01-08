@@ -7,7 +7,7 @@ import {
 } from "../schemas/attribute.schema";
 import attributeRepository from "../repositories/attribute.repository";
 import categoryRepository from "../repositories/category.repository";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { AttributeResponseCode } from "../constants/codes/attribute.code";
 import { successResponse } from "../utils/response";

@@ -3,7 +3,7 @@ import { ValidateResponseCode } from "../constants/codes/validate.code";
 import {
   ValidateError,
   ValidateErrorDetailType,
-} from "../errors/validate-error";
+} from "../errors/validate.error";
 import { Multer } from "multer";
 import storage from "../storage";
 

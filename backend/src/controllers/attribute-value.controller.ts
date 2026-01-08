@@ -6,7 +6,7 @@ import {
   updateAttrValSchema,
 } from "../schemas/attribute-value.schema";
 import attributeRepository from "../repositories/attribute.repository";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { AttrValResponseCode } from "../constants/codes/attribute-value.code";
 import attributeValueRepository from "../repositories/attribute-value.repository";

@@ -12,8 +12,9 @@ import { toast } from "sonner";
 
 export default function FloatButton() {
   const { openModal, closeModal } = useModalActions();
-  const { mutate, isPending } = useMutation({
-    mutationFn: (captchaToken?: string) => authService.test(captchaToken),
+  const { mutate: testCaptcha, isPending } = useMutation({
+    mutationFn: ({ captchaToken }: { captchaToken?: string }) =>
+      authService.test(captchaToken),
     onSuccess: () => toast.success("Test thành công!"),
     onError: (error) => {
       const errorHandler = createErrorHandler(
@@ -25,7 +26,7 @@ export default function FloatButton() {
                 type: "captcha",
                 props: {
                   onVerify: async (token) => {
-                    mutate(token);
+                    testCaptcha({ captchaToken: token });
                     closeModal();
                   },
                 },
@@ -60,7 +61,7 @@ export default function FloatButton() {
         className="size-10 rounded-full overflow-hidden bg-primary grid place-items-center cursor-pointer glow-hover"
         onClick={() => {
           if (isPending) return;
-          mutate();
+          testCaptcha({});
         }}
       >
         <Image

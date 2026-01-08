@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "../constants/http-status";
 import { failResponse } from "../utils/response";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { logger } from "../utils/logger";
-import { ValidateError } from "../errors/validate-error";
-import { JWTError } from "../errors/jwt-error";
+import { ValidateError } from "../errors/validate.error";
+import { JWTError } from "../errors/jwt.error";
 import { Prisma } from "@prisma/client";
 import { DBResponseCode } from "../constants/codes/db.code";
+import { Http } from "winston/lib/winston/transports";
+import RateLimitError from "../errors/rate-limit.error";
 
 export function errorHandler(
   err: unknown,
@@ -30,6 +32,14 @@ export function errorHandler(
         .json(
           failResponse(err.code, err.message, { validateErros: err.errors })
         );
+      return;
+    }
+
+    // Rate Limit Error
+    if (err instanceof RateLimitError) {
+      res
+        .status(err.htttpCode)
+        .json(failResponse(err.code, err.message, err.error));
       return;
     }
 

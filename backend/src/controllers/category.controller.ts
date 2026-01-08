@@ -12,7 +12,7 @@ import {
   getProductFromRootCategorySchema,
   udpateCategorySchema,
 } from "../schemas/category.schema";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { CategoryResponseCode } from "../constants/codes/category.code";
 import { createSlug } from "../utils/slug";
 import { validateFile } from "../utils/file";
@@ -20,7 +20,7 @@ import storage from "../storage";
 import { successResponse } from "../utils/response";
 import { AddressResponseCode } from "../constants/codes/address.code";
 import { logger } from "../utils/logger";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/not-found.error";
 import { set } from "zod";
 import { AccessTokenPayload } from "../services/jwt.service";
 

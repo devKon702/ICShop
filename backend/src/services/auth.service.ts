@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { AuthResponseCode } from "../constants/codes/auth.code";
 import { Role } from "../constants/db";
 import { HttpStatus } from "../constants/http-status";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import accountRepository from "../repositories/account.repository";
 import { compareString, hashString } from "../utils/bcrypt";
 import jwtService, { RefreshTokenPayload } from "./jwt.service";
@@ -13,7 +13,7 @@ import { env } from "../constants/env";
 import storage from "../storage";
 import { logger } from "../utils/logger";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
-import { JWTError } from "../errors/jwt-error";
+import { JWTError } from "../errors/jwt.error";
 import otpService from "./opt.service";
 import sessionRepository from "../repositories/session.repository";
 import redisService, { redisKeys } from "./redis.service";
@@ -21,6 +21,8 @@ import sessionService from "./session.service";
 import crypto, { hash } from "crypto";
 import mailService from "./mail.service";
 import { generateResetPasswordHtml } from "../utils/html";
+import { ICaptchaService, TurnstileCaptchaService } from "./captcha.service";
+import { SecurityResponseCode } from "../constants/codes/security.code";
 
 class AuthService {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -59,12 +61,26 @@ class AuthService {
     });
   };
 
-  public async login(
-    res: Response,
-    email: string,
-    password: string,
-    role: Role
-  ) {
+  public async login(args: {
+    res: Response;
+    email: string;
+    password: string;
+    captchaToken: string;
+    role: Role;
+  }) {
+    const { res, email, password, captchaToken, role } = args;
+    // Verify CAPTCHA
+    const captchaService: ICaptchaService = new TurnstileCaptchaService();
+    const isCaptchaValid = await captchaService.verifyCaptcha(captchaToken);
+    if (!isCaptchaValid) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        SecurityResponseCode.INVALID_CAPTCHA,
+        "CAPTCHA không hợp lệ",
+        true
+      );
+    }
+
     const account = await accountRepository.findByEmail(email, role);
     // Account not found
     if (!account) {

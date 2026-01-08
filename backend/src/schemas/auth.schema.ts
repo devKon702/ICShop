@@ -6,6 +6,7 @@ export const loginSchema = z.object({
   body: z.object({
     email: z.string().email(),
     password: z.string(),
+    captchaToken: z.string(),
   }),
 });
 
@@ -14,8 +15,6 @@ export const loginWithGoogleSchema = requestSchema({
     token: z.string(),
   }),
 });
-
-export type LoginIType = z.infer<typeof loginSchema>;
 
 export const signupSchema = z.object({
   body: z.object({
@@ -57,5 +56,3 @@ export const resetPasswordSchema = requestSchema({
     newPassword: z.string().min(6, "Mật khẩu tối thiểu 6 kí tự"),
   }),
 });
-
-export type SignupIType = z.infer<typeof signupSchema>;

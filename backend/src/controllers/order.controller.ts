@@ -15,14 +15,14 @@ import {
   changeOrderAddressSchema,
 } from "../schemas/order.schema";
 import wholesaleRepository from "../repositories/wholesale.repository";
-import { AppError } from "../errors/app-error";
+import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { OrderResponseCode } from "../constants/codes/order.code";
 import { DeliveryType, OrderStatus } from "../constants/db";
 import { successResponse } from "../utils/response";
 import { Decimal } from "@prisma/client/runtime/library";
 import addressRepository from "../repositories/address.repository";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/not-found.error";
 import productRepository from "../repositories/product.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
 import { sanitizeData } from "../utils/sanitize";

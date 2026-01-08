@@ -15,7 +15,7 @@ import { CollectionResponseCode } from "../constants/codes/collection.code";
 import { findByIdSchema } from "../schemas/shared.schema";
 import { sanitizeData } from "../utils/sanitize";
 import productRepository from "../repositories/product.repository";
-import { NotFoundError } from "../errors/not-found-error";
+import { NotFoundError } from "../errors/not-found.error";
 import { AccessTokenPayload } from "../services/jwt.service";
 
 class CollectionController {
