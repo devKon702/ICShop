@@ -24,23 +24,20 @@ const adminPath = "/admin/auth";
 // POST /auth/login
 authRouter.post(
   path + "/login",
-  createRateLimiter(RateLimitPolicies.LOGIN),
   validate(loginSchema),
-  authController.login(Role.USER)
+  createFailureLimiter(RateLimitPolicies.LOGIN, authController.login(Role.USER))
 );
 
 // POST /auth/google
 authRouter.post(
   path + "/google",
-  createRateLimiter(RateLimitPolicies.LOGIN),
   validate(loginWithGoogleSchema),
-  authController.loginWithGoogle
+  createFailureLimiter(RateLimitPolicies.LOGIN, authController.loginWithGoogle)
 );
 
 // POST /admin/auth/login
 authRouter.post(
   adminPath + "/login",
-  createRateLimiter(RateLimitPolicies.ADMIN_LOGIN),
   validate(loginSchema),
   createFailureLimiter(
     RateLimitPolicies.ADMIN_LOGIN,

@@ -350,24 +350,19 @@ class AuthService {
   };
 
   public async sendEmailOtp(email: string, requireExistence?: boolean) {
+    const expiredInSeconds = 5 * 60; // 5 minutes
     if (requireExistence !== undefined) {
       const existAccount = await accountRepository.findByEmail(email);
       // If email already exists
-      if (!!existAccount !== requireExistence)
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          AuthResponseCode.EMAIL_EXIST,
-          !!existAccount ? "Email đã được sử dụng" : "Email không tồn tại",
-          true
-        );
+      if (!!existAccount === requireExistence) {
+        const otp = otpService.generateOTP(6);
+        // Save and send OTP
+        await Promise.all([
+          otpService.save(email, otp, expiredInSeconds),
+          otpService.send(email, otp, expiredInSeconds),
+        ]);
+      }
     }
-    const otp = otpService.generateOTP(6);
-    const expiredInSeconds = 5 * 60; // 5 minutes
-    // Save and send OTP
-    await Promise.all([
-      otpService.save(email, otp, expiredInSeconds),
-      otpService.send(email, otp, expiredInSeconds),
-    ]);
     const expiresAt = new Date(Date.now() + expiredInSeconds * 1000);
     return { expiresAt };
   }

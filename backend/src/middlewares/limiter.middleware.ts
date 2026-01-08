@@ -127,20 +127,6 @@ export const createRateLimiter = (
           "Quá nhiều yêu cầu, vui lòng thử lại sau."
         );
       }
-      // res
-      //   .status(HttpStatus.TOO_MANY_REQUESTS)
-      //   .json(
-      //     failResponse(
-      //       SecurityResponseCode.TOO_MANY_REQUESTS,
-      //       policy.type === "BLOCK"
-      //         ? ""
-      //         : "Vui lòng hoàn thành CAPTCHA để tiếp tục.",
-      //       policy.type === "CAPTCHA"
-      //         ? { requireCaptcha: true, policy: policy.name }
-      //         : undefined
-      //     )
-      //   );
-      // return;
     }
     next();
   };
@@ -152,7 +138,9 @@ export const createFailureLimiter = (
     req: Request,
     res: Response,
     next?: NextFunction
-  ) => Promise<void>
+  ) => Promise<void>,
+  actorType: "IP" | "USER" = "IP",
+  excludedCodes?: string[]
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -160,10 +148,35 @@ export const createFailureLimiter = (
       // Success
       // Optionally, reset failure count on success
     } catch (error) {
-      if (error instanceof AppError) {
+      if (error instanceof AppError && !excludedCodes?.includes(error.code)) {
         /// Increment failure rate limit count
       }
       next(error);
     }
   };
+};
+
+export const createSuccessLimiter = (
+  policy: (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies],
+  controller: (
+    req: Request,
+    res: Response,
+    next?: NextFunction
+  ) => Promise<void>
+) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await controller(req, res, next);
+      // Success
+      /// Increment success rate limit count
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+export const createEnforceRateLimiter = (
+  policy: (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies]
+) => {
+  return async (req: Request, res: Response, next: NextFunction) => {};
 };
