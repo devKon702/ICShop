@@ -69,17 +69,6 @@ class AuthService {
     role: Role;
   }) {
     const { res, email, password, captchaToken, role } = args;
-    // Verify CAPTCHA
-    const captchaService: ICaptchaService = new TurnstileCaptchaService();
-    const isCaptchaValid = await captchaService.verifyCaptcha(captchaToken);
-    if (!isCaptchaValid) {
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        SecurityResponseCode.INVALID_CAPTCHA,
-        "CAPTCHA không hợp lệ",
-        true
-      );
-    }
 
     const account = await accountRepository.findByEmail(email, role);
     // Account not found
@@ -254,15 +243,6 @@ class AuthService {
     phone: string;
     otp: string;
   }) => {
-    const existAccount = await accountRepository.findByEmail(email);
-    // If email already exists
-    if (existAccount)
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        AuthResponseCode.EMAIL_EXIST,
-        "Email đã được sử dụng",
-        true
-      );
     // Verify OTP
     const savedOtp = await otpService.verify(email, otp);
     if (!savedOtp) {
@@ -273,6 +253,15 @@ class AuthService {
         true
       );
     }
+    const existAccount = await accountRepository.findByEmail(email);
+    // If email already exists
+    if (existAccount)
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AuthResponseCode.EMAIL_EXIST,
+        "Email đã được sử dụng",
+        true
+      );
     // Create new account
     const hashedPassword = await hashString(password);
     const newAccount = await accountRepository.create({

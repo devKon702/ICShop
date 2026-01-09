@@ -14,11 +14,13 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { SECURITY_CODE } from "@/constants/api-code";
 import { useInterval } from "@/libs/hooks/useInterval";
-import { ApiErrorResponseSchema } from "@/libs/schemas/response.schema";
 import { authService } from "@/libs/services/auth.service";
+import { useModalActions } from "@/store/modal-store";
 import { formatTime } from "@/utils/date";
 import { emailRegex, phoneRegex } from "@/utils/regex";
+import { createErrorHandler } from "@/utils/response-handler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
@@ -56,7 +58,7 @@ const schema = z
       .string({ message: "Mật khẩu không được để trống" })
       .min(6, "Tối thiểu 6 kí tự")
       .max(100, "Tối đa 100 kí tự"),
-    confirm: z.string().optional(),
+    confirm: z.string(),
   })
   .refine((data) => data.password === data.confirm, {
     path: ["confirm"],
@@ -69,6 +71,7 @@ interface RegisterFormProps {
 
 export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
   const [remainSeconds, setRemainSeconds] = React.useState<number | null>(null);
+  const { openModal, closeModal } = useModalActions();
   useInterval(
     () => {
       setRemainSeconds((prev) => {
@@ -84,7 +87,8 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
     mode: "onSubmit",
   });
   const { mutate: sendOtpMutate, isPending: isSendingOtp } = useMutation({
-    mutationFn: async (email: string) => authService.sendOtp({ email }),
+    mutationFn: async ({ email, token }: { email: string; token?: string }) =>
+      authService.sendOtp({ email, token }),
     onSuccess: (data) => {
       setRemainSeconds(
         Math.round(
@@ -95,7 +99,27 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
       toast.success(`Đã gửi OTP đến ${data.data.email}`);
     },
     onError: (error) => {
-      toast.error(error?.message || "Gửi mã OTP thất bại, vui lòng thử lại");
+      const handler = createErrorHandler(
+        {
+          [SECURITY_CODE.TOO_MANY_REQUESTS]: () => {
+            openModal({
+              type: "captcha",
+              props: {
+                onVerify: async (token) => {
+                  sendOtpMutate({ email: form.getValues("email"), token });
+                  closeModal();
+                },
+              },
+            });
+          },
+        },
+        {
+          ["API"]: (message) => {
+            toast.error(message);
+          },
+        }
+      );
+      handler(error);
     },
   });
   const { mutate: signupMutate } = useMutation({
@@ -111,12 +135,15 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
       redirectLogin();
     },
     onError: (error) => {
-      const pError = ApiErrorResponseSchema.safeParse(error);
-      if (pError.success) {
-        toast.error(pError.data.message);
-        return;
-      }
-      toast.error("Đăng ký thất bại, vui lòng thử lại");
+      const handler = createErrorHandler(
+        {},
+        {
+          API: (message) => toast.error(message),
+          NETWORK: () => toast.error("Lỗi mạng, vui lòng thử lại"),
+          TIMEOUT: () => toast.error("Yêu cầu thất bại, vui lòng thử lại"),
+        }
+      );
+      handler(error);
     },
   });
   return (
@@ -124,7 +151,15 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
       <form
         noValidate
         className="space-y-4 flex-1 app"
-        onSubmit={form.handleSubmit((data) => signupMutate(data))}
+        onSubmit={form.handleSubmit((data) =>
+          signupMutate({
+            name: data.name,
+            email: data.email,
+            otp: data.otp,
+            phone: data.phone,
+            password: data.password,
+          })
+        )}
       >
         <FormField
           name="name"
@@ -176,7 +211,7 @@ export default function RegisterForm({ redirectLogin }: RegisterFormProps) {
                     onClick={() => {
                       const emailValue = form.getValues("email");
                       if (emailRegex().test(emailValue))
-                        sendOtpMutate(emailValue);
+                        sendOtpMutate({ email: emailValue });
                       else {
                         form.setError("email", {
                           type: "manual",

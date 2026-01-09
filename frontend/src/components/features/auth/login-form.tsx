@@ -21,6 +21,7 @@ import { useModalActions } from "@/store/modal-store";
 import { Lock, Mail } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import TurnstileWidget from "@/components/common/turnstile-widget";
+import { createErrorHandler } from "@/utils/response-handler";
 
 const formSchema = z.object({
   email: z.string().email("Email không đúng định dạng"),
@@ -77,7 +78,13 @@ export default function LoginForm({
   });
 
   const { mutate: googleLoginMutate } = useMutation({
-    mutationFn: async (token: string) => authService.loginWithGoogle(token),
+    mutationFn: async ({
+      googleToken,
+      captchaToken,
+    }: {
+      googleToken: string;
+      captchaToken?: string;
+    }) => authService.loginWithGoogle(googleToken, captchaToken),
     onSuccess: ({ data, message }) => {
       login(
         {
@@ -94,7 +101,15 @@ export default function LoginForm({
       closeModal();
     },
     onError: (error) => {
-      toast.error(error.message || "Đăng nhập thất bại, vui lòng thử lại");
+      const handler = createErrorHandler(
+        {},
+        {
+          API: (message) => {
+            toast.error(message);
+          },
+        }
+      );
+      handler(error);
     },
   });
 
@@ -167,7 +182,9 @@ export default function LoginForm({
           <GoogleLogin
             onSuccess={(credentialResponse) => {
               if (credentialResponse.credential)
-                googleLoginMutate(credentialResponse.credential);
+                googleLoginMutate({
+                  googleToken: credentialResponse.credential,
+                });
               else {
                 console.log("No credential returned");
               }

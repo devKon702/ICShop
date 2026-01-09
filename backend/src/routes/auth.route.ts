@@ -24,6 +24,7 @@ const adminPath = "/admin/auth";
 // POST /auth/login
 authRouter.post(
   path + "/login",
+  createRateLimiter(RateLimitPolicies.LOGIN, { skipIncrement: () => true }),
   validate(loginSchema),
   createFailureLimiter(RateLimitPolicies.LOGIN, authController.login(Role.USER))
 );
@@ -54,10 +55,19 @@ authRouter.post(
 );
 
 // POST /auth/logout
-authRouter.post(path + "/logout", jwtMiddleware, authController.logout);
+authRouter.post(
+  path + "/logout",
+  jwtMiddleware,
+  createRateLimiter(RateLimitPolicies.LOG_OUT),
+  authController.logout
+);
 
 // POST /auth/refresh
-authRouter.post(path + "/refresh", authController.refresh);
+authRouter.post(
+  path + "/refresh",
+  createRateLimiter(RateLimitPolicies.REFRESH_TOKEN),
+  authController.refresh
+);
 
 // POST /auth/otp
 authRouter.post(

@@ -16,6 +16,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { SECURITY_CODE } from "@/constants/api-code";
 import env from "@/constants/env";
 import { useInterval } from "@/libs/hooks/useInterval";
 import accountService from "@/libs/services/account.service";
@@ -23,6 +24,7 @@ import { authService } from "@/libs/services/auth.service";
 import { userService } from "@/libs/services/user.service";
 import { useModalActions } from "@/store/modal-store";
 import { formatTime } from "@/utils/date";
+import { createErrorHandler } from "@/utils/response-handler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
@@ -81,13 +83,39 @@ export default function AccountForm() {
 
   const { mutate: sendOtpMutation, isPending: isSendingOtpMutation } =
     useMutation({
-      mutationFn: (email: string) => authService.sendOtp({ email }),
+      mutationFn: ({ email, token }: { email: string; token?: string }) =>
+        authService.sendOtp({ email, token }),
       onSuccess: (data) => {
         toast.success(`Đã gửi OTP đến email ${data.data.email}`);
         setOtpExpiredAt(new Date(data.data.expiresAt));
       },
-      onError: () => {
-        toast.error("Gửi OTP thất bại. Vui lòng thử lại.");
+      onError: (err) => {
+        const handler = createErrorHandler(
+          {
+            [SECURITY_CODE.TOO_MANY_REQUESTS]: (message, errors) => {
+              if (errors.requireCaptcha) {
+                openModal({
+                  type: "captcha",
+                  props: {
+                    onVerify: async (token) => {
+                      sendOtpMutation({
+                        email: form.getValues("email"),
+                        token,
+                      });
+                      closeModal();
+                    },
+                  },
+                });
+              }
+            },
+          },
+          {
+            API: (message) => {
+              toast.error(message);
+            },
+          }
+        );
+        handler(err);
       },
     });
 
@@ -284,7 +312,7 @@ export default function AccountForm() {
                       className="bg-primary/10 hover:bg-primary/20 text-gray-500 disabled:cursor-progress"
                       disabled={isSendingOtpMutation}
                       onClick={() => {
-                        sendOtpMutation(field.value);
+                        sendOtpMutation({ email: field.value });
                       }}
                     >
                       <Send />
@@ -334,7 +362,9 @@ export default function AccountForm() {
                           <span
                             className="text-primary cursor-pointer hover:underline"
                             onClick={() => {
-                              sendOtpMutation(form.getValues("email"));
+                              sendOtpMutation({
+                                email: form.getValues("email"),
+                              });
                             }}
                           >
                             Gửi lại

@@ -104,29 +104,26 @@ export async function fetchHandler<T>(
 
 export function createErrorHandler(
   apiHandlers: {
-    code: string;
-    handler: (
+    [code: string]: (
       message: string,
       errors?: z.infer<typeof ApiErrorResponseSchema.shape.errors>
     ) => void;
-  }[],
-  options?: { type: ApiErrorType; handler: (message: string) => void }[]
+  },
+  options?: { [type in ApiErrorType]?: (message: string) => void }
 ) {
   return (error: ApiError | unknown) => {
     if (error instanceof ApiError) {
       if (error.type === "API") {
-        const matchedHandler = apiHandlers.find(
-          (h) => h.code === error.code
-        )?.handler;
+        const matchedHandler = apiHandlers[error.code];
         if (matchedHandler) {
           matchedHandler(error.message, error.errors);
           return;
         }
       }
       // Check error type to see if it matches any provided options
-      const option = options?.find((option) => option.type === error.type);
+      const option = options[error.type];
       if (option) {
-        option.handler(error.message);
+        option(error.message);
         return;
       }
     }

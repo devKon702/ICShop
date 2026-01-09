@@ -33,9 +33,13 @@ export const authService = {
       )
     ),
 
-  loginWithGoogle: async (token: string) =>
+  loginWithGoogle: async (token: string, captchaToken?: string) =>
     axiosHandler(
-      apiAxios.post("/v1/auth/google", { token }),
+      apiAxios.post(
+        "/v1/auth/google",
+        { token },
+        { headers: captchaToken ? { "X-Captcha-Token": captchaToken } : {} }
+      ),
       ApiResponseSchema(
         z.object({
           account: AccountBaseSchema.extend({ user: UserBaseSchema }),
@@ -65,9 +69,13 @@ export const authService = {
   logout: async () =>
     axiosHandler(apiAxios.post("/v1/auth/logout"), ApiResponseSchema(z.null())),
 
-  sendOtp: async ({ email }: { email: string }) => {
+  sendOtp: async ({ email, token }: { email: string; token?: string }) => {
     return axiosHandler(
-      apiAxios.post("/v1/auth/otp", { email }),
+      apiAxios.post(
+        "/v1/auth/otp",
+        { email },
+        { headers: token ? { "X-Captcha-Token": token } : {} }
+      ),
       ApiResponseSchema(
         z.object({ email: z.string(), expiresAt: z.string().datetime() })
       )
