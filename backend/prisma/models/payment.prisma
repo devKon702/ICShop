@@ -1,0 +1,52 @@
+model PaymentMethod {
+  id        Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// Mã phương thức thanh toán
+  code      String  @db.VarChar(50) @unique
+  /// Tên phương thức thanh toán (tiếng Việt)
+  name      String  @db.TinyText
+  /// Mô tả phương thức thanh toán (tiếng Việt)
+  desc      String  @db.Text
+  /// Thứ tự hiển thị
+  position  Int     @db.UnsignedTinyInt @default(1)
+  /// Trạng thái hiển thị của phương thức thanh toán
+  isActive           Boolean           @default(true)
+
+  paymentConfigs PaymentConfig[]
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("PayMethCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("PayMethModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+enum Environment {
+  production
+  sandbox
+}
+
+model PaymentConfig {
+  id               Int        @id @default(autoincrement()) @db.UnsignedInt
+  /// ID của phương thức thanh toán
+  paymentMethodId  Int        @db.UnsignedInt
+  /// Môi trường áp dụng (production, sandbox)
+  environment     Environment @default(sandbox)
+  /// Cấu hình công khai dạng JSON
+  publicConfig    String     @db.Text
+  /// Cấu hình riêng tư dạng JSON
+  privateConfig   String     @db.Text
+  /// Trạng thái kích hoạt cấu hình
+  isActive        Boolean    @default(true)
+
+  paymentMethod    PaymentMethod @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("PayConfCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("PayConfModified", fields: [modifierId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}

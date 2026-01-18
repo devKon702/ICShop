@@ -1,0 +1,36 @@
+enum Role {
+  user
+  admin
+}
+
+enum AuthProvider {
+  google
+  local
+}
+
+model Account {
+  id            Int       @id @default(autoincrement()) @db.UnsignedInt
+  /// Địa chỉ email
+  email         String    @unique
+  /// Mật khẩu
+  password      String?
+  /// Phân quyền của tài khoản
+  role          Role      @default(user)
+  /// Tài khoản đã xác thực email
+  emailVerified   Boolean   @default(false)
+  /// Phương thức đăng ký
+  provider     AuthProvider @default(local)
+  /// Tài khoản đang khả dụng và có thể đăng nhập
+  isActive      Boolean   @default(true)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int?               @db.UnsignedInt
+  creator            User?              @relation("AccountCreated", fields: [creatorId], references: [id])
+  modifierId         Int?               @db.UnsignedInt
+  modifier           User?              @relation("AccountModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  user          User?      
+  @@index([email])
+}

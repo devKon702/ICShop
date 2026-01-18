@@ -1,0 +1,23 @@
+model Collection {
+  id      Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// Tên bộ sưu tập (tiếng Việt)
+  name    String  @db.Text
+  /// Mô tả bộ sưu tập (tiếng Việt)
+  desc    String  @db.Text
+  /// Vị trí hiển thị trong danh sách
+  position  Int       @db.UnsignedTinyInt @default(1)
+  /// Đuôi đường dẫn đến trang bộ sưu tập
+  slug       String     @db.VarChar(150) @unique
+  // Trạng thái hiển thị cho bộ sưu tập
+  isActive           Boolean           @default(true)
+
+  productCollections  ProductCollection[]
+  
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("CollectionCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("CollectionModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}

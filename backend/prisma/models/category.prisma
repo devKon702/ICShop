@@ -1,0 +1,30 @@
+model Category {
+  id         Int        @id @default(autoincrement()) @db.UnsignedInt
+  /// Tên danh mục (tiếng Việt)
+  name       String     @db.Text
+  /// Đường dẫn đến ảnh danh mục
+  imageUrl   String?    @db.VarChar(255)
+  /// ID của danh mục cha - level 1 thì null
+  parentId   Int?       @db.UnsignedInt
+  parent     Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  /// Bậc của danh mục từ 1 đến 3
+  level      Int        @db.UnsignedTinyInt
+  /// Đuôi đường dẫn đến trang danh mục
+  slug       String     @db.VarChar(150) @unique
+  // Trạng thái hiển thị cho danh mục
+  isActive           Boolean           @default(true)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("CategoryCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("CategoryModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  children   Category[] @relation("CategoryHierarchy")
+  products   Product[]
+  attributes Attribute[]
+
+  @@index([slug])
+}

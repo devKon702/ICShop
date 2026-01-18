@@ -6,7 +6,7 @@ import { useModalActions } from "@/store/modal-store";
 import { createErrorHandler } from "@/utils/response-handler";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
-import Link from "next/link";
+// import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
 
@@ -18,29 +18,23 @@ export default function FloatButton() {
     onSuccess: () => toast.success("Test thành công!"),
     onError: (error) => {
       const errorHandler = createErrorHandler(
-        [
-          {
-            code: SECURITY_CODE.TOO_MANY_REQUESTS,
-            handler: () =>
-              openModal({
-                type: "captcha",
-                props: {
-                  onVerify: async (token) => {
-                    testCaptcha({ captchaToken: token });
-                    closeModal();
-                  },
+        {
+          [SECURITY_CODE.TOO_MANY_REQUESTS]: () =>
+            openModal({
+              type: "captcha",
+              props: {
+                onVerify: async (token) => {
+                  testCaptcha({ captchaToken: token });
+                  closeModal();
                 },
-              }),
+              },
+            }),
+        },
+        {
+          API: (message) => {
+            toast.error(message);
           },
-        ],
-        [
-          {
-            type: "API",
-            handler: (message) => {
-              toast.error(message);
-            },
-          },
-        ]
+        }
       );
       errorHandler(error);
     },

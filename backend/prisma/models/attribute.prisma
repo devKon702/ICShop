@@ -1,0 +1,37 @@
+model Attribute {
+  id         Int               @id @default(autoincrement()) @db.UnsignedInt
+  // Tên thông số (tiếng Việt)
+  name       String            @db.Text
+  // ID danh mục chứa thông số
+  categoryId Int               @db.UnsignedInt
+  category   Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("AttributeCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("AttributeModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  values     AttributeValue[]
+}
+
+model AttributeValue {
+  id           Int          @id @default(autoincrement()) @db.UnsignedInt
+  /// ID thông só chứa giá trị này
+  attributeId  Int          @db.UnsignedInt
+  attribute    Attribute       @relation(fields: [attributeId], references: [id], onDelete: Restrict)
+  /// Giá trị của thông số (tiếng Việt)
+  value        String          @db.Text
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("AttrValCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("AttrValModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  products     ProductAttribute[]
+}

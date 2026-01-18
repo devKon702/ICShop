@@ -29,6 +29,10 @@ import { sanitizeData } from "../utils/sanitize";
 import { AccessTokenPayload } from "../services/jwt.service";
 import { ProductResponseCode } from "../constants/codes/product.code";
 import cartRepository from "../repositories/cart.repository";
+import {
+  PaymentPrivateConfigSchemas,
+  VietQrPublicConfigSchema,
+} from "../schemas/payment";
 
 class OrderController {
   // USER

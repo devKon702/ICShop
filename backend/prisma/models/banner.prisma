@@ -1,0 +1,17 @@
+model Banner {
+  id        Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// Đường dẫn đến ảnh quảng cáo
+  imageUrl  String  @db.VarChar(255)
+  /// Vị trí hiển thị trong danh sách
+  position  Int     @db.UnsignedTinyInt @default(1)
+  /// Loại ảnh quảng cáo
+  type      String  @db.VarChar(10)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("BannerCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("BannerModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}

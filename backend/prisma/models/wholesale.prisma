@@ -1,0 +1,50 @@
+model Wholesale {
+  id         Int             @id @default(autoincrement()) @db.UnsignedInt
+  /// ID của sản phẩm
+  productId  Int             @unique @db.UnsignedInt
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// Số lượng mua tối thiểu
+  min_quantity  Int          @default(1) @db.UnsignedTinyInt
+  /// Số lượng mua tối đa
+  max_quantity  Int         @db.UnsignedInt
+  ///  Bội số mua
+  quantity_step  Int          @db.UnsignedTinyInt @default(1)
+  /// Đơn vị mua (tiếng Việt)
+  unit        String         @db.TinyText
+  /// Thuế sản phẩm theo đơn vị phần trăm
+  vat         Decimal            @db.Decimal(5,2) @default(0)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("WholesaleCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("WholesaleModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  details    WholesaleDetail[]
+}
+
+model WholesaleDetail {
+  id          Int         @id @default(autoincrement()) @db.UnsignedInt
+  /// ID của bảng giá
+  wholesaleId Int         @db.UnsignedInt
+  wholesale   Wholesale  @relation(fields: [wholesaleId], references: [id], onDelete: Cascade)
+  /// Dòng mô tả cho phạm vi giá áp dụng
+  desc        String      @db.TinyText
+  /// Giá trị dưới để áp dụng giá
+  min         Int         @db.UnsignedInt
+  /// Giá trị trên để áp dụng giá
+  max         Int?        @db.UnsignedInt
+  /// Đơn giá
+  price       Decimal     @db.Decimal(15,3)
+
+  version            Int               @default(1) @db.UnsignedInt
+  creatorId          Int               @db.UnsignedInt
+  creator            User              @relation("WhDetCreated", fields: [creatorId], references: [id])
+  modifierId         Int               @db.UnsignedInt
+  modifier           User              @relation("WhDetModified", fields: [modifierId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+}

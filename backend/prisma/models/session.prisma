@@ -1,0 +1,16 @@
+model Session {
+  id            String    @id @db.VarChar(36)
+  /// Refresh token jti
+  rtJti         String    @unique @db.VarChar(36)
+  /// ID người dùng
+  userId        Int       @db.UnsignedInt
+  /// Phiên bản (số lần rotate token) của session
+  version       Int       @default(1) @db.UnsignedInt
+  /// Thời gian hết hạn của refresh token
+  expiresAt     DateTime
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation("userSessions", fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,49 @@
+model Location {
+  id        Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// Tên địa điểm (tiếng Việt)
+  name      String  @db.TinyText
+  /// Loại địa điểm (1: tỉnh, 2: quận/huyện, 3: xã/phường)
+  type      Int     @db.UnsignedTinyInt
+  /// ID địa điểm cha
+  parentId Int?   @db.UnsignedInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent    Location? @relation("LocationChildren", fields: [parentId], references: [id], onDelete: Restrict)
+  children  Location[] @relation("LocationChildren")
+
+  addressProvinces Address[] @relation("Province") 
+  addressDistricts Address[] @relation("District") 
+  addressWards Address[] @relation("Ward")
+}
+
+model Address {
+  id            Int     @id @default(autoincrement()) @db.UnsignedInt
+  /// ID người dùng
+  userId        Int       @db.UnsignedInt
+  /// Tên định danh cho địa chỉ (tiếng Việt)
+  alias         String    @db.TinyText
+  /// Tên người nhận (tiếng Việt)
+  receiverName  String    @db.TinyText
+  /// Số điện thoại người nhận
+  receiverPhone String    @db.VarChar(15)
+  /// Code tỉnh
+  provinceId  Int    @db.UnsignedInt 
+  /// Code quận, huyện
+  districtId  Int    @db.UnsignedInt
+  /// Code xã
+  wardId   Int    @db.UnsignedInt
+  /// Tỉnh
+  province      Location    @relation("Province", fields: [provinceId], references: [id])
+  /// Quận, huyện
+  district      Location    @relation("District", fields: [districtId], references: [id])
+  /// Xã
+  ward       Location    @relation("Ward", fields: [wardId], references: [id])
+  /// Địa chỉ chi tiết
+  detail        String    @db.Text
+
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  user          User    @relation(fields: [userId], references: [id])
+}
