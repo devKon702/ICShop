@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { PaymentType } from "../../constants/payment";
 
 export const VietQrPublicConfigSchema = z.object({
-  type: z.literal("VietQR"),
+  type: z.literal(PaymentType.VietQR),
   description: z.string().max(500).optional(),
   bankName: z.string(),
   bankCode: z.string(),
@@ -10,5 +11,5 @@ export const VietQrPublicConfigSchema = z.object({
 });
 
 export const VietQrPrivateConfigSchema = z.object({
-  type: z.literal("VietQR"),
+  type: z.literal(PaymentType.VietQR),
 });
