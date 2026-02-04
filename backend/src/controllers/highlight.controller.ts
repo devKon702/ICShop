@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { TokenPayload } from "../types/token-payload";
 import {
   createHighlightSchema,
   deleteHighlightSchema,

@@ -1,16 +1,14 @@
 import { Request, Response } from "express";
 import productImageRepository from "../repositories/product-image.repository";
-import { TokenPayload } from "../types/token-payload";
 import {
   createProductImageSchema,
   deleteProductImageSchema,
   updateProductImagePositionSchema,
   updateProductImageSchema,
 } from "../schemas/product-image.schema";
-import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { ProductImageResponseCode } from "../constants/codes/product-image.code";
-import { handleImagesUpload, validateFile } from "../utils/file.util";
+import { handleImagesUpload } from "../utils/file.util";
 import storage from "../storage";
 import { successResponse } from "../utils/response.util";
 import { ValidateError } from "../errors/validate.error";

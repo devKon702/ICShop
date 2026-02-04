@@ -6,14 +6,13 @@ import { PaymentResponseCode } from "../constants/codes/payment.code";
 import { sanitizeData } from "../utils/sanitize.util";
 import { findByIdSchema } from "../schemas/shared.schema";
 import { Role } from "../constants/db";
-import { updateActiveProductSchema } from "../schemas/product.shema";
 import {
   createPaymentConfigSchema,
   createPaymentMethodSchema,
   updatePaymentConfigSchema,
   updatePaymentMethodSchema,
 } from "../schemas/payment";
-import { TokenPayload } from "../types/token-payload";
+import { AccessTokenPayload } from "../services/jwt.service";
 
 class PaymentController {
   public async getPayments(req: Request, res: Response) {
@@ -80,7 +79,7 @@ class PaymentController {
     const {
       body: { code, desc, isActive, name, position },
     } = createPaymentMethodSchema.parse(req);
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const created = await paymentService.createPaymentMethod({
       code,
       creatorId: sub,
@@ -106,7 +105,7 @@ class PaymentController {
       params: { id },
       body: { code, desc, isActive, name, position },
     } = updatePaymentMethodSchema.parse(req);
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const updated = await paymentService.updatePaymentMehtod(id, {
       code,
       name,
@@ -153,7 +152,7 @@ class PaymentController {
         publicConfig,
       },
     } = createPaymentConfigSchema.parse(req);
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
     const created = paymentService.createPaymentConfig({
       creatorId: sub,
       environment,
@@ -179,7 +178,7 @@ class PaymentController {
       params: { id },
       body: { environment, isActive, privateConfig, publicConfig },
     } = updatePaymentConfigSchema.parse(req);
-    const { sub } = res.locals.tokenPayload as TokenPayload;
+    const { sub } = res.locals.auth as AccessTokenPayload;
 
     const updated = await paymentService.updatePaymentConfig(id, {
       environment,

@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import productRepository from "../repositories/product.repository";
-import { TypedRequest } from "../types/TypedRequest";
 import { HttpStatus } from "../constants/http-status";
-import { failResponse, successResponse } from "../utils/response.util";
+import { successResponse } from "../utils/response.util";
 import { ProductResponseCode } from "../constants/codes/product.code";
 import {
   createProductSchema,
@@ -108,37 +107,6 @@ class ProductController {
         total,
       }),
     );
-  };
-
-  getProductByCategoryId = async (
-    req: TypedRequest<
-      { categoryId: string },
-      any,
-      { page: string; limit: string }
-    >,
-    res: Response,
-  ) => {
-    const { categoryId } = req.params;
-    const { page = "1", limit = "10" } = req.query;
-    try {
-      const [products, total] = await productRepository.findByCategoryId(
-        Number(categoryId),
-        Number(page),
-        Number(limit),
-      );
-      res.status(HttpStatus.OK).json(
-        successResponse(ProductResponseCode.OK, "success", products, {
-          total,
-          limit: Number(limit),
-          page: Number(page),
-        }),
-      );
-    } catch (e) {
-      console.log(e);
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .json(failResponse(ProductResponseCode.FAIL, "fail"));
-    }
   };
 
   public create = async (req: Request, res: Response) => {

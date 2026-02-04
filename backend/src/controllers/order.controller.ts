@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import orderRepository from "../repositories/order.repository";
-import { TokenPayload } from "../types/token-payload";
 import {
   cancleOrderSchema,
   createOrderSchema,

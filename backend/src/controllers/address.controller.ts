@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import addressRepository from "../repositories/address.repository";
-import { TokenPayload } from "../types/token-payload";
 import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response.util";
 import { AddressResponseCode } from "../constants/codes/address.code";

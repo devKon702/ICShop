@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { RateLimitPolicies } from "../middlewares/limiter.middleware";
-import { TokenPayload } from "../types/token-payload";
 import redisService, { redisKeys } from "./redis.service";
 import { ICaptchaService, TurnstileCaptchaService } from "./captcha.service";
 import RateLimitError from "../errors/rate-limit.error";
+import { AccessTokenPayload } from "./jwt.service";
 
 type RateLimitPolicy =
   (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies];
@@ -16,7 +16,7 @@ export interface IRateLimitService {
   handleExceed(
     policy: RateLimitPolicy,
     actor: string,
-    captchaToken?: string
+    captchaToken?: string,
   ): Promise<void>;
   reset: (policy: RateLimitPolicy, actor: string) => Promise<void>;
 }
@@ -25,11 +25,11 @@ export class RedisRateLimitService implements IRateLimitService {
   public getActorKey(
     req: Request,
     res: Response,
-    actorType: "IP" | "USER" = "USER"
+    actorType: "IP" | "USER" = "USER",
   ): string {
     if (actorType === "USER") {
       return String(
-        (res.locals.tokenPayload as TokenPayload)?.sub ?? req.ip ?? "unknown"
+        (res.locals.auth as AccessTokenPayload)?.sub ?? req.ip ?? "unknown",
       );
     } else {
       return req.ip ?? "unknown";
@@ -38,7 +38,7 @@ export class RedisRateLimitService implements IRateLimitService {
 
   public async getCount(
     policy: RateLimitPolicy,
-    actor: string
+    actor: string,
   ): Promise<number> {
     const rlKey = redisKeys.rateLimit(policy.name, actor);
     const rlCount = await redisService.getValue<number>(rlKey);
@@ -47,7 +47,7 @@ export class RedisRateLimitService implements IRateLimitService {
 
   public async hasRateLimitBypass(
     policy: RateLimitPolicy,
-    actor: string
+    actor: string,
   ): Promise<boolean> {
     if (
       policy.type === "CAPTCHA" &&
@@ -55,7 +55,7 @@ export class RedisRateLimitService implements IRateLimitService {
     ) {
       // Check if captcha passed key exists
       const passedUsageCount = await redisService.incrementKey(
-        redisKeys.captchaPassed(policy.name, actor)
+        redisKeys.captchaPassed(policy.name, actor),
       ); // Increment usage count
       if (passedUsageCount <= policy.max) {
         return true;
@@ -68,7 +68,7 @@ export class RedisRateLimitService implements IRateLimitService {
 
   public async increment(
     policy: RateLimitPolicy,
-    actor: string
+    actor: string,
   ): Promise<number> {
     const rlKey = redisKeys.rateLimit(policy.name, actor);
     const rlCount = await redisService.incrementKey(rlKey);
@@ -83,7 +83,7 @@ export class RedisRateLimitService implements IRateLimitService {
   public async handleExceed(
     policy: RateLimitPolicy,
     actor: string,
-    captchaToken?: string
+    captchaToken?: string,
   ): Promise<void> {
     // If CAPTCHA type, check for captcha token
     if (policy.type === "CAPTCHA") {
@@ -97,7 +97,7 @@ export class RedisRateLimitService implements IRateLimitService {
         await redisService.setValue(
           redisKeys.captchaPassed(policy.name, actor),
           1,
-          policy.windowMs / 1000
+          policy.windowMs / 1000,
         );
         return;
       }
@@ -105,12 +105,12 @@ export class RedisRateLimitService implements IRateLimitService {
     if (policy.type === "CAPTCHA") {
       throw new RateLimitError(
         { requireCaptcha: true, policy: policy.name },
-        "Vui lòng hoàn thành CAPTCHA để tiếp tục."
+        "Vui lòng hoàn thành CAPTCHA để tiếp tục.",
       );
     } else {
       throw new RateLimitError(
         undefined,
-        "Quá nhiều yêu cầu, vui lòng thử lại sau."
+        "Quá nhiều yêu cầu, vui lòng thử lại sau.",
       );
     }
   }

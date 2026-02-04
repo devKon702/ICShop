@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import categoryRepository from "../repositories/category.repository";
-import { ResponseObject, StatusCode } from "../models/response";
-import { TypedRequest } from "../types/TypedRequest";
 import { HttpStatus } from "../constants/http-status";
 import {
   createCategorySchema,
@@ -20,7 +18,6 @@ import { successResponse } from "../utils/response.util";
 import { AddressResponseCode } from "../constants/codes/address.code";
 import { logger } from "../utils/logger.util";
 import { NotFoundError } from "../errors/not-found.error";
-import { set } from "zod";
 import { AccessTokenPayload } from "../services/jwt.service";
 
 class CategoryController {
@@ -108,23 +105,6 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Lấy danh mục cấp 3 thành công",
-          categories,
-        ),
-      );
-  };
-
-  getCategoryByName = async (
-    req: TypedRequest<any, any, { name: string; limit: number }>,
-    res: Response,
-  ) => {
-    const { name, limit } = req.query;
-    const categories = await categoryRepository.findByName(name, Number(limit));
-    res
-      .status(HttpStatus.OK)
-      .json(
-        successResponse(
-          CategoryResponseCode.OK,
-          "Lấy danh mục thành công",
           categories,
         ),
       );
