@@ -1,18 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 import { JWTError } from "../errors/jwt.error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
-import { verifyToken } from "../utils/jwt";
-import { AccessTokenPayload } from "../services/jwt.service";
+import jwtService, { AccessTokenPayload } from "../services/jwt.service";
 import sessionService from "../services/session.service";
 export const verifyAccessToken = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ") || !auth.split(" ")[1]) {
     return next(
-      new JWTError(JWTResponseCode.TOKEN_MISSING, "Không tìm thấy token")
+      new JWTError(JWTResponseCode.TOKEN_MISSING, "Không tìm thấy token"),
     );
   }
   // Lấy token từ bearer token
@@ -20,7 +19,7 @@ export const verifyAccessToken = (
 
   try {
     // Xác thực và lấy payload từ token
-    const payload = verifyToken(token, "access");
+    const payload = jwtService.verifyAccessToken(token);
     res.locals.auth = payload;
     next();
   } catch (err) {
@@ -31,12 +30,12 @@ export const verifyAccessToken = (
 export const validateAccessToken = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const payload = res.locals.auth as AccessTokenPayload;
   const session = await sessionService.getOrLoadSession(
     payload.sessionId,
-    payload.role
+    payload.role,
   );
   if (session?.version !== payload.sessionVersion) {
     // Handle use revoked token logic here

@@ -8,11 +8,11 @@ import {
 } from "../schemas/statistics.schema";
 import productRepository from "../repositories/product.repository";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { StatisticsResponseCode } from "../constants/codes/statistics.code";
 import orderRepository from "../repositories/order.repository";
 import userRepository from "../repositories/user.repository";
-import { sanitizeData } from "../utils/sanitize";
+import { sanitizeData } from "../utils/sanitize.util";
 
 class StatisticsController {
   public async getBestSellingProducts(req: Request, res: Response) {
@@ -23,7 +23,7 @@ class StatisticsController {
     const result = await orderRepository.findBestSellingProducts(
       from,
       to,
-      limit
+      limit,
     );
     res
       .status(HttpStatus.OK)
@@ -31,8 +31,8 @@ class StatisticsController {
         successResponse(
           StatisticsResponseCode.OK,
           "Lấy sản phẩm bán chạy thành công",
-          result
-        )
+          result,
+        ),
       );
   }
 
@@ -48,8 +48,8 @@ class StatisticsController {
         result.map((item) => ({
           status: item.status,
           count: item._count.id,
-        }))
-      )
+        })),
+      ),
     );
   }
 
@@ -59,7 +59,7 @@ class StatisticsController {
     } = countOrderDailySchema.parse(req);
 
     const numberOfDays = Math.ceil(
-      (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)
+      (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24),
     );
     const dates = Array.from({ length: numberOfDays }, (_, i) => {
       const dateFrom = new Date(from.getTime() + i * 24 * 60 * 60 * 1000);
@@ -67,8 +67,8 @@ class StatisticsController {
         Math.min(
           new Date(from.getTime() + (i + 1) * 24 * 60 * 60 * 1000).getTime() -
             1,
-          to.getTime()
-        )
+          to.getTime(),
+        ),
       );
 
       return { dateFrom, dateTo };
@@ -77,14 +77,14 @@ class StatisticsController {
       dates.map(async (date) => {
         const count = await orderRepository.countByCreated(
           date.dateFrom,
-          date.dateTo
+          date.dateTo,
         );
         return {
           from: date.dateFrom,
           to: date.dateTo,
           count,
         };
-      })
+      }),
     );
     res
       .status(HttpStatus.OK)
@@ -92,8 +92,8 @@ class StatisticsController {
         successResponse(
           StatisticsResponseCode.OK,
           "Lấy thống kê đơn hàng theo ngày thành công",
-          result
-        )
+          result,
+        ),
       );
   }
 
@@ -114,7 +114,7 @@ class StatisticsController {
         return userRepository
           .findById(item.userId)
           .then((user) => ({ user, orderCount: item._count.id }));
-      })
+      }),
     );
 
     res.status(HttpStatus.OK).json(
@@ -124,8 +124,8 @@ class StatisticsController {
         sanitizeData(result, {
           omit: ["password"],
           useDefault: false,
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -144,8 +144,8 @@ class StatisticsController {
         successResponse(
           StatisticsResponseCode.OK,
           "Lấy tổng số người dùng thành công",
-          { count }
-        )
+          { count },
+        ),
       );
   }
 }

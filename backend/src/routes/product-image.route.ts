@@ -3,7 +3,7 @@ import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
 import { validate } from "../middlewares/validate.middleware";
-import { upload } from "../utils/multer";
+import { upload } from "../utils/multer.util";
 import {
   createProductImageSchema,
   deleteProductImageSchema,
@@ -22,7 +22,7 @@ productImageRouter.post(
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(createProductImageSchema),
-  productImageController.create
+  productImageController.create,
 );
 
 // DELETE /gallery/:id
@@ -31,7 +31,7 @@ productImageRouter.delete(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(deleteProductImageSchema),
-  productImageController.delete
+  productImageController.delete,
 );
 
 // PATCH /gallery/position
@@ -40,7 +40,7 @@ productImageRouter.patch(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateProductImagePositionSchema),
-  productImageController.updatePosition
+  productImageController.updatePosition,
 );
 
 // PATCH /gallery/:id
@@ -50,7 +50,7 @@ productImageRouter.patch(
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(updateProductImageSchema),
-  productImageController.updateImage
+  productImageController.updateImage,
 );
 
 export default productImageRouter;

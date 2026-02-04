@@ -10,7 +10,7 @@ import categoryRepository from "../repositories/category.repository";
 import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { AttributeResponseCode } from "../constants/codes/attribute.code";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { deleteAddressSchema } from "../schemas/address.schema";
 import { AccessTokenPayload } from "../services/jwt.service";
 
@@ -28,7 +28,7 @@ export class AttributeController {
         HttpStatus.NOT_FOUND,
         AttributeResponseCode.CATEGORY_NOT_FOUND,
         "Không tìm thấy danh mục",
-        true
+        true,
       );
     // Danh mục phải là cấp 3
     if (category.level != 3)
@@ -36,7 +36,7 @@ export class AttributeController {
         HttpStatus.UNPROCESSABLE_ENTITY,
         AttributeResponseCode.INVALID_CATEGORY,
         "Chỉ thêm cho danh mục cấp 3",
-        true
+        true,
       );
     // Hợp lệ
     const attribute = await attributeRepository.create(sub, {
@@ -49,8 +49,8 @@ export class AttributeController {
         successResponse(
           AttributeResponseCode.OK,
           "Tạo thông số thành công",
-          attribute
-        )
+          attribute,
+        ),
       );
   };
   public update = async (req: Request, res: Response) => {
@@ -65,7 +65,7 @@ export class AttributeController {
         HttpStatus.NOT_FOUND,
         AttributeResponseCode.NOT_FOUND,
         "Không tìm thấy thông số",
-        true
+        true,
       );
     res
       .status(HttpStatus.OK)
@@ -73,8 +73,8 @@ export class AttributeController {
         successResponse(
           AttributeResponseCode.OK,
           "Cập nhật thông số thành công",
-          newAttribute
-        )
+          newAttribute,
+        ),
       );
   };
   public delete = async (req: Request, res: Response) => {
@@ -85,7 +85,7 @@ export class AttributeController {
     res
       .status(HttpStatus.OK)
       .json(
-        successResponse(AttributeResponseCode.OK, "Xóa thông số thành công")
+        successResponse(AttributeResponseCode.OK, "Xóa thông số thành công"),
       );
   };
 
@@ -100,8 +100,8 @@ export class AttributeController {
         successResponse(
           AttributeResponseCode.OK,
           "Lấy thông số thành công",
-          attributes
-        )
+          attributes,
+        ),
       );
   };
 }

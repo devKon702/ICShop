@@ -19,13 +19,13 @@ import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { OrderResponseCode } from "../constants/codes/order.code";
 import { DeliveryType, OrderStatus } from "../constants/db";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { Decimal } from "@prisma/client/runtime/library";
 import addressRepository from "../repositories/address.repository";
 import { NotFoundError } from "../errors/not-found.error";
 import productRepository from "../repositories/product.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
-import { sanitizeData } from "../utils/sanitize";
+import { sanitizeData } from "../utils/sanitize.util";
 import { AccessTokenPayload } from "../services/jwt.service";
 import { ProductResponseCode } from "../constants/codes/product.code";
 import cartRepository from "../repositories/cart.repository";
@@ -48,7 +48,7 @@ class OrderController {
       if (productMap.has(item.productId)) {
         productMap.set(
           item.productId,
-          productMap.get(item.productId)! + item.quantity
+          productMap.get(item.productId)! + item.quantity,
         );
       } else {
         productMap.set(item.productId, item.quantity);
@@ -63,7 +63,7 @@ class OrderController {
       groupedProducts.map(async (item) => {
         const cartDetail = await cartRepository.findByUserIdAndProductId(
           sub,
-          item.productId
+          item.productId,
         );
         if (!cartDetail) {
           const product = await productRepository.findById(item.productId);
@@ -72,7 +72,7 @@ class OrderController {
               HttpStatus.UNPROCESSABLE_ENTITY,
               ProductResponseCode.NOT_FOUND,
               `Sản phẩm không tồn tại`,
-              true
+              true,
             );
           }
           throw new AppError(
@@ -81,10 +81,10 @@ class OrderController {
             `Vui lòng thêm sản phẩm ${product?.name.slice(0, 20).trim()}${
               product?.name.length > 20 ? "..." : ""
             } vào giỏ hàng trước khi đặt hàng`,
-            true
+            true,
           );
         }
-      })
+      }),
     );
 
     // Check exist address
@@ -95,14 +95,14 @@ class OrderController {
     if (deliveryType === DeliveryType.POST && !address)
       throw new NotFoundError(
         OrderResponseCode.ADDRESS_NOT_FOUND,
-        "Không tìm thấy địa chỉ"
+        "Không tìm thấy địa chỉ",
       );
 
     // Get unit price + vat for each product
     const productPrices = await Promise.all(
       groupedProducts.map((item) =>
-        wholesaleRepository.findByQuantity(item.productId, item.quantity)
-      )
+        wholesaleRepository.findByQuantity(item.productId, item.quantity),
+      ),
     );
     // Check if some product price not exist ~ product not exist
     if (productPrices.some((item) => item === null))
@@ -110,7 +110,7 @@ class OrderController {
         HttpStatus.UNPROCESSABLE_ENTITY,
         OrderResponseCode.INVALID_PRICE,
         "Sản phẩm không tồn tại",
-        true
+        true,
       );
 
     // Check valid product quantity
@@ -122,21 +122,21 @@ class OrderController {
           HttpStatus.UNPROCESSABLE_ENTITY,
           OrderResponseCode.INVALID_PRODUCT_QUANTITY,
           `Tối thiểu mua ${min_quantity}`,
-          true
+          true,
         );
       if (item.quantity > max_quantity)
         throw new AppError(
           HttpStatus.UNPROCESSABLE_ENTITY,
           OrderResponseCode.INVALID_PRODUCT_QUANTITY,
           `Tối đa mua ${max_quantity}`,
-          true
+          true,
         );
       if (item.productId % quantity_step)
         throw new AppError(
           HttpStatus.UNPROCESSABLE_ENTITY,
           OrderResponseCode.INVALID_PRODUCT_QUANTITY,
           `Bội số mua là ${quantity_step}`,
-          true
+          true,
         );
     });
 
@@ -181,7 +181,7 @@ class OrderController {
     res
       .status(HttpStatus.OK)
       .json(
-        successResponse(OrderResponseCode.OK, "Tạo đơn hàng thành công", order)
+        successResponse(OrderResponseCode.OK, "Tạo đơn hàng thành công", order),
       );
   };
   public filterMyOrders = async (req: Request, res: Response) => {
@@ -204,8 +204,8 @@ class OrderController {
           OrderResponseCode.OK,
           "Lấy danh sách đơn hàng thành công",
           orders,
-          { limit, page, total }
-        )
+          { limit, page, total },
+        ),
       );
   };
   public getMyOrderById = async (req: Request, res: Response) => {
@@ -217,7 +217,7 @@ class OrderController {
     if (!order)
       throw new NotFoundError(
         "Không tìm thấy đơn hàng",
-        OrderResponseCode.NOT_FOUND
+        OrderResponseCode.NOT_FOUND,
       );
     const responseBody = {
       ...order,
@@ -229,8 +229,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Lấy thông tin đơn hàng thành công",
-          responseBody
-        )
+          responseBody,
+        ),
       );
   };
   public cancelOrder = async (req: Request, res: Response) => {
@@ -245,7 +245,7 @@ class OrderController {
     if (!order)
       throw new NotFoundError(
         "Không tìm thấy đơn hàng",
-        OrderResponseCode.NOT_FOUND
+        OrderResponseCode.NOT_FOUND,
       );
     // Check order belong to user
     if (order.userId !== sub)
@@ -253,7 +253,7 @@ class OrderController {
         HttpStatus.FORBIDDEN,
         OrderResponseCode.FORBIDDEN,
         "Không có đủ quyền hạn",
-        true
+        true,
       );
     // Check order status changeable
     if (order.status !== OrderStatus.PENDING) {
@@ -261,7 +261,7 @@ class OrderController {
         HttpStatus.UNPROCESSABLE_ENTITY,
         OrderResponseCode.INVALID_STATUS_CHANGE,
         "Không thể hủy đơn hàng này",
-        true
+        true,
       );
     }
     const newOrder = await orderRepository.changeOrderStatus(sub, id, {
@@ -275,8 +275,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Hủy đơn hàng thành công",
-          newOrder
-        )
+          newOrder,
+        ),
       );
   };
   public seenOrderTimeline = async (req: Request, res: Response) => {
@@ -291,7 +291,7 @@ class OrderController {
         HttpStatus.NOT_FOUND,
         OrderResponseCode.NOT_FOUND,
         "Không tìm thấy thông báo",
-        true
+        true,
       );
     res
       .status(HttpStatus.OK)
@@ -299,8 +299,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Tắt thông báo thành công",
-          timeline
-        )
+          timeline,
+        ),
       );
   };
   public getMyUnseenOrderTimeline = async (req: Request, res: Response) => {
@@ -312,8 +312,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Lấy thông báo thành công",
-          timelines
-        )
+          timelines,
+        ),
       );
   };
   public updateOrderAddress = async (req: Request, res: Response) => {
@@ -331,13 +331,13 @@ class OrderController {
     if (deliveryType === DeliveryType.POST && !address) {
       throw new NotFoundError(
         OrderResponseCode.ADDRESS_NOT_FOUND,
-        "Không tìm thấy địa chỉ"
+        "Không tìm thấy địa chỉ",
       );
     }
     if (!order || order.userId !== sub) {
       throw new NotFoundError(
         OrderResponseCode.NOT_FOUND,
-        "Không tìm thấy đơn hàng"
+        "Không tìm thấy đơn hàng",
       );
     }
     const updatedOrder = await (deliveryType === DeliveryType.POST
@@ -373,8 +373,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Cập nhật địa chỉ giao hàng thành công",
-          updatedOrder
-        )
+          updatedOrder,
+        ),
       );
   };
   // ADMIN
@@ -412,8 +412,8 @@ class OrderController {
           OrderResponseCode.OK,
           "Lọc đơn hàng thành công",
           result,
-          { page, limit, total }
-        )
+          { page, limit, total },
+        ),
       );
   };
 
@@ -427,7 +427,7 @@ class OrderController {
         HttpStatus.NOT_FOUND,
         OrderResponseCode.NOT_FOUND,
         "Không tìm thấy đơn hàng",
-        true
+        true,
       );
     res
       .status(HttpStatus.OK)
@@ -435,8 +435,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Lấy thông tin đơn hàng thành công",
-          order
-        )
+          order,
+        ),
       );
   };
 
@@ -450,7 +450,7 @@ class OrderController {
     if (!order) {
       throw new NotFoundError(
         OrderResponseCode.NOT_FOUND,
-        "Không tìm thấy đơn hàng"
+        "Không tìm thấy đơn hàng",
       );
     }
 
@@ -481,7 +481,7 @@ class OrderController {
         HttpStatus.UNPROCESSABLE_ENTITY,
         OrderResponseCode.INVALID_STATUS_CHANGE,
         `Chuyển đổi trạng thái không hợp lệ`,
-        true
+        true,
       );
     }
 
@@ -496,8 +496,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Thay đổi trạng thái đơn hàng thành công",
-          newOrder
-        )
+          newOrder,
+        ),
       );
   };
 
@@ -513,7 +513,7 @@ class OrderController {
         HttpStatus.NOT_FOUND,
         OrderResponseCode.TIMELINE_NOT_FOUND,
         "Không tìm thấy lịch sử trạng thái",
-        true
+        true,
       );
     res
       .status(HttpStatus.OK)
@@ -521,8 +521,8 @@ class OrderController {
         successResponse(
           OrderResponseCode.OK,
           "Cập nhật mô tả thay đổi trạng thái thành công",
-          timeline
-        )
+          timeline,
+        ),
       );
   };
 
@@ -535,7 +535,7 @@ class OrderController {
     if (!product) {
       throw new NotFoundError(
         ProductResponseCode.NOT_FOUND,
-        "Không tìm thấy sản phẩm"
+        "Không tìm thấy sản phẩm",
       );
     }
 
@@ -555,8 +555,8 @@ class OrderController {
           OrderResponseCode.OK,
           "Lấy đơn hàng theo sản phẩm thành công",
           sanitizeData(orders, { omit: ["password"] }),
-          { page, limit, total }
-        )
+          { page, limit, total },
+        ),
       );
   };
 
@@ -581,8 +581,8 @@ class OrderController {
           OrderResponseCode.OK,
           "Lấy đơn hàng theo người dùng thành công",
           orders,
-          { page, limit, total }
-        )
+          { page, limit, total },
+        ),
       );
   };
 }

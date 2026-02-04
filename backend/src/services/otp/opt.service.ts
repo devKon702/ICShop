@@ -1,18 +1,9 @@
 import crypto from "crypto";
-import { compareString, hashString } from "../utils/bcrypt";
-import redis, { redisKeys } from "../utils/redis";
-import mailService from "./mail.service";
-import { env } from "../constants/env";
-import { generateOTPHtml } from "../utils/html";
-type OTPOptions =
-  | {
-      expiredAt?: never;
-      expiredInSeconds: number;
-    }
-  | {
-      expiredAt: Date;
-      expiredInSeconds?: never;
-    };
+import { compareString, hashString } from "../../utils/bcrypt.util";
+import mailService from "../mail.service";
+import { env } from "../../constants/env";
+import { generateOTPHtml } from "../../utils/html.util";
+import redisService, { redisKeys } from "../redis.service";
 
 class OTPService {
   public generateOTP(length: number): string {
@@ -25,20 +16,22 @@ class OTPService {
   public async save(
     email: string,
     code: string,
-    expiredInSeconds: number
+    expiredInSeconds: number,
   ): Promise<void> {
     const hashOtp = await hashString(code);
     // Save to redis
     const ttlSeconds = expiredInSeconds;
-    await redis.setValue(redisKeys.otpEmail(email), hashOtp, ttlSeconds);
+    await redisService.setValue(redisKeys.otpEmail(email), hashOtp, ttlSeconds);
   }
 
   public async verify(email: string, code: string): Promise<boolean> {
-    const hashOtp = await redis.getValue<string>(redisKeys.otpEmail(email));
+    const hashOtp = await redisService.getValue<string>(
+      redisKeys.otpEmail(email),
+    );
     if (!hashOtp) return false;
     const result = await compareString(code, hashOtp);
     if (result) {
-      await redis.deleteKey(redisKeys.otpEmail(email));
+      await redisService.deleteKey(redisKeys.otpEmail(email));
     }
     return result;
   }
@@ -46,7 +39,7 @@ class OTPService {
   public async send(
     email: string,
     code: string,
-    expiredInSeconds: number
+    expiredInSeconds: number,
   ): Promise<void> {
     const html = generateOTPHtml({
       otp: code,

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { HttpStatus } from "../constants/http-status";
 import locationRepository from "../repositories/location.repository";
 import { findByIdSchema } from "../schemas/shared.schema";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { LocationResponseCode } from "../constants/codes/location.code";
 import { NotFoundError } from "../errors/not-found.error";
 
@@ -12,7 +12,7 @@ class LocationController {
     if (!provinces) {
       throw new NotFoundError(
         LocationResponseCode.NOT_FOUND,
-        "Không tìm thấy tỉnh thành"
+        "Không tìm thấy tỉnh thành",
       );
     }
     res
@@ -21,8 +21,8 @@ class LocationController {
         successResponse(
           LocationResponseCode.OK,
           "Lấy danh sách tỉnh thành công",
-          provinces
-        )
+          provinces,
+        ),
       );
   };
 
@@ -34,7 +34,7 @@ class LocationController {
     if (!districts) {
       throw new NotFoundError(
         LocationResponseCode.NOT_FOUND,
-        "Không tìm thấy quận huyện"
+        "Không tìm thấy quận huyện",
       );
     }
     res
@@ -43,8 +43,8 @@ class LocationController {
         successResponse(
           LocationResponseCode.OK,
           "Lấy danh sách quận huyện thành công",
-          districts
-        )
+          districts,
+        ),
       );
   };
 
@@ -56,7 +56,7 @@ class LocationController {
     if (!wards) {
       throw new NotFoundError(
         LocationResponseCode.NOT_FOUND,
-        "Không tìm thấy xã phường"
+        "Không tìm thấy xã phường",
       );
     }
     res
@@ -65,8 +65,8 @@ class LocationController {
         successResponse(
           LocationResponseCode.OK,
           "Lấy danh sách xã phường thành công",
-          wards
-        )
+          wards,
+        ),
       );
   };
 }

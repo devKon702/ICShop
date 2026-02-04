@@ -10,9 +10,9 @@ import {
 import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { ProductImageResponseCode } from "../constants/codes/product-image.code";
-import { handleImagesUpload, validateFile } from "../utils/file";
+import { handleImagesUpload, validateFile } from "../utils/file.util";
 import storage from "../storage";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { ValidateError } from "../errors/validate.error";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
 import { NotFoundError } from "../errors/not-found.error";
@@ -44,8 +44,8 @@ class ProductImageController {
         successResponse(
           ProductImageResponseCode.OK,
           "Thêm ảnh thành công",
-          productImage
-        )
+          productImage,
+        ),
       );
   };
 
@@ -62,8 +62,8 @@ class ProductImageController {
         successResponse(
           ProductImageResponseCode.OK,
           "Xóa ảnh thành công",
-          productImage
-        )
+          productImage,
+        ),
       );
   };
   public updatePosition = async (req: Request, res: Response) => {
@@ -74,7 +74,7 @@ class ProductImageController {
 
     const newGallery = await productImageRepository.updatePosition(
       sub,
-      gallery
+      gallery,
     );
     res
       .status(HttpStatus.OK)
@@ -82,8 +82,8 @@ class ProductImageController {
         successResponse(
           ProductImageResponseCode.OK,
           "Thay đổi vị trí thành công",
-          newGallery
-        )
+          newGallery,
+        ),
       );
   };
 
@@ -103,7 +103,7 @@ class ProductImageController {
     if (!productImage)
       throw new NotFoundError(
         ProductImageResponseCode.NOT_FOUND,
-        "Không tìm thấy ảnh sản phẩm"
+        "Không tìm thấy ảnh sản phẩm",
       );
 
     const result = await handleImagesUpload({
@@ -119,8 +119,8 @@ class ProductImageController {
         successResponse(
           ProductImageResponseCode.OK,
           "Cập nhật thành công",
-          result
-        )
+          result,
+        ),
       );
   };
 }

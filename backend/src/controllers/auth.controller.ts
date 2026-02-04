@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { AuthResponseCode } from "../constants/codes/auth.code";
 import {
   forgotPasswordSchema,
@@ -33,7 +33,7 @@ class AuthController {
       successResponse(AuthResponseCode.OK, "Đăng nhập thành công", {
         account: publicAccount,
         token: accessToken,
-      })
+      }),
     );
   };
 
@@ -53,8 +53,8 @@ class AuthController {
         {
           account: publicAccount,
           token: accessToken,
-        }
-      )
+        },
+      ),
     );
   };
 
@@ -77,8 +77,8 @@ class AuthController {
         successResponse(
           AuthResponseCode.OK,
           "Tạo tài khoản thành công",
-          newAccount
-        )
+          newAccount,
+        ),
       );
   };
 
@@ -98,7 +98,7 @@ class AuthController {
     res.status(HttpStatus.OK).json(
       successResponse(AuthResponseCode.OK, "Làm mới token thành công", {
         token: accessToken,
-      })
+      }),
     );
   };
 
@@ -109,14 +109,14 @@ class AuthController {
     // Service
     const { expiresAt } = await authService.sendEmailOtp(
       email,
-      requireExistence
+      requireExistence,
     );
     // Response
     res.status(HttpStatus.OK).json(
       successResponse(AuthResponseCode.OK, "Gửi OTP thành công", {
         email,
         expiresAt,
-      })
+      }),
     );
   }
 
@@ -132,8 +132,8 @@ class AuthController {
       .json(
         successResponse(
           AuthResponseCode.OK,
-          "Nếu email tồn tại, mã đặt lại mật khẩu đã được gửi"
-        )
+          "Nếu email tồn tại, mã đặt lại mật khẩu đã được gửi",
+        ),
       );
   }
 
@@ -147,7 +147,7 @@ class AuthController {
     res
       .status(HttpStatus.OK)
       .json(
-        successResponse(AuthResponseCode.OK, "Đặt lại mật khẩu thành công")
+        successResponse(AuthResponseCode.OK, "Đặt lại mật khẩu thành công"),
       );
   }
 

@@ -1,6 +1,13 @@
+/**
+ * @param config Cấu hình
+ * @returns
+ */
 export const generateResetPasswordHtml = (config: {
+  /** Tên ứng dụng sẽ hiển thị ở thư cho client */
   appName: string;
+  /** Thời gian tồn tại của otp (giây) */
   expiredInSeconds: number;
+  /** Đường dẫn đến trang reset password */
   resetLink: string;
 }) => {
   return `
@@ -61,7 +68,7 @@ export const generateResetPasswordHtml = (config: {
             <tr>
               <td style="padding-top: 10px; font-size: 15px; color: #444;">
                 Thao tác có hiệu lực trong <strong>${Math.floor(
-                  config.expiredInSeconds / 60
+                  config.expiredInSeconds / 60,
                 )} phút.</strong>
               </td>
             </tr>
@@ -98,8 +105,8 @@ export const generateResetPasswordHtml = (config: {
             "
           >
             © ${new Date().getFullYear()} ${
-    config.appName
-  }. All rights reserved.
+              config.appName
+            }. All rights reserved.
           </div>
         </td>
       </tr>
@@ -109,9 +116,17 @@ export const generateResetPasswordHtml = (config: {
 `;
 };
 
+/**
+ * Hàm tạo mã html chứa otp cho client
+ * @param config Cấu hình data gửi html
+ * @returns Mã html
+ */
 export const generateOTPHtml = (config: {
+  /** Mã otp gửi cho client */
   otp: string;
+  /** Thời gian tồn tại của otp (giây) */
   expiredInSeconds: number;
+  /** Tên ứng dụng sẽ hiển thị cho client */
   appName: string;
 }) => {
   return `
@@ -165,7 +180,7 @@ export const generateOTPHtml = (config: {
               <td style="font-size:14px;color:#555;">
                 Mã OTP có hiệu lực trong
                 <strong>${Math.floor(
-                  config.expiredInSeconds / 60
+                  config.expiredInSeconds / 60,
                 )} phút</strong>.
                 Không chia sẻ mã này cho bất kỳ ai.
               </td>
@@ -178,8 +193,8 @@ export const generateOTPHtml = (config: {
           </table>
           <div style="font-size:12px;color:#999;margin-top:20px;text-align:center;">
             © ${new Date().getFullYear()} ${
-    config.appName
-  }. All rights reserved.
+              config.appName
+            }. All rights reserved.
           </div>
         </td>
       </tr>

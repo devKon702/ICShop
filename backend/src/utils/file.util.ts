@@ -1,22 +1,26 @@
-import { z, ZodError } from "zod";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
-import {
-  ValidateError,
-  ValidateErrorDetailType,
-} from "../errors/validate.error";
-import { Multer } from "multer";
+import { ValidateError } from "../errors/validate.error";
 import storage from "../storage";
-
+/** Loại file ảnh hỗ trợ */
 const imageSupportedType = ["image/jpg", "image/jpeg"];
+/** Loại file video hỗ trợ */
 const videoSupportedType = ["video/mp4"];
 
+/**
+ * Hàm validate file
+ * @param file Multer file cần validate
+ * @param options Tùy chọn để validate
+ */
 export const validateFile = (
   file: Express.Multer.File | undefined,
   options: {
+    /** Tên field chứa file từ request, dùng để chỉ field bị lỗi từ request */
     inputField: string;
+    /** Kích thước tối đa của file */
     maxSize: number;
+    /** Loại file */
     type: "image" | "video";
-  }
+  },
 ) => {
   // Kiểm tra file tồn tại
   if (!file)
@@ -79,7 +83,7 @@ export const handleImagesUpload = async <T>({
       inputField: options?.inputField ?? "file",
       maxSize: options?.maxSize ?? 1024 * 1024,
       type: "image",
-    })
+    }),
   );
 
   // Get early file urls before save
@@ -95,8 +99,8 @@ export const handleImagesUpload = async <T>({
   oldUrls.forEach((url) => storage.delete(url));
   await Promise.all(
     files.map((file, index) =>
-      storage.save(file.buffer, newUrls[index].split(".")[0], file.mimetype)
-    )
+      storage.save(file.buffer, newUrls[index].split(".")[0], file.mimetype),
+    ),
   );
   return results;
 };

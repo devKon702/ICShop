@@ -7,10 +7,10 @@ import {
 } from "../schemas/highlight.schema";
 import highlightRepository from "../repositories/highlight.repository";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { HighlightResponseCode } from "../constants/codes/highlight.code";
 import { HighlightType } from "../constants/db";
-import { sanitizeData } from "../utils/sanitize";
+import { sanitizeData } from "../utils/sanitize.util";
 import { AccessTokenPayload } from "../services/jwt.service";
 
 class HighlightController {
@@ -31,8 +31,8 @@ class HighlightController {
         successResponse(
           HighlightResponseCode.OK,
           "Thêm sản phẩm vào mục nổi bật thành công",
-          highlight
-        )
+          highlight,
+        ),
       );
   };
   public delete = async (req: Request, res: Response) => {
@@ -46,8 +46,8 @@ class HighlightController {
         successResponse(
           HighlightResponseCode.OK,
           "Xóa sản phẩm khỏi mục nổi bật thành công",
-          deleted
-        )
+          deleted,
+        ),
       );
   };
 
@@ -59,8 +59,8 @@ class HighlightController {
 
     const result = await Promise.all(
       data.map((item) =>
-        highlightRepository.updatePosition(sub, item.id, item.position)
-      )
+        highlightRepository.updatePosition(sub, item.id, item.position),
+      ),
     );
     res
       .status(HttpStatus.OK)
@@ -68,14 +68,14 @@ class HighlightController {
         successResponse(
           HighlightResponseCode.OK,
           "Thay đổi vị trí hiển thị thành công",
-          result
-        )
+          result,
+        ),
       );
   };
   public getHighlight = async (req: Request, res: Response) => {
     const types = Object.values(HighlightType);
     const result = await Promise.all(
-      types.map((item) => highlightRepository.getHighlight(item, true))
+      types.map((item) => highlightRepository.getHighlight(item, true)),
     );
 
     const list = types.map((item, index) => ({
@@ -92,14 +92,14 @@ class HighlightController {
         successResponse(
           HighlightResponseCode.OK,
           "Lấy danh sách nổi bật thành công",
-          list
-        )
+          list,
+        ),
       );
   };
   public adminGetHighlight = async (req: Request, res: Response) => {
     const types = Object.values(HighlightType);
     const result = await Promise.all(
-      types.map((item) => highlightRepository.getHighlight(item))
+      types.map((item) => highlightRepository.getHighlight(item)),
     );
 
     const list = types.map((item, index) => ({
@@ -113,8 +113,8 @@ class HighlightController {
         successResponse(
           HighlightResponseCode.OK,
           "Lấy danh sách nổi bật thành công",
-          list
-        )
+          list,
+        ),
       );
   };
 }

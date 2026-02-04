@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import paymentService from "../services/payment.service";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { PaymentResponseCode } from "../constants/codes/payment.code";
-import { sanitizeData } from "../utils/sanitize";
+import { sanitizeData } from "../utils/sanitize.util";
 import { findByIdSchema } from "../schemas/shared.schema";
 import { Role } from "../constants/db";
 import { updateActiveProductSchema } from "../schemas/product.shema";

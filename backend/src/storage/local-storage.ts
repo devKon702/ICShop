@@ -2,7 +2,7 @@
 import { IFileStorage } from "./file-storage.interface";
 import fs from "fs/promises";
 import path from "path";
-import { getFileTail } from "../utils/file";
+import { getFileTail } from "../utils/file.util";
 import { env } from "../constants/env";
 
 export class LocalStorage implements IFileStorage {
@@ -15,7 +15,7 @@ export class LocalStorage implements IFileStorage {
   async save(
     fileBuffer: Buffer,
     fileName: string,
-    mimeType: string
+    mimeType: string,
   ): Promise<string> {
     const fileType = getFileTail(mimeType);
     const filePath = path.join(this.storagePath, `${fileName}.${fileType}`);

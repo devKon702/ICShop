@@ -1,5 +1,6 @@
 import multer from "multer";
 
+/** Đối tượng multer để upload file của app */
 export const upload = multer({
   storage: multer.memoryStorage(), // không lưu file ngay
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB

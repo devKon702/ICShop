@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { vietnameseRegex } from "../utils/regex";
+import { vietnameseRegex } from "../utils/regex.util";
 
 export const createAttrValSchema = z.object({
   body: z.object({
@@ -9,7 +9,7 @@ export const createAttrValSchema = z.object({
       .nonempty()
       .regex(
         vietnameseRegex(true),
-        "Giá trị bao gồm chữ cái, số và khoảng trắng"
+        "Giá trị bao gồm chữ cái, số và khoảng trắng",
       ),
   }),
 });
@@ -21,7 +21,7 @@ export const updateAttrValSchema = z.object({
       .nonempty()
       .regex(
         vietnameseRegex(true),
-        "Giá trị bao gồm chữ cái, số và khoảng trắng"
+        "Giá trị bao gồm chữ cái, số và khoảng trắng",
       ),
   }),
   params: z.object({ id: z.coerce.number().min(1, "ID không hợp lệ") }),

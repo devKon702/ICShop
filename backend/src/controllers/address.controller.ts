@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import addressRepository from "../repositories/address.repository";
 import { TokenPayload } from "../types/token-payload";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { AddressResponseCode } from "../constants/codes/address.code";
 import {
   createAddressSchema,
@@ -25,8 +25,8 @@ class AddressController {
         successResponse(
           AddressResponseCode.OK,
           "Lấy danh sách địa chỉ thành công",
-          addresses
-        )
+          addresses,
+        ),
       );
   };
   public createAddress = async (req: Request, res: Response) => {
@@ -52,7 +52,7 @@ class AddressController {
         HttpStatus.NOT_FOUND,
         AddressResponseCode.NOT_FOUND,
         "Không tìm thấy thông tin địa lý",
-        true
+        true,
       );
     }
 
@@ -72,8 +72,8 @@ class AddressController {
         successResponse(
           AddressResponseCode.OK,
           "Thêm địa chỉ thành công",
-          address
-        )
+          address,
+        ),
       );
   };
   public updateAddress = async (req: Request, res: Response) => {
@@ -98,7 +98,7 @@ class AddressController {
         HttpStatus.NOT_FOUND,
         AddressResponseCode.NOT_FOUND,
         "Không tìm thấy địa chỉ",
-        true
+        true,
       );
     // Kiểm tra địa chỉ là của user
     if (address.userId !== sub)
@@ -106,7 +106,7 @@ class AddressController {
         HttpStatus.FORBIDDEN,
         AddressResponseCode.NOT_ALLOWED,
         "Không có thể cập nhật địa chỉ này",
-        true
+        true,
       );
     // Kiểm tra thông tin địa lý
     const [province, district, ward] = await Promise.all([
@@ -119,7 +119,7 @@ class AddressController {
         HttpStatus.NOT_FOUND,
         AddressResponseCode.NOT_FOUND,
         "Không tìm thấy thông tin địa lý",
-        true
+        true,
       );
     }
     // Hợp lệ
@@ -139,8 +139,8 @@ class AddressController {
         successResponse(
           AddressResponseCode.OK,
           "Cập nhật địa chỉ thành công",
-          newAddress
-        )
+          newAddress,
+        ),
       );
   };
   public deleteAddress = async (req: Request, res: Response) => {
@@ -155,7 +155,7 @@ class AddressController {
         HttpStatus.NOT_FOUND,
         AddressResponseCode.NOT_FOUND,
         "Không tìm thấy địa chỉ",
-        true
+        true,
       );
     // Kiểm tra địa chỉ là của user
     if (address.userId !== sub)
@@ -163,7 +163,7 @@ class AddressController {
         HttpStatus.FORBIDDEN,
         AddressResponseCode.NOT_ALLOWED,
         "Không thể xóa địa chỉ này",
-        true
+        true,
       );
     // Hợp lệ
     await addressRepository.delete(id);
@@ -180,8 +180,8 @@ class AddressController {
         successResponse(
           AddressResponseCode.OK,
           "Lấy danh sách tỉnh thành công",
-          provinces
-        )
+          provinces,
+        ),
       );
   };
 
@@ -196,8 +196,8 @@ class AddressController {
         successResponse(
           AddressResponseCode.OK,
           "Lấy danh sách quận huyện thành công",
-          districts
-        )
+          districts,
+        ),
       );
   };
 
@@ -212,8 +212,8 @@ class AddressController {
         successResponse(
           AddressResponseCode.OK,
           "Lấy danh sách xã phường thành công",
-          wards
-        )
+          wards,
+        ),
       );
   };
 }

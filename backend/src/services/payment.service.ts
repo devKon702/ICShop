@@ -5,9 +5,9 @@ import { findByIdSchema } from "../schemas/shared.schema";
 import { NotFoundError } from "../errors/not-found.error";
 import { PaymentResponseCode } from "../constants/codes/payment.code";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { sanitize } from "dompurify";
-import { sanitizeData } from "../utils/sanitize";
+import { sanitizeData } from "../utils/sanitize.util";
 import { Role } from "../constants/db";
 import {
   PaymentPrivateConfigSchemas,

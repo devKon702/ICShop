@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { vietnameseRegex } from "../utils/regex";
+import { vietnameseRegex } from "../utils/regex.util";
 import { query } from "winston";
 
 export const GetCategorySchema = z.object({

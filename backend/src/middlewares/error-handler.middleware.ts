@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "../constants/http-status";
-import { failResponse } from "../utils/response";
+import { failResponse } from "../utils/response.util";
 import { AppError } from "../errors/app.error";
-import { logger } from "../utils/logger";
+import { logger } from "../utils/logger.util";
 import { ValidateError } from "../errors/validate.error";
 import { JWTError } from "../errors/jwt.error";
 import { Prisma } from "@prisma/client";
@@ -14,7 +14,7 @@ export function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   // Lỗi nghiệp vụ
   if (err instanceof AppError && err.isOperational) {
@@ -30,7 +30,7 @@ export function errorHandler(
       res
         .status(err.htttpCode)
         .json(
-          failResponse(err.code, err.message, { validateErros: err.errors })
+          failResponse(err.code, err.message, { validateErros: err.errors }),
         );
       return;
     }
@@ -58,8 +58,8 @@ export function errorHandler(
         .json(
           failResponse(
             DBResponseCode.CONFLICT_UNIQUE_KEY,
-            "Dữ liệu bị trùng lặp"
-          )
+            "Dữ liệu bị trùng lặp",
+          ),
         );
       return;
     }

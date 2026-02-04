@@ -4,23 +4,23 @@ import { Role } from "../constants/db";
 import { HttpStatus } from "../constants/http-status";
 import { AppError } from "../errors/app.error";
 import accountRepository from "../repositories/account.repository";
-import { compareString, hashString } from "../utils/bcrypt";
+import { compareString, hashString } from "../utils/bcrypt.util";
 import jwtService, { RefreshTokenPayload } from "./jwt.service";
 import { JWTConfig } from "../constants/jwt-config";
 import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { env } from "../constants/env";
 import storage from "../storage";
-import { logger } from "../utils/logger";
+import { logger } from "../utils/logger.util";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import { JWTError } from "../errors/jwt.error";
-import otpService from "./opt.service";
+import otpService from "./otp/opt.service";
 import sessionRepository from "../repositories/session.repository";
 import redisService, { redisKeys } from "./redis.service";
 import sessionService from "./session.service";
 import crypto, { hash } from "crypto";
 import mailService from "./mail.service";
-import { generateResetPasswordHtml } from "../utils/html";
+import { generateResetPasswordHtml } from "../utils/html.util";
 import { ICaptchaService, TurnstileCaptchaService } from "./captcha.service";
 import { SecurityResponseCode } from "../constants/codes/security.code";
 
@@ -77,7 +77,7 @@ class AuthService {
         HttpStatus.NOT_FOUND,
         AuthResponseCode.NOT_FOUND,
         "Không tìm thấy tài khoản",
-        true
+        true,
       );
     }
     // Wrong password, including case password null with google signup
@@ -89,7 +89,7 @@ class AuthService {
         HttpStatus.UNAUTHORIZED,
         AuthResponseCode.WRONG_PASSWORD,
         "Sai mật khẩu",
-        true
+        true,
       );
     }
     // Account is blocked
@@ -98,7 +98,7 @@ class AuthService {
         HttpStatus.FORBIDDEN,
         AuthResponseCode.USER_BLOCKED,
         "Tài khoản đã bị khóa",
-        true
+        true,
       );
     }
     // Success
@@ -146,7 +146,7 @@ class AuthService {
         HttpStatus.UNAUTHORIZED,
         AuthResponseCode.INVALID_GOOGLE_TOKEN,
         "Token Google không hợp lệ",
-        true
+        true,
       );
     }
     const { email, name, picture } = payload;
@@ -157,7 +157,7 @@ class AuthService {
         HttpStatus.FORBIDDEN,
         AuthResponseCode.FORBIDDEN,
         "Không thể đăng nhập với email này",
-        true
+        true,
       );
     }
     let isComeback = true;
@@ -173,7 +173,7 @@ class AuthService {
           avatarUrl = await storage.save(
             buffer,
             String(Date.now()),
-            "image/jpeg"
+            "image/jpeg",
           );
         } catch (error) {
           logger.error("Failed to fetch/upload google avatar picture", error);
@@ -197,7 +197,7 @@ class AuthService {
         HttpStatus.FORBIDDEN,
         AuthResponseCode.USER_BLOCKED,
         "Tài khoản đã bị khóa",
-        true
+        true,
       );
     }
     // Generate token for new/existing account
@@ -250,7 +250,7 @@ class AuthService {
         HttpStatus.BAD_REQUEST,
         AuthResponseCode.INVALID_OTP,
         "Mã OTP không hợp lệ hoặc đã hết hạn",
-        true
+        true,
       );
     }
     const existAccount = await accountRepository.findByEmail(email);
@@ -260,7 +260,7 @@ class AuthService {
         HttpStatus.BAD_REQUEST,
         AuthResponseCode.EMAIL_EXIST,
         "Email đã được sử dụng",
-        true
+        true,
       );
     // Create new account
     const hashedPassword = await hashString(password);
@@ -296,13 +296,13 @@ class AuthService {
     // Find session in redis and database
     const session = await sessionService.getOrLoadSession(
       tokenPayload.sessionId,
-      tokenPayload.role
+      tokenPayload.role,
     );
     // Session not found
     if (!session) {
       throw new JWTError(
         JWTResponseCode.TOKEN_REVOKED,
-        "Không tìm thấy phiên làm việc"
+        "Không tìm thấy phiên làm việc",
       );
     }
     // JTI mismatch
@@ -372,7 +372,7 @@ class AuthService {
     await redisService.setValue(
       redisKeys.passwordReset(email),
       await hashString(token),
-      config.expiredInSeconds
+      config.expiredInSeconds,
     );
     // Send email
     const html = generateResetPasswordHtml(config);
@@ -386,18 +386,18 @@ class AuthService {
   public async resetPassword(
     email: string,
     token: string,
-    newPassword: string
+    newPassword: string,
   ) {
     // Verify token
     const savedHashedToken = await redisService.getValue<string>(
-      redisKeys.passwordReset(email)
+      redisKeys.passwordReset(email),
     );
     if (!savedHashedToken || !(await compareString(token, savedHashedToken))) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
         AuthResponseCode.INVALID_RESET_TOKEN,
         "Token không hợp lệ hoặc đã hết hạn",
-        true
+        true,
       );
     }
     // Update new password
@@ -408,14 +408,14 @@ class AuthService {
         HttpStatus.NOT_FOUND,
         AuthResponseCode.NOT_FOUND,
         "Không tìm thấy tài khoản",
-        true
+        true,
       );
     }
 
     await accountRepository.changePassword(
       account.id,
       account.user!.id,
-      hashedPassword
+      hashedPassword,
     );
   }
 }

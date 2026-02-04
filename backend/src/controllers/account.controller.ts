@@ -3,7 +3,7 @@ import accountRepository from "../repositories/account.repository";
 import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { AuthResponseCode } from "../constants/codes/auth.code";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import {
   ChangePasswordIType,
   filterAccountSchema,
@@ -12,9 +12,9 @@ import {
   updateMyEmailSchema,
 } from "../schemas/account.schema";
 import { AccountResponseCode } from "../constants/codes/account.code";
-import { compareString, hashString } from "../utils/bcrypt";
-import { sanitizeData } from "../utils/sanitize";
-import emailOptService from "../services/opt.service";
+import { compareString, hashString } from "../utils/bcrypt.util";
+import { sanitizeData } from "../utils/sanitize.util";
+import emailOptService from "../services/otp/opt.service";
 import { NotFoundError } from "../errors/not-found.error";
 import { AccessTokenPayload } from "../services/jwt.service";
 
@@ -29,7 +29,7 @@ class AccountController {
         HttpStatus.NOT_FOUND,
         AccountResponseCode.NOT_FOUND,
         "Không tìm thấy tài khoản",
-        true
+        true,
       );
     }
     const { password, ...accountWithoutPassword } = account;
@@ -39,8 +39,8 @@ class AccountController {
         successResponse(
           AccountResponseCode.OK,
           "Tìm thông tin thành công",
-          accountWithoutPassword
-        )
+          accountWithoutPassword,
+        ),
       );
   };
 
@@ -52,7 +52,7 @@ class AccountController {
         HttpStatus.NOT_FOUND,
         AccountResponseCode.NOT_FOUND,
         "Không tìm thấy thông tin",
-        true
+        true,
       );
     const { password, ...accountWithoutPass } = account;
     res
@@ -61,14 +61,14 @@ class AccountController {
         successResponse(
           AuthResponseCode.OK,
           "Lấy thông tin thành công",
-          accountWithoutPass
-        )
+          accountWithoutPass,
+        ),
       );
   };
 
   public changePassword = async (
     req: Request<any, any, ChangePasswordIType["body"]>,
-    res: Response
+    res: Response,
   ) => {
     const { sub } = res.locals.auth as AccessTokenPayload;
     const { currentPassword, newPassword } = req.body;
@@ -77,7 +77,7 @@ class AccountController {
     if (!account) {
       throw new NotFoundError(
         AccountResponseCode.NOT_FOUND,
-        "Không tìm thấy tài khoản"
+        "Không tìm thấy tài khoản",
       );
     }
     // Kiểm tra tài khoản bị khóa
@@ -86,7 +86,7 @@ class AccountController {
         HttpStatus.FORBIDDEN,
         AccountResponseCode.LOCKED,
         "Tài khoản đang bị khóa",
-        true
+        true,
       );
     }
     // Check if account is local account
@@ -95,7 +95,7 @@ class AccountController {
         HttpStatus.BAD_REQUEST,
         AccountResponseCode.WRONG_PASSWORD,
         "Tài khoản tạo với Google không thể đổi mật khẩu",
-        true
+        true,
       );
     }
     // So sánh mật khẩu cũ
@@ -107,19 +107,19 @@ class AccountController {
         HttpStatus.BAD_REQUEST,
         AccountResponseCode.WRONG_PASSWORD,
         "Mật khẩu hiện tại không đúng",
-        true
+        true,
       );
     }
     // Thay đổi mật khẩu
     accountRepository.changePassword(
       account.id,
       account.user?.id!,
-      await hashString(newPassword)
+      await hashString(newPassword),
     );
     res
       .status(HttpStatus.OK)
       .json(
-        successResponse(AccountResponseCode.OK, "Thay đổi mật khẩu thành công")
+        successResponse(AccountResponseCode.OK, "Thay đổi mật khẩu thành công"),
       );
   };
 
@@ -145,8 +145,8 @@ class AccountController {
           useDefault: false,
           omit: ["password"],
         }),
-        { total: count, page, limit }
-      )
+        { total: count, page, limit },
+      ),
     );
   };
 
@@ -162,7 +162,7 @@ class AccountController {
         HttpStatus.FORBIDDEN,
         AccountResponseCode.SELF_LOCK,
         "Không thể thao tác trên tài khoản bản thân",
-        true
+        true,
       );
     // Tìm kiếm tài khoản
     const account = await accountRepository.findById(accountId);
@@ -171,7 +171,7 @@ class AccountController {
         HttpStatus.NOT_FOUND,
         AccountResponseCode.NOT_FOUND,
         "Không tìm thấy tài khoản",
-        true
+        true,
       );
     }
     // Kiểm tra có cần đổi isActive không
@@ -187,8 +187,8 @@ class AccountController {
         sanitizeData(result, {
           useDefault: false,
           omit: ["password"],
-        })
-      )
+        }),
+      ),
     );
     return;
   };
@@ -202,7 +202,7 @@ class AccountController {
     if (!account) {
       throw new NotFoundError(
         AccountResponseCode.NOT_FOUND,
-        "Không tìm thấy tài khoản"
+        "Không tìm thấy tài khoản",
       );
     }
     if (account.isActive === false) {
@@ -210,7 +210,7 @@ class AccountController {
         HttpStatus.FORBIDDEN,
         AccountResponseCode.LOCKED,
         "Tài khoản đang bị khóa",
-        true
+        true,
       );
     }
     // Check unique email including this account
@@ -220,7 +220,7 @@ class AccountController {
         HttpStatus.CONFLICT,
         AccountResponseCode.EMAIL_EXISTS,
         "Email đã được sử dụng",
-        true
+        true,
       );
     }
     // Check OTP
@@ -229,7 +229,7 @@ class AccountController {
         HttpStatus.BAD_REQUEST,
         AccountResponseCode.INVALID_OTP,
         "Mã OTP không hợp lệ",
-        true
+        true,
       );
     }
     // Update email
@@ -238,9 +238,11 @@ class AccountController {
     res.status(HttpStatus.OK).json(
       successResponse(AccountResponseCode.OK, "Cập nhật email thành công", {
         email: result.email,
-      })
+      }),
     );
   };
+
+  public async adminUpdateEmail(req: Request, res: Response) {}
 }
 
 export default new AccountController();

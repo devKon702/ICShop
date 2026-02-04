@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { idStringSchema, requestSchema } from "./shared.schema";
-import { vietnameseRegex } from "../utils/regex";
+import { vietnameseRegex } from "../utils/regex.util";
 
 export const createColectionSchema = requestSchema({
   body: z.object({
@@ -51,7 +51,7 @@ export const updateCollectionSchema = requestSchema({
     })
     .refine(
       (val) => Object.entries(val).some(([_, value]) => value !== undefined),
-      "Cần có ít nhất một trường để cập nhật"
+      "Cần có ít nhất một trường để cập nhật",
     ),
 });
 

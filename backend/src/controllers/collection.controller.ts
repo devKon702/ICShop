@@ -8,12 +8,12 @@ import {
   updateProductPositionInCollectionSchema,
 } from "../schemas/collection.schema";
 import collectionRepository from "../repositories/collection.repository";
-import { createSlug } from "../utils/slug";
+import { createSlug } from "../utils/slug.util";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { CollectionResponseCode } from "../constants/codes/collection.code";
 import { findByIdSchema } from "../schemas/shared.schema";
-import { sanitizeData } from "../utils/sanitize";
+import { sanitizeData } from "../utils/sanitize.util";
 import productRepository from "../repositories/product.repository";
 import { NotFoundError } from "../errors/not-found.error";
 import { AccessTokenPayload } from "../services/jwt.service";
@@ -40,14 +40,14 @@ class CollectionController {
         sanitizeData(collections, {
           useDefault: true,
           omit: ["isActive"],
-        })
-      )
+        }),
+      ),
     );
   };
 
   public adminGetCollectionsWithProducts = async (
     req: Request,
-    res: Response
+    res: Response,
   ) => {
     const collections = await collectionRepository.findMany({
       orderBy: "asc",
@@ -62,8 +62,8 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Lấy danh sách bộ sưu tập thành công",
-          collections
-        )
+          collections,
+        ),
       );
   };
 
@@ -78,8 +78,8 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Lấy danh sách bộ sưu tập thành công",
-          collections
-        )
+          collections,
+        ),
       );
   };
 
@@ -103,8 +103,8 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Tạo bộ sưu tập thành công",
-          collection
-        )
+          collection,
+        ),
       );
   };
 
@@ -129,8 +129,8 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Cập nhật bộ sưu tập thành công",
-          collection
-        )
+          collection,
+        ),
       );
   };
 
@@ -147,8 +147,8 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Xóa bộ sưu tập thành công",
-          deletedCollection
-        )
+          deletedCollection,
+        ),
       );
   };
 
@@ -185,8 +185,8 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Thêm sản phẩm vào bộ sưu tập thành công",
-          newProductCollection
-        )
+          newProductCollection,
+        ),
       );
   };
 
@@ -202,14 +202,14 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Xóa sản phẩm khỏi bộ sưu tập thành công",
-          deletedProductCollection
-        )
+          deletedProductCollection,
+        ),
       );
   };
 
   public updateProductPositionInCollection = async (
     req: Request,
-    res: Response
+    res: Response,
   ) => {
     const { sub } = res.locals.auth as AccessTokenPayload;
     const {
@@ -229,7 +229,7 @@ class CollectionController {
       id,
       {
         position,
-      }
+      },
     );
 
     res
@@ -238,8 +238,8 @@ class CollectionController {
         successResponse(
           CollectionResponseCode.OK,
           "Cập nhật vị trí sản phẩm trong bộ sưu tập thành công",
-          result
-        )
+          result,
+        ),
       );
   };
 }

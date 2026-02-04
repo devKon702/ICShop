@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AnyZodObject, ZodError } from "zod";
 import { HttpStatus } from "../constants/http-status";
-import { failResponse } from "../utils/response";
+import { failResponse } from "../utils/response.util";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
 import {
   ValidateError,
@@ -26,7 +26,7 @@ export const validate = (schema: AnyZodObject) => {
           message: item.message,
         }));
         return next(
-          new ValidateError(ValidateResponseCode.INVALID_INPUT, detail)
+          new ValidateError(ValidateResponseCode.INVALID_INPUT, detail),
         );
       }
       next(err);

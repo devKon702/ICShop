@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { vietnameseRegex } from "../utils/regex";
+import { vietnameseRegex } from "../utils/regex.util";
 
 export const createAttributeSchema = z.object({
   body: z.object({

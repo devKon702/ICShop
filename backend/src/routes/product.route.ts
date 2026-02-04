@@ -16,7 +16,7 @@ import {
   updateActiveProductSchema,
   updateWholesaleProductSchema,
 } from "../schemas/product.shema";
-import { upload } from "../utils/multer";
+import { upload } from "../utils/multer.util";
 import { findByIdSchema } from "../schemas/shared.schema";
 
 const productRouter = express.Router();
@@ -27,14 +27,14 @@ const adminPath = "/admin/product";
 productRouter.get(
   path + "/search",
   validate(getProductByName),
-  productController.getByName
+  productController.getByName,
 );
 
 // GET /product/:slug
 productRouter.get(
   path + "/:slug",
   validate(getProductBySlugSchema),
-  productController.getBySlug
+  productController.getBySlug,
 );
 
 // GET /admin/product/:id
@@ -43,7 +43,7 @@ productRouter.get(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getProductByIdSchema),
-  productController.adminGetById
+  productController.adminGetById,
 );
 
 // GET /admin/product?cid=&name=&active=&page=&limit=&order=
@@ -52,7 +52,7 @@ productRouter.get(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(filterProductSchema),
-  productController.adminFilter
+  productController.adminFilter,
 );
 
 // POST /admin/product
@@ -61,7 +61,7 @@ productRouter.post(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(createProductSchema),
-  productController.create
+  productController.create,
 );
 
 // PATCH /admin/product/:id/poster
@@ -71,7 +71,7 @@ productRouter.patch(
   authorize([Role.ADMIN]),
   upload.single("poster"),
   validate(updatePosterSchema),
-  productController.updatePoster
+  productController.updatePoster,
 );
 
 // PATCH /admin/product/:id/info
@@ -80,7 +80,7 @@ productRouter.patch(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateProductSchema),
-  productController.updateInfo
+  productController.updateInfo,
 );
 
 // PATCH /admin/product/:id/category
@@ -89,7 +89,7 @@ productRouter.patch(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateProductCategorySchema),
-  productController.updateCategory
+  productController.updateCategory,
 );
 
 // PATCH /admin/product/:id/lock
@@ -98,7 +98,7 @@ productRouter.patch(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateActiveProductSchema),
-  productController.updateActive
+  productController.updateActive,
 );
 
 // PATCH /admin/product/:id/wholesale
@@ -107,7 +107,7 @@ productRouter.patch(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(updateWholesaleProductSchema),
-  productController.updateWholesale
+  productController.updateWholesale,
 );
 
 // DELETE /admin/product/:id
@@ -116,6 +116,6 @@ productRouter.delete(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(findByIdSchema),
-  productController.delete
+  productController.delete,
 );
 export default productRouter;

@@ -61,4 +61,12 @@ export const updateMyEmailSchema = requestSchema({
   }),
 });
 
+export const adminUpdateEmail = requestSchema({
+  body: z.object({
+    newEmail: z.string().email("Email không hợp lệ"),
+    newEmailOtp: z.string().length(6, "Mã OTP gồm 6 ký tự"),
+    currentEmailOtp: z.string().length(6, "Mã OTP gồm 6 ký tự"),
+  }),
+});
+
 export type LockAccountIType = z.infer<typeof changeAccountStatusSchema>;

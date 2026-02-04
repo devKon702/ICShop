@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { logger } from "../utils/logger";
+import { logger } from "../utils/logger.util";
 
 export const requestLogger = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const requestId = uuidv4();
   res.locals.requestId = requestId;

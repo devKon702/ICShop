@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { phoneRegex, vietnameseRegex } from "../utils/regex";
+import { phoneRegex, vietnameseRegex } from "../utils/regex.util";
 import { DeliveryType, OrderStatus } from "../constants/db";
 import { idStringSchema, requestSchema } from "./shared.schema";
 
@@ -10,7 +10,7 @@ export const createOrderSchema = z.object({
         .number()
         .refine(
           (val) => [DeliveryType.SHOP, DeliveryType.POST].includes(val),
-          "Loại giao hàng không hợp lệ"
+          "Loại giao hàng không hợp lệ",
         ),
       addressId: idStringSchema.optional(),
       receiverName: z
@@ -28,7 +28,7 @@ export const createOrderSchema = z.object({
             .number()
             .int("Phải là kiểu số nguyên")
             .min(1, "Số lượng tối thiểu là 1"),
-        })
+        }),
       ),
     })
     .refine((data) => {
@@ -50,7 +50,7 @@ export const filterMyOrdersSchema = z.object({
       .number()
       .refine(
         (val) => Object.values(OrderStatus).includes(val),
-        "Trạng thái đơn hàng không hợp lệ"
+        "Trạng thái đơn hàng không hợp lệ",
       )
       .optional(),
     from: z.string().optional(),
@@ -93,7 +93,7 @@ export const getOrdersByProductIdSchema = requestSchema({
       .number()
       .refine(
         (val) => Object.values(OrderStatus).includes(val),
-        "Trạng thái đơn hàng không hợp lệ"
+        "Trạng thái đơn hàng không hợp lệ",
       )
       .optional(),
   }),
@@ -118,7 +118,7 @@ export const changeOrderAddressSchema = z.object({
         .number()
         .refine(
           (val) => Object.values(DeliveryType).includes(val),
-          "Loại giao hàng không hợp lệ"
+          "Loại giao hàng không hợp lệ",
         ),
       addressId: idStringSchema.optional(),
       receiverName: z
@@ -150,7 +150,7 @@ export const createOrderTimelineSchema = z.object({
       .number()
       .refine(
         (val) => Object.values(OrderStatus).includes(val),
-        "Trạng thái đơn hàng không hợp lệ"
+        "Trạng thái đơn hàng không hợp lệ",
       ),
     desc: z.string(),
   }),
@@ -177,7 +177,7 @@ export const adminFilterOrdersSchema = z.object({
       .number()
       .refine(
         (val) => Object.values(OrderStatus).includes(val),
-        "Trạng thái đơn hàng không hợp lệ"
+        "Trạng thái đơn hàng không hợp lệ",
       )
       .optional(),
     isActive: z
@@ -219,7 +219,7 @@ export const adminGetOrderByUserSchema = requestSchema({
       .number()
       .refine(
         (val) => Object.values(OrderStatus).includes(val),
-        "Trạng thái đơn hàng không hợp lệ"
+        "Trạng thái đơn hàng không hợp lệ",
       )
       .optional(),
     page: z.coerce.number().min(1).default(1),

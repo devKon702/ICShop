@@ -46,6 +46,20 @@ class AccountRepository {
     // });
   };
 
+  public findByUserIdAndRole = async (userId: number, role: Role) => {
+    return prisma.account.findFirst({
+      where: {
+        user: {
+          id: userId,
+        },
+        role,
+      },
+      include: {
+        user: true,
+      },
+    });
+  };
+
   public create = async (data: {
     email: string;
     password: string | null;
@@ -89,7 +103,7 @@ class AccountRepository {
   public changePassword = async (
     accountId: number,
     userId: number,
-    newPass: string
+    newPass: string,
   ) => {
     return prisma.account.update({
       data: {
@@ -153,7 +167,7 @@ class AccountRepository {
   public changeStatus = async (
     accountId: number,
     isActive: boolean,
-    modifierId: number
+    modifierId: number,
   ) => {
     return prisma.account.update({
       data: {
@@ -172,7 +186,7 @@ class AccountRepository {
     modifierId: number,
     data: Partial<
       Pick<Account, "email" | "isActive" | "password" | "emailVerified">
-    >
+    >,
   ) => {
     return prisma.account.update({
       where: {

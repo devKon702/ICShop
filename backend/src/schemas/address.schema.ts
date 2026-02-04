@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { phoneRegex, vietnameseRegex } from "../utils/regex";
+import { phoneRegex, vietnameseRegex } from "../utils/regex.util";
 
 export const createAddressSchema = z.object({
   body: z.object({

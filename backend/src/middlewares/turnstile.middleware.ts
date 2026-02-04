@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../constants/http-status";
 import { fail } from "assert";
-import { failResponse } from "../utils/response";
+import { failResponse } from "../utils/response.util";
 import { TurnstileCaptchaService } from "../services/captcha.service";
 import { SecurityResponseCode } from "../constants/codes/security.code";
 
 export const verifyTurnstileCaptcha = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const token = req.headers["CF-Turnstile-Token"] as string | undefined;
   if (!token) {
@@ -17,8 +17,8 @@ export const verifyTurnstileCaptcha = async (
       .json(
         failResponse(
           SecurityResponseCode.MISSING_CAPTCHA,
-          "Không tìm thấy token CAPTCHA"
-        )
+          "Không tìm thấy token CAPTCHA",
+        ),
       );
   }
   // Verify captcha
@@ -30,8 +30,8 @@ export const verifyTurnstileCaptcha = async (
       .json(
         failResponse(
           SecurityResponseCode.INVALID_CAPTCHA,
-          "Token CAPTCHA không hợp lệ"
-        )
+          "Token CAPTCHA không hợp lệ",
+        ),
       );
   }
   next();

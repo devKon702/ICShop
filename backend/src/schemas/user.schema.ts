@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailRegex, phoneRegex, vietnameseRegex } from "../utils/regex";
+import { emailRegex, phoneRegex, vietnameseRegex } from "../utils/regex.util";
 import { requestSchema } from "./shared.schema";
 
 export const updateUserSchema = requestSchema({

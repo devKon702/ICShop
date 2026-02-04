@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import productRepository from "../repositories/product.repository";
 import { TypedRequest } from "../types/TypedRequest";
 import { HttpStatus } from "../constants/http-status";
-import { failResponse, successResponse } from "../utils/response";
+import { failResponse, successResponse } from "../utils/response.util";
 import { ProductResponseCode } from "../constants/codes/product.code";
-import { TokenPayload } from "../types/token-payload";
 import {
   createProductSchema,
   filterProductSchema,
@@ -20,10 +19,10 @@ import {
 import categoryRepository from "../repositories/category.repository";
 import { AppError } from "../errors/app.error";
 import attributeRepository from "../repositories/attribute.repository";
-import { handleImagesUpload, validateFile } from "../utils/file";
-import { createSlug } from "../utils/slug";
+import { handleImagesUpload, validateFile } from "../utils/file.util";
+import { createSlug } from "../utils/slug.util";
 import storage from "../storage";
-import { sanitizeHtml } from "../utils/sanitize";
+import { sanitizeHtml } from "../utils/sanitize.util";
 import attributeValueRepository from "../repositories/attribute-value.repository";
 import wholesaleRepository from "../repositories/wholesale.repository";
 import { NotFoundError } from "../errors/not-found.error";
@@ -47,8 +46,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Lấy sản phẩm thành công",
-          product
-        )
+          product,
+        ),
       );
   };
 
@@ -64,8 +63,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Lấy thông tin sản phẩm thành công",
-          product
-        )
+          product,
+        ),
       );
   };
 
@@ -76,7 +75,7 @@ class ProductController {
     const [products, total] = await productRepository.findByName(
       name,
       page,
-      limit
+      limit,
     );
     res
       .status(HttpStatus.OK)
@@ -85,8 +84,8 @@ class ProductController {
           ProductResponseCode.OK,
           "Tìm kiếm thành công",
           products,
-          { page, limit, total }
-        )
+          { page, limit, total },
+        ),
       );
   };
 
@@ -100,14 +99,14 @@ class ProductController {
       page,
       limit,
       order,
-      active
+      active,
     );
     res.status(HttpStatus.OK).json(
       successResponse(ProductResponseCode.OK, "Lọc thành công", products, {
         page,
         limit,
         total,
-      })
+      }),
     );
   };
 
@@ -117,7 +116,7 @@ class ProductController {
       any,
       { page: string; limit: string }
     >,
-    res: Response
+    res: Response,
   ) => {
     const { categoryId } = req.params;
     const { page = "1", limit = "10" } = req.query;
@@ -125,14 +124,14 @@ class ProductController {
       const [products, total] = await productRepository.findByCategoryId(
         Number(categoryId),
         Number(page),
-        Number(limit)
+        Number(limit),
       );
       res.status(HttpStatus.OK).json(
         successResponse(ProductResponseCode.OK, "success", products, {
           total,
           limit: Number(limit),
           page: Number(page),
-        })
+        }),
       );
     } catch (e) {
       console.log(e);
@@ -170,13 +169,13 @@ class ProductController {
         HttpStatus.UNPROCESSABLE_ENTITY,
         ProductResponseCode.INVALID_CATEGORY,
         "Sản phẩm chỉ có thể thuộc danh mục bậc 3",
-        true
+        true,
       );
     // Check if the value is in the correct category
     const isValidValues = valueIds.every((valueId) =>
       attributes.some((attr) =>
-        attr.values.some((attrVal) => attrVal.id === valueId)
-      )
+        attr.values.some((attrVal) => attrVal.id === valueId),
+      ),
     );
     // Category not contain attribute value
     if (!isValidValues)
@@ -184,7 +183,7 @@ class ProductController {
         HttpStatus.UNPROCESSABLE_ENTITY,
         ProductResponseCode.INVALID_ATTRIBUTE_VALUE,
         "Danh sách giá trị thông số không thuộc danh mục của sản phẩm",
-        true
+        true,
       );
 
     // OK
@@ -207,8 +206,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Tạo sản phẩm thành công",
-          product
-        )
+          product,
+        ),
       );
   };
 
@@ -227,7 +226,7 @@ class ProductController {
     if (!product)
       throw new NotFoundError(
         ProductResponseCode.NOT_FOUND,
-        "Không tìm thấy sản phẩm"
+        "Không tìm thấy sản phẩm",
       );
     // Handle file change
     const result = await handleImagesUpload({
@@ -246,8 +245,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Cập nhật poster thành công",
-          result
-        )
+          result,
+        ),
       );
   };
 
@@ -275,8 +274,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Cập nhật sản phẩm thành công",
-          newProduct
-        )
+          newProduct,
+        ),
       );
   };
 
@@ -296,12 +295,12 @@ class ProductController {
     if (!product)
       throw new NotFoundError(
         ProductResponseCode.NOT_FOUND,
-        "Không tìm thấy sản phẩm"
+        "Không tìm thấy sản phẩm",
       );
     if (!category)
       throw new NotFoundError(
         ProductResponseCode.CATEGORY_NOT_FOUND,
-        "Không tìm thấy danh mục"
+        "Không tìm thấy danh mục",
       );
 
     // Only add product to category level 3
@@ -310,7 +309,7 @@ class ProductController {
         HttpStatus.UNPROCESSABLE_ENTITY,
         ProductResponseCode.INVALID_CATEGORY,
         "Chỉ có thể chọn danh mục cấp 3",
-        true
+        true,
       );
     // Update category and add value
     const result = await productRepository.updateCategoryAndAttribute(sub, id, {
@@ -323,8 +322,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Cập nhật danh mục thành công",
-          result
-        )
+          result,
+        ),
       );
   };
 
@@ -341,8 +340,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           `${isActive ? "Mở khóa" : "Khóa"} sản phẩm thành công`,
-          product
-        )
+          product,
+        ),
       );
   };
 
@@ -360,12 +359,12 @@ class ProductController {
     if (!product)
       throw new NotFoundError(
         ProductResponseCode.NOT_FOUND,
-        "Không tìm thấy sản phẩm"
+        "Không tìm thấy sản phẩm",
       );
     if (!wholesale)
       throw new NotFoundError(
         ProductResponseCode.WHOLESALE_NOT_FOUND,
-        "Không tìm thấy bảng giá"
+        "Không tìm thấy bảng giá",
       );
 
     // Check value changed
@@ -410,7 +409,7 @@ class ProductController {
               desc: item.desc,
             }))
           : undefined,
-      }
+      },
     );
     res
       .status(HttpStatus.OK)
@@ -418,8 +417,8 @@ class ProductController {
         successResponse(
           ProductResponseCode.OK,
           "Cập nhật bảng giá thành công",
-          wholesaleUpdated
-        )
+          wholesaleUpdated,
+        ),
       );
   };
 

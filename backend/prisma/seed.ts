@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import accountRepository from "../src/repositories/account.repository";
-import { hashString } from "../src/utils/bcrypt";
+import { hashString } from "../src/utils/bcrypt.util";
 import { Role } from "../src/constants/db";
-import { logger } from "../src/utils/logger";
+import { logger } from "../src/utils/logger.util";
 import {
   createLocationHierarchy,
   fetchProvinceDetail,

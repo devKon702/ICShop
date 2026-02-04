@@ -1,6 +1,6 @@
 import z, { boolean, number } from "zod";
 import { PaginationSchema } from "./pagination.schema";
-import { vietnameseRegex } from "../utils/regex";
+import { vietnameseRegex } from "../utils/regex.util";
 import { brotliDecompress } from "zlib";
 
 const hasGap = (sortedRanges: { min: number; max: number | null }[]) => {
@@ -50,8 +50,8 @@ const wholesaleSchema = z
           })
           .refine(
             (val) => val.max == null || val.min <= val.max,
-            "Khoảng giá không hợp lệ"
-          )
+            "Khoảng giá không hợp lệ",
+          ),
       )
       .min(1, "Tối thiểu có một giá bán")
       .transform((arr) =>
@@ -60,23 +60,23 @@ const wholesaleSchema = z
           if (a.max === null) return 1;
           if (b.max === null) return -1;
           return a.min - b.min;
-        })
+        }),
       )
       .refine(
         (arr) => !hasGap(arr.map((item) => ({ min: item.min, max: item.max }))),
-        "Bảng giá có khoảng trông"
+        "Bảng giá có khoảng trông",
       ),
   })
   .refine(
     (data) => data.max_quantity >= data.min_quantity,
-    "Phạm vi số lượng mua không hợp lệ"
+    "Phạm vi số lượng mua không hợp lệ",
   )
   .refine(
     (data) =>
       data.details.some(
-        (item) => item.max === null || item.max >= data.max_quantity
+        (item) => item.max === null || item.max >= data.max_quantity,
       ) && data.details.some((item) => item.min <= data.min_quantity),
-    "Bảng giá chưa bao quát hết số lượng mua của sản phẩm"
+    "Bảng giá chưa bao quát hết số lượng mua của sản phẩm",
   );
 
 export const createProductSchema = z.object({
@@ -92,7 +92,7 @@ export const createProductSchema = z.object({
       .max(1000 * 1000, "Cân nặng tối đa 1 tấn"),
     wholesale: wholesaleSchema,
     valueIds: z.array(
-      z.number().int("ID là kiểu số nguyên").min(1, "ID không hợp lệ")
+      z.number().int("ID là kiểu số nguyên").min(1, "ID không hợp lệ"),
     ),
   }),
 });

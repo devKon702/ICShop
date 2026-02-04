@@ -1,12 +1,9 @@
 import { Request, Response } from "express";
-import { TypedRequest } from "../types/TypedRequest";
-import { ResponseObject, StatusCode } from "../models/response";
 import cartDetailRepository from "../repositories/cart.repository";
-import { TokenPayload } from "../types/token-payload";
 import cartRepository from "../repositories/cart.repository";
 import { HttpStatus } from "../constants/http-status";
 import { CartResponseCode } from "../constants/codes/cart.code";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import {
   createCartSchema,
   deleteMultiCartSchema,
@@ -20,7 +17,7 @@ class CartController {
     res
       .status(HttpStatus.OK)
       .json(
-        successResponse(CartResponseCode.OK, "Lấy giỏ hàng thành công", cart)
+        successResponse(CartResponseCode.OK, "Lấy giỏ hàng thành công", cart),
       );
   };
 
@@ -31,7 +28,7 @@ class CartController {
     } = createCartSchema.parse(req);
     const existing = await cartDetailRepository.findByUserIdAndProductId(
       sub,
-      productId
+      productId,
     );
     let cart;
     if (existing) cart = await cartRepository.updateCart(existing.id);
@@ -42,8 +39,8 @@ class CartController {
         successResponse(
           CartResponseCode.OK,
           "Thêm vào giỏ hàng thành công",
-          cart
-        )
+          cart,
+        ),
       );
   };
 
@@ -54,7 +51,7 @@ class CartController {
     } = deleteMultiCartSchema.parse(req);
 
     const deleted = await Promise.all(
-      cartIds.map((item) => cartRepository.deleteCart(item, sub))
+      cartIds.map((item) => cartRepository.deleteCart(item, sub)),
     );
 
     res
@@ -63,8 +60,8 @@ class CartController {
         successResponse(
           CartResponseCode.OK,
           "Xóa sản phẩm khỏi giỏ hàng thành công",
-          deleted
-        )
+          deleted,
+        ),
       );
   };
 }

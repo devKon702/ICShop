@@ -3,7 +3,7 @@ import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import userController from "../controllers/user.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { updateUserSchema } from "../schemas/user.schema";
-import { upload } from "../utils/multer";
+import { upload } from "../utils/multer.util";
 
 const userRouter = express.Router();
 
@@ -14,7 +14,7 @@ userRouter.patch(
   jwtMiddleware,
   upload.single("avatar"),
   validate(updateUserSchema),
-  userController.update
+  userController.update,
 );
 
 // userRouter.patch(

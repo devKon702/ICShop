@@ -3,7 +3,6 @@ import categoryRepository from "../repositories/category.repository";
 import { ResponseObject, StatusCode } from "../models/response";
 import { TypedRequest } from "../types/TypedRequest";
 import { HttpStatus } from "../constants/http-status";
-import { TokenPayload } from "../types/token-payload";
 import {
   createCategorySchema,
   deleteCategorySchema,
@@ -14,12 +13,12 @@ import {
 } from "../schemas/category.schema";
 import { AppError } from "../errors/app.error";
 import { CategoryResponseCode } from "../constants/codes/category.code";
-import { createSlug } from "../utils/slug";
-import { validateFile } from "../utils/file";
+import { createSlug } from "../utils/slug.util";
+import { validateFile } from "../utils/file.util";
 import storage from "../storage";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { AddressResponseCode } from "../constants/codes/address.code";
-import { logger } from "../utils/logger";
+import { logger } from "../utils/logger.util";
 import { NotFoundError } from "../errors/not-found.error";
 import { set } from "zod";
 import { AccessTokenPayload } from "../services/jwt.service";
@@ -39,7 +38,7 @@ class CategoryController {
     if (!category)
       throw new NotFoundError(
         CategoryResponseCode.NOT_FOUND,
-        "Không tìm thấy danh mục"
+        "Không tìm thấy danh mục",
       );
     res
       .status(HttpStatus.OK)
@@ -47,8 +46,8 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Lấy danh mục thành công",
-          category
-        )
+          category,
+        ),
       );
   };
 
@@ -62,7 +61,7 @@ class CategoryController {
         HttpStatus.NOT_FOUND,
         CategoryResponseCode.NOT_FOUND,
         "Không tìm thấy danh mục",
-        true
+        true,
       );
     res
       .status(HttpStatus.OK)
@@ -70,8 +69,8 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Lấy danh mục thành công",
-          category
-        )
+          category,
+        ),
       );
   };
 
@@ -83,8 +82,8 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Lấy cây danh mục thành công",
-          categoryTree
-        )
+          categoryTree,
+        ),
       );
   };
 
@@ -96,8 +95,8 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Lấy cây danh mục thành công",
-          categoryTree
-        )
+          categoryTree,
+        ),
       );
   };
 
@@ -109,27 +108,26 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Lấy danh mục cấp 3 thành công",
-          categories
-        )
+          categories,
+        ),
       );
   };
 
   getCategoryByName = async (
     req: TypedRequest<any, any, { name: string; limit: number }>,
-    res: Response
+    res: Response,
   ) => {
     const { name, limit } = req.query;
-    try {
-      const categories = await categoryRepository.findByName(
-        name,
-        Number(limit)
+    const categories = await categoryRepository.findByName(name, Number(limit));
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          CategoryResponseCode.OK,
+          "Lấy danh mục thành công",
+          categories,
+        ),
       );
-      res.json(new ResponseObject(StatusCode.OK, "success", categories));
-    } catch (e) {
-      res
-        .status(400)
-        .json(new ResponseObject(StatusCode.BAD_REQUEST, "fail", null));
-    }
   };
 
   public getProductFromRootCategory = async (req: Request, res: Response) => {
@@ -144,8 +142,8 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Lấy danh sách sản phẩm thành công",
-          result
-        )
+          result,
+        ),
       );
   };
 
@@ -165,7 +163,7 @@ class CategoryController {
           HttpStatus.NOT_FOUND,
           CategoryResponseCode.PARENT_NOT_FOUND,
           "Không tìm thấy danh mục cha",
-          true
+          true,
         );
 
       // Kiểm tra parent là cấp nhỏ nhất - level == 3
@@ -174,7 +172,7 @@ class CategoryController {
           HttpStatus.CONFLICT,
           CategoryResponseCode.INVALID_PARENT,
           "Không thể thuộc danh mục con nhỏ nhất",
-          true
+          true,
         );
       level = parent.level + 1;
     }
@@ -191,7 +189,7 @@ class CategoryController {
       imageUrl = await storage.save(
         file.buffer,
         String(Date.now()),
-        file.mimetype
+        file.mimetype,
       );
     }
 
@@ -211,8 +209,8 @@ class CategoryController {
         successResponse(
           AddressResponseCode.OK,
           "Tạo danh mục thành công",
-          category
-        )
+          category,
+        ),
       );
   };
   public update = async (req: Request, res: Response) => {
@@ -230,7 +228,7 @@ class CategoryController {
         HttpStatus.NOT_FOUND,
         CategoryResponseCode.NOT_FOUND,
         "Không tìm thấy danh mục",
-        true
+        true,
       );
     // Nếu có truyền parentId khác với parentId cũ
     if (parentId !== undefined && parentId !== oldCategory.parentId) {
@@ -241,7 +239,7 @@ class CategoryController {
           HttpStatus.NOT_FOUND,
           CategoryResponseCode.PARENT_NOT_FOUND,
           "Không tìm thấy thư mục cha",
-          true
+          true,
         );
       // Chỉ thay đổi parent cùng bậc
       if (newParent.level !== oldCategory.level - 1)
@@ -249,7 +247,7 @@ class CategoryController {
           HttpStatus.UNPROCESSABLE_ENTITY,
           CategoryResponseCode.INVALID_PARENT,
           "Chỉ được chuyển danh mục trong cùng bậc",
-          true
+          true,
         );
     }
     // Kiểm tra image
@@ -284,8 +282,8 @@ class CategoryController {
         successResponse(
           CategoryResponseCode.OK,
           "Cập nhật danh mục thành công",
-          newCategory
-        )
+          newCategory,
+        ),
       );
   };
   public delete = async (req: Request, res: Response) => {
@@ -299,7 +297,7 @@ class CategoryController {
       await storage.delete(deleted.imageUrl);
     }
     logger.info(
-      `[${res.locals.requestId}] Admin ${sub} deleted category: ${deleted.name}`
+      `[${res.locals.requestId}] Admin ${sub} deleted category: ${deleted.name}`,
     );
     res
       .status(HttpStatus.OK)

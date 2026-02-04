@@ -10,7 +10,7 @@ import {
   getProductFromRootCategorySchema,
   udpateCategorySchema,
 } from "../schemas/category.schema";
-import { upload } from "../utils/multer";
+import { upload } from "../utils/multer.util";
 import { deleteAddressSchema } from "../schemas/address.schema";
 
 const categoryRouter = express.Router();
@@ -24,14 +24,14 @@ categoryRouter.get(path, categoryController.getAll4User);
 categoryRouter.get(
   path + "/:slug",
   validate(getCategoryBySlugSchema),
-  categoryController.getBySlug
+  categoryController.getBySlug,
 );
 
 // GET /category/:id/showroom
 categoryRouter.get(
   path + "/:id/showroom",
   validate(getProductFromRootCategorySchema),
-  categoryController.getProductFromRootCategory
+  categoryController.getProductFromRootCategory,
 );
 
 // GET /admin/category
@@ -39,7 +39,7 @@ categoryRouter.get(
   adminPath,
   jwtMiddleware,
   authorize([Role.ADMIN]),
-  categoryController.getAll4Admin
+  categoryController.getAll4Admin,
 );
 
 // GET /admin/category/leaf
@@ -47,7 +47,7 @@ categoryRouter.get(
   adminPath + "/leaf",
   jwtMiddleware,
   authorize([Role.ADMIN]),
-  categoryController.getLeafCategory
+  categoryController.getLeafCategory,
 );
 
 // GET /admin/category/:id
@@ -55,12 +55,12 @@ categoryRouter.get(
   adminPath + "/:id",
   jwtMiddleware,
   authorize([Role.ADMIN]),
-  categoryController.getById
+  categoryController.getById,
 );
 
 categoryRouter.get(
   path + "/overview",
-  categoryController.getProductFromRootCategory
+  categoryController.getProductFromRootCategory,
 );
 
 // POST /admin/category
@@ -70,7 +70,7 @@ categoryRouter.post(
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(createCategorySchema),
-  categoryController.create
+  categoryController.create,
 );
 
 // PUT /admin/category/:id
@@ -80,7 +80,7 @@ categoryRouter.put(
   authorize([Role.ADMIN]),
   upload.single("image"),
   validate(udpateCategorySchema),
-  categoryController.update
+  categoryController.update,
 );
 
 // DELETE /admin/category/:id
@@ -89,7 +89,7 @@ categoryRouter.delete(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(deleteAddressSchema),
-  categoryController.delete
+  categoryController.delete,
 );
 
 export default categoryRouter;

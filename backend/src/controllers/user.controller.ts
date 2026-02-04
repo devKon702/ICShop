@@ -3,9 +3,13 @@ import { UpdateUserIType, updateUserSchema } from "../schemas/user.schema";
 import { TokenPayload } from "../types/token-payload";
 import userRepository from "../repositories/user.repository";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { UserResponseCode } from "../constants/codes/user.code";
-import { getFileName, handleImagesUpload, validateFile } from "../utils/file";
+import {
+  getFileName,
+  handleImagesUpload,
+  validateFile,
+} from "../utils/file.util";
 import storage from "../storage";
 import { AccessTokenPayload } from "../services/jwt.service";
 
@@ -106,8 +110,8 @@ class UserController {
         successResponse(
           UserResponseCode.OK,
           "Cập nhật thông tin thành công",
-          restUser
-        )
+          restUser,
+        ),
       );
   };
 }

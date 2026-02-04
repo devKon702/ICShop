@@ -10,7 +10,7 @@ import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { AttrValResponseCode } from "../constants/codes/attribute-value.code";
 import attributeValueRepository from "../repositories/attribute-value.repository";
-import { successResponse } from "../utils/response";
+import { successResponse } from "../utils/response.util";
 import { AccessTokenPayload } from "../services/jwt.service";
 
 class AttributeValueController {
@@ -26,7 +26,7 @@ class AttributeValueController {
         HttpStatus.NOT_FOUND,
         AttrValResponseCode.ATTR_NOT_FOUND,
         "Không tìm thấy thông số",
-        true
+        true,
       );
     const attrVal = await attributeValueRepository.create(sub, {
       attributeId,
@@ -38,8 +38,8 @@ class AttributeValueController {
         successResponse(
           AttrValResponseCode.OK,
           "Tạo giá trị thành công",
-          attrVal
-        )
+          attrVal,
+        ),
       );
   };
   public update = async (req: Request, res: Response) => {
@@ -55,7 +55,7 @@ class AttributeValueController {
         HttpStatus.NOT_FOUND,
         AttrValResponseCode.NOT_FOUND,
         "Không tìm thấy thông số",
-        true
+        true,
       );
     res
       .status(HttpStatus.OK)
@@ -63,8 +63,8 @@ class AttributeValueController {
         successResponse(
           AttrValResponseCode.OK,
           "Cập nhật giá trị thành công",
-          newVal
-        )
+          newVal,
+        ),
       );
   };
   public delete = async (req: Request, res: Response) => {

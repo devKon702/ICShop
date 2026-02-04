@@ -10,12 +10,12 @@ const logFormat = printf(({ level, message, timestamp, stack }) => {
 });
 
 // log level: error > warn > info > http > verbose > debug > silly
-
+/** Winston Logger của app */
 export const logger = winston.createLogger({
   level: env.NODE_ENV === "production" ? "info" : "debug",
   format: combine(
     timestamp({ format: "YYYY-MM-DD HH:mm::ss.SSS" }),
-    errors({ stack: true })
+    errors({ stack: true }),
   ),
   transports: [
     new winston.transports.Console({
