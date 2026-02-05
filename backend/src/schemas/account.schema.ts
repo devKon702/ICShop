@@ -54,7 +54,13 @@ export const changeAccountStatusSchema = z.object({
   }),
 });
 
-export const updateMyEmailSchema = requestSchema({
+export const sendUpdateUserEmailOtpSchema = requestSchema({
+  body: z.object({
+    email: z.string().email("Email không hợp lệ"),
+  }),
+});
+
+export const updateUserEmailSchema = requestSchema({
   body: z.object({
     email: z.string().email("Email không hợp lệ"),
     otp: z.string().length(6, "Mã OTP gồm 6 ký tự"),

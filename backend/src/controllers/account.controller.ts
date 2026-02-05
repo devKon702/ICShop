@@ -9,14 +9,20 @@ import {
   filterAccountSchema,
   getAccountInfoSchema,
   changeAccountStatusSchema,
-  updateMyEmailSchema,
+  updateUserEmailSchema,
+  sendUpdateUserEmailOtpSchema,
 } from "../schemas/account.schema";
 import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt.util";
 import { sanitizeData } from "../utils/sanitize.util";
-import emailOptService from "../services/otp/opt.service";
 import { NotFoundError } from "../errors/not-found.error";
 import { AccessTokenPayload } from "../services/jwt.service";
+import {
+  OtpChannel,
+  otpPolicies,
+  OtpPurpose,
+  otpService,
+} from "../services/otp";
 
 class AccountController {
   public getInfo = async (req: Request, res: Response) => {
@@ -193,11 +199,32 @@ class AccountController {
     return;
   };
 
-  public updateMyEmail = async (req: Request, res: Response) => {
+  public sendUpdateUserEmailOtp = async (req: Request, res: Response) => {
+    const { sub } = res.locals.auth as AccessTokenPayload;
+    const {
+      body: { email },
+    } = sendUpdateUserEmailOtpSchema.parse(req);
+    const policy = otpPolicies.CHANGE_EMAIL;
+    const account = await accountRepository.findByEmail(email);
+    const expiresAt = !account
+      ? await otpService.sendOtp({
+          target: email,
+          channel: OtpChannel.EMAIL,
+          purpose: OtpPurpose.CHANGE_EMAIL,
+        })
+      : new Date(Date.now() + policy.ttlSecs * 1000);
+    res.status(HttpStatus.OK).json(
+      successResponse(AccountResponseCode.OK, "Gửi OTP thành công", {
+        expiresAt,
+      }),
+    );
+  };
+
+  public updateUserEmail = async (req: Request, res: Response) => {
     const { sub } = res.locals.auth as AccessTokenPayload;
     const {
       body: { email, otp },
-    } = updateMyEmailSchema.parse(req);
+    } = updateUserEmailSchema.parse(req);
     const account = await accountRepository.findByUserId(sub);
     if (!account) {
       throw new NotFoundError(
@@ -213,6 +240,22 @@ class AccountController {
         true,
       );
     }
+    // Check OTP
+    if (
+      !(await otpService.verifyOtp({
+        target: email,
+        channel: OtpChannel.EMAIL,
+        purpose: OtpPurpose.CHANGE_EMAIL,
+        code: otp,
+      }))
+    ) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AccountResponseCode.INVALID_OTP,
+        "Mã OTP không hợp lệ",
+        true,
+      );
+    }
     // Check unique email including this account
     const existingAccountByEmail = await accountRepository.findByEmail(email);
     if (existingAccountByEmail) {
@@ -223,17 +266,14 @@ class AccountController {
         true,
       );
     }
-    // Check OTP
-    if (!(await emailOptService.verify(email, otp))) {
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        AccountResponseCode.INVALID_OTP,
-        "Mã OTP không hợp lệ",
-        true,
-      );
-    }
     // Update email
     const result = await accountRepository.update(account.id, sub, { email });
+    // Revoke OTP
+    await otpService.revokeOtp({
+      target: email,
+      channel: OtpChannel.EMAIL,
+      purpose: OtpPurpose.CHANGE_EMAIL,
+    });
 
     res.status(HttpStatus.OK).json(
       successResponse(AccountResponseCode.OK, "Cập nhật email thành công", {

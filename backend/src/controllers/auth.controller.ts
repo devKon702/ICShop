@@ -104,13 +104,10 @@ class AuthController {
 
   public async sendEmailOTP(req: Request, res: Response) {
     const {
-      body: { email, requireExistence },
+      body: { email },
     } = sendEmailOTPSchema.parse(req);
     // Service
-    const { expiresAt } = await authService.sendEmailOtp(
-      email,
-      requireExistence,
-    );
+    const { expiresAt } = await authService.sendUserRegisterOtp(email);
     // Response
     res.status(HttpStatus.OK).json(
       successResponse(AuthResponseCode.OK, "Gửi OTP thành công", {

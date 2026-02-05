@@ -26,14 +26,17 @@ authRouter.post(
   path + "/login",
   createRateLimiter(RateLimitPolicies.LOGIN, { skipIncrement: () => true }),
   validate(loginSchema),
-  createFailureLimiter(RateLimitPolicies.LOGIN, authController.login(Role.USER))
+  createFailureLimiter(
+    RateLimitPolicies.LOGIN,
+    authController.login(Role.USER),
+  ),
 );
 
 // POST /auth/google
 authRouter.post(
   path + "/google",
   validate(loginWithGoogleSchema),
-  createFailureLimiter(RateLimitPolicies.LOGIN, authController.loginWithGoogle)
+  createFailureLimiter(RateLimitPolicies.LOGIN, authController.loginWithGoogle),
 );
 
 // POST /admin/auth/login
@@ -42,8 +45,8 @@ authRouter.post(
   validate(loginSchema),
   createFailureLimiter(
     RateLimitPolicies.ADMIN_LOGIN,
-    authController.login(Role.ADMIN)
-  )
+    authController.login(Role.ADMIN),
+  ),
 );
 
 // POST /auth/signup
@@ -51,7 +54,7 @@ authRouter.post(
   path + "/signup",
   createRateLimiter(RateLimitPolicies.REGISTER),
   validate(signupSchema),
-  authController.signup
+  authController.signup,
 );
 
 // POST /auth/logout
@@ -59,22 +62,22 @@ authRouter.post(
   path + "/logout",
   jwtMiddleware,
   createRateLimiter(RateLimitPolicies.LOG_OUT),
-  authController.logout
+  authController.logout,
 );
 
 // POST /auth/refresh
 authRouter.post(
   path + "/refresh",
   createRateLimiter(RateLimitPolicies.REFRESH_TOKEN),
-  authController.refresh
+  authController.refresh,
 );
 
 // POST /auth/otp
 authRouter.post(
-  path + "/otp",
+  path + "/signup/send-otp",
   createRateLimiter(RateLimitPolicies.SENT_OTP),
   validate(sendEmailOTPSchema),
-  authController.sendEmailOTP
+  authController.sendEmailOTP,
 );
 
 // POST /auth/forgot-password
@@ -82,14 +85,14 @@ authRouter.post(
   path + "/forgot-password",
   createRateLimiter(RateLimitPolicies.FORGOT_PASSWORD),
   validate(forgotPasswordSchema),
-  authController.forgotPassword
+  authController.forgotPassword,
 );
 
 // POST /auth/reset-password
 authRouter.post(
   path + "/reset-password",
   validate(resetPasswordSchema),
-  authController.resetPassword
+  authController.resetPassword,
 );
 
 // POST /auth/testToken
@@ -104,7 +107,7 @@ authRouter.get(
     max: 3,
     type: "CAPTCHA",
   }),
-  authController.test
+  authController.test,
 );
 
 export default authRouter;

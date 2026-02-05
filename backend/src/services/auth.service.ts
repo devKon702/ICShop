@@ -347,23 +347,21 @@ class AuthService {
     return { accessToken };
   };
 
-  public async sendEmailOtp(
+  public async sendUserRegisterOtp(
     email: string,
-    requireExistence?: boolean,
   ): Promise<{ expiresAt: Date }> {
-    const policy = otpPolicies.CHANGE_EMAIL;
-    if (requireExistence !== undefined) {
-      const existAccount = await accountRepository.findByEmail(email);
-      // If email already exists
-      if (!!existAccount === requireExistence) {
-        const expiresAt = await otpService.sendOtp({
-          target: email,
-          channel: OtpChannel.EMAIL,
-          purpose: OtpPurpose.CHANGE_EMAIL,
-        });
-        return { expiresAt };
-      }
+    const policy = otpPolicies.REGISTER;
+    const existAccount = await accountRepository.findByEmail(email);
+    // Send OTP If email not used
+    if (!existAccount) {
+      const expiresAt = await otpService.sendOtp({
+        target: email,
+        channel: OtpChannel.EMAIL,
+        purpose: OtpPurpose.CHANGE_EMAIL,
+      });
+      return { expiresAt };
     }
+    // If email is used -> only send expire time
     const expiresAt = new Date(Date.now() + policy.ttlSecs * 1000);
     return { expiresAt };
   }

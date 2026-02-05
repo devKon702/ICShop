@@ -7,7 +7,8 @@ import {
   filterAccountSchema,
   getAccountInfoSchema,
   changeAccountStatusSchema,
-  updateMyEmailSchema,
+  updateUserEmailSchema,
+  sendUpdateUserEmailOtpSchema,
 } from "../schemas/account.schema";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
@@ -19,7 +20,7 @@ const path = "/account";
 accountRouter.get(
   path + "/me",
   jwtMiddleware,
-  accountController.getMyInformation
+  accountController.getMyInformation,
 );
 
 // GET /account/:id
@@ -28,7 +29,7 @@ accountRouter.get(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(getAccountInfoSchema),
-  accountController.getInfo
+  accountController.getInfo,
 );
 
 // GET /account?name=&email=&phone=&page=&limit=&role=
@@ -37,7 +38,16 @@ accountRouter.get(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(filterAccountSchema),
-  accountController.filter
+  accountController.filter,
+);
+
+// POST /account/change-email/send-otp
+accountRouter.post(
+  path + "/change-email/send-otp",
+  jwtMiddleware,
+  authorize([Role.USER]),
+  validate(sendUpdateUserEmailOtpSchema),
+  accountController.sendUpdateUserEmailOtp,
 );
 
 // PATCH /account/password
@@ -45,7 +55,7 @@ accountRouter.patch(
   path + "/password",
   jwtMiddleware,
   validate(changePasswordSchema),
-  accountController.changePassword
+  accountController.changePassword,
 );
 
 // PATCH /account/status
@@ -54,15 +64,16 @@ accountRouter.patch(
   jwtMiddleware,
   authorize([Role.ADMIN]),
   validate(changeAccountStatusSchema),
-  accountController.changeStatus
+  accountController.changeStatus,
 );
 
-// PATCH /account/email
+// PATCH /account/change-email
 accountRouter.patch(
-  path + "/email",
+  path + "/change-email",
   jwtMiddleware,
-  validate(updateMyEmailSchema),
-  accountController.updateMyEmail
+  validate(updateUserEmailSchema),
+  authorize([Role.USER]),
+  accountController.updateUserEmail,
 );
 
 export default accountRouter;
