@@ -1,21 +1,17 @@
 import { Environment } from "@prisma/client";
 import { env } from "../constants/env";
 import paymentMethodRepository from "../repositories/payment-method.repository";
-import { findByIdSchema } from "../schemas/shared.schema";
 import { NotFoundError } from "../errors/not-found.error";
 import { PaymentResponseCode } from "../constants/codes/payment.code";
 import { HttpStatus } from "../constants/http-status";
-import { successResponse } from "../utils/response.util";
-import { sanitize } from "dompurify";
-import { sanitizeData } from "../utils/sanitize.util";
 import { Role } from "../constants/db";
+import { z } from "zod";
+import { AppError } from "../errors/app.error";
+import paymentConfigRepository from "../repositories/payment-config.repository";
 import {
   PaymentPrivateConfigSchemas,
   PaymentPublicConfigSchemas,
 } from "../schemas/payment";
-import { z } from "zod";
-import { AppError } from "../errors/app.error";
-import paymentConfigRepository from "../repositories/payment-config.repository";
 
 class PaymentService {
   public async getPayments() {
@@ -155,4 +151,4 @@ class PaymentService {
   }
 }
 
-export default new PaymentService();
+export const paymentService = new PaymentService();

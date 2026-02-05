@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentType } from "../../constants/payment";
+import { PaymentType } from "../../../constants/payment";
 
 export const VietQrPublicConfigSchema = z.object({
   type: z.literal(PaymentType.VietQR),

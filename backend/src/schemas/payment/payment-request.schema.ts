@@ -1,19 +1,11 @@
 import { z } from "zod";
-import {
-  VietQrPrivateConfigSchema,
-  VietQrPublicConfigSchema,
-} from "./vietqr.schema";
 import { idStringSchema, requestSchema } from "../shared.schema";
 import { PaymentType } from "../../constants/payment";
 import { Environment } from "@prisma/client";
-
-export const PaymentPublicConfigSchemas = z.discriminatedUnion("type", [
-  VietQrPublicConfigSchema,
-]);
-
-export const PaymentPrivateConfigSchemas = z.discriminatedUnion("type", [
-  VietQrPrivateConfigSchema,
-]);
+import {
+  PaymentPrivateConfigSchemas,
+  PaymentPublicConfigSchemas,
+} from "./configs/payment.schema";
 
 export const createPaymentMethodSchema = requestSchema({
   body: z.object({
