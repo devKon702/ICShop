@@ -14,15 +14,13 @@ import storage from "../storage";
 import { logger } from "../utils/logger.util";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
 import { JWTError } from "../errors/jwt.error";
-import otpService from "./otp/opt.service";
 import sessionRepository from "../repositories/session.repository";
 import redisService, { redisKeys } from "./redis.service";
 import sessionService from "./session.service";
-import crypto, { hash } from "crypto";
+import crypto from "crypto";
 import mailService from "./mail.service";
 import { generateResetPasswordHtml } from "../utils/html.util";
-import { ICaptchaService, TurnstileCaptchaService } from "./captcha.service";
-import { SecurityResponseCode } from "../constants/codes/security.code";
+import { OtpChannel, otpPolicies, OtpPurpose, otpService } from "./otp";
 
 class AuthService {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -244,7 +242,12 @@ class AuthService {
     otp: string;
   }) => {
     // Verify OTP
-    const savedOtp = await otpService.verify(email, otp);
+    const savedOtp = await otpService.verifyOtp({
+      channel: OtpChannel.EMAIL,
+      target: email,
+      code: otp,
+      purpose: OtpPurpose.REGISTER,
+    });
     if (!savedOtp) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
@@ -271,6 +274,12 @@ class AuthService {
       phone,
       provider: "local",
       role: Role.USER,
+    });
+    // Revoke OTP
+    await otpService.revokeOtp({
+      target: email,
+      channel: OtpChannel.EMAIL,
+      purpose: OtpPurpose.REGISTER,
     });
     return newAccount;
   };
@@ -338,21 +347,24 @@ class AuthService {
     return { accessToken };
   };
 
-  public async sendEmailOtp(email: string, requireExistence?: boolean) {
-    const expiredInSeconds = 5 * 60; // 5 minutes
+  public async sendEmailOtp(
+    email: string,
+    requireExistence?: boolean,
+  ): Promise<{ expiresAt: Date }> {
+    const policy = otpPolicies.CHANGE_EMAIL;
     if (requireExistence !== undefined) {
       const existAccount = await accountRepository.findByEmail(email);
       // If email already exists
       if (!!existAccount === requireExistence) {
-        const otp = otpService.generateOTP(6);
-        // Save and send OTP
-        await Promise.all([
-          otpService.save(email, otp, expiredInSeconds),
-          otpService.send(email, otp, expiredInSeconds),
-        ]);
+        const expiresAt = await otpService.sendOtp({
+          target: email,
+          channel: OtpChannel.EMAIL,
+          purpose: OtpPurpose.CHANGE_EMAIL,
+        });
+        return { expiresAt };
       }
     }
-    const expiresAt = new Date(Date.now() + expiredInSeconds * 1000);
+    const expiresAt = new Date(Date.now() + policy.ttlSecs * 1000);
     return { expiresAt };
   }
 
