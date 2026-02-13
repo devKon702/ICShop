@@ -1,6 +1,8 @@
 export enum OtpPurpose {
   REGISTER = "REGISTER",
   CHANGE_EMAIL = "CHANGE_EMAIL",
+  ADMIN_CHANGE_EMAIL = "ADMIN_CHANGE_EMAIL",
+  // ADMIN_CHANGE_PASSWORD = "ADMIN_CHANGE_PASSWORD",
 }
 
 export enum OtpChannel {

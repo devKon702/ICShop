@@ -42,4 +42,17 @@ export const otpPolicies = {
         }),
     },
   },
+  ADMIN_CHANGE_EMAIL: {
+    ttlSecs: 5 * 60,
+    channels: [OtpChannel.EMAIL],
+    purpose: OtpPurpose.ADMIN_CHANGE_EMAIL,
+    templates: {
+      EMAIL: (ttlSecs, code) =>
+        generateOTPHtml({
+          appName: env.APP_NAME,
+          expiredInSeconds: ttlSecs,
+          otp: code,
+        }),
+    },
+  },
 } satisfies Record<OtpPurpose, OtpPolicy>;

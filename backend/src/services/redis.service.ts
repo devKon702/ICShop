@@ -11,6 +11,7 @@ export const redisKeys = {
   rateLimit: (policyName: string, actor: string) => `rl:${policyName}:${actor}`,
   captchaPassed: (policyName: string, actor: string) =>
     `captcha:passed:${policyName}:${actor}`,
+  securityToken: (token: string) => `security:token:${token}`,
 } as const;
 
 class RedisService {
