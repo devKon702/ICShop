@@ -1,9 +1,6 @@
 import { randomBytes } from "crypto";
 import { SecurityAction } from "./security-token.constant";
 import redisService, { redisKeys } from "../redis.service";
-import { AppError } from "../../errors/app.error";
-import { HttpStatus } from "../../constants/http-status";
-import { SecurityResponseCode } from "../../constants/codes/security.code";
 
 interface SecurityTokenPayload {
   action: SecurityAction;
@@ -11,6 +8,7 @@ interface SecurityTokenPayload {
     userId?: number;
     email?: string;
     password?: string;
+    token?: string;
   };
 }
 
@@ -18,7 +16,7 @@ class SecurityTokenService {
   /**
    * Hàm tạo và lưu token cho các hành động bảo mật
    * @param payload Data lưu theo token, chứa các trường cần thiết cho action
-   * @param ttlSeconds Thời gian sống của token
+   * @param ttlSeconds Thời gian sống của token (giây)
    * @returns
    */
   public async create(
@@ -43,18 +41,11 @@ class SecurityTokenService {
   public async verify(
     token: string,
     expectedAction: SecurityAction,
-  ): Promise<SecurityTokenPayload> {
+  ): Promise<SecurityTokenPayload | null> {
     const payload = await redisService.getValue<SecurityTokenPayload>(
       redisKeys.securityToken(token),
     );
-    if (!payload || payload.action !== expectedAction)
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        SecurityResponseCode.INVALID_TOKEN,
-        "Token không hợp lệ",
-        true,
-      );
-
+    if (!payload || payload.action !== expectedAction) return null;
     return payload;
   }
 

@@ -202,3 +202,183 @@ export const generateOTPHtml = (config: {
   </body>
 </html>`;
 };
+
+export const generateAdminChangeEmailRequest = (config: {
+  appName: string;
+  confirmLink: string;
+  rejectLink: string;
+  expiresInMins: number;
+}) => {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirm Email Change</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f5f6f8;font-family:Arial,Helvetica,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px;">
+            <tr>
+              <td style="text-align:center;font-size:24px;font-weight:bold;color:#333;">
+              ${config.appName}
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:20px;font-size:18px;color:#333;">
+              Xác nhận cập nhật địa chỉ email
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:10px;color:#555;font-size:14px;line-height:1.6;">
+              Có một yêu cầu cập nhật địa chỉ email cho tài khoản ${config.appName} của bạn. Nếu đó là bạn, hãy xác nhận bằng cách ấn vào nút bên dưới
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:30px;text-align:center;">
+                <a href="${config.confirmLink}"
+                  style="
+                    background:#4CAF50;
+                    color:white;
+                    padding:12px 24px;
+                    text-decoration:none;
+                    border-radius:6px;
+                    display:inline-block;
+                    font-weight:bold;
+                    margin-right:10px;"    
+                >
+                Xác nhận
+                </a>
+
+                <a href="${config.rejectLink}"
+                  style="
+                    background:#e53935;
+                    color:white;
+                    padding:12px 24px;
+                    text-decoration:none;
+                    border-radius:6px;
+                    display:inline-block;
+                    font-weight:bold;"
+                >
+                Không phải tôi
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <p style="font-size:13px;color:#777;">
+                Thao tác hết hạn sau <strong>${config.expiresInMins} phút</strong>.
+                </p>
+              </td>  
+            </tr>
+
+            <tr>
+              <td style="padding-top:30px;font-size:12px;color:#999;line-height:1.5;">
+              Nếu bạn không phải người gửi yêu cầu này, vui lòng ấn "Không phải tôi" hoặc bỏ qua email này.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+};
+
+export const generateAdminLockAccount = (config: {
+  appName: string;
+  expiresInHours: number;
+  link: string;
+}) => {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px;">
+            <tr>
+              <td style="text-align:center;font-size:24px;font-weight:bold;color:#333;">
+              ${config.appName}
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:25px;font-size:20px;font-weight:bold;color:#333;">
+              Thông báo thay đổi địa chỉ email
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:15px;font-size:14px;color:#555;line-height:1.6;">
+              Địa chỉ email liên kết với tài khoản của bạn vừa thay đổi thành công.
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:10px;font-size:14px;color:#555;line-height:1.6;">
+              Nếu đó là bạn, vui lòng bỏ qua thư này.
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:10px;font-size:14px;color:#555;line-height:1.6;">
+              Nếu bạn <strong>KHÔNG</strong> thực hiện thay đổi này, vui lòng ấn nút bên dưới để nhanh chóng khóa tài khoản của bạn.
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:30px;text-align:center;">
+
+                <a href="${config.link}"
+                  style="
+                    background:#e53935;
+                    color:white;
+                    padding:14px 28px;
+                    text-decoration:none;
+                    border-radius:6px;
+                    font-weight:bold;
+                    display:inline-block;
+                    font-size:15px;"
+                >
+                Khóa tài khoản
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:25px;font-size:13px;color:#777;">
+              Nếu nút phía trên không hoạt động hoặc không hiển thị, vui lòng copy và paste đường link sau vào trình duyệt để khóa tài khoản của bạn:
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:10px;font-size:13px;color:#555;word-break:break-all;">
+              <a href="${config.link}">${config.link}</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding-top:30px;font-size:12px;color:#999;line-height:1.6;">
+              Vì lí do bảo mật, thao tác sẽ hết hạn sau <strong>${config.expiresInHours}</strong> giờ.
+              </td>.
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+};

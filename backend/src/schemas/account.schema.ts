@@ -2,6 +2,7 @@ import { resourceLimits } from "worker_threads";
 import { z } from "zod";
 import { Role } from "../constants/db";
 import { requestSchema } from "./shared.schema";
+import { otpService } from "../services/otp";
 
 export const changePasswordSchema = z.object({
   body: z
@@ -67,11 +68,29 @@ export const updateUserEmailSchema = requestSchema({
   }),
 });
 
-export const adminUpdateEmail = requestSchema({
+export const adminRequestChangeEmailSchema = requestSchema({
   body: z.object({
-    newEmail: z.string().email("Email không hợp lệ"),
-    newEmailOtp: z.string().length(6, "Mã OTP gồm 6 ký tự"),
-    currentEmailOtp: z.string().length(6, "Mã OTP gồm 6 ký tự"),
+    password: z.string().nonempty(),
+  }),
+});
+
+export const adminRejectChangeEmailSchema = requestSchema({
+  body: z.object({
+    token: z.string().nonempty(),
+  }),
+});
+
+export const adminConfirmChangeEmailSchema = requestSchema({
+  body: z.object({
+    token: z.string().nonempty(),
+    newEmail: z.string().email(),
+    otp: z.string().nonempty(),
+  }),
+});
+
+export const adminLockAccountSchema = requestSchema({
+  body: z.object({
+    token: z.string().nonempty(),
   }),
 });
 

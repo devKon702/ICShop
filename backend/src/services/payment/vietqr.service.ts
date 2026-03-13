@@ -1,0 +1,1 @@
+class VietQrService implements PaymentService {}

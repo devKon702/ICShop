@@ -9,12 +9,23 @@ import {
   changeAccountStatusSchema,
   updateUserEmailSchema,
   sendUpdateUserEmailOtpSchema,
+  adminRequestChangeEmailSchema,
+  adminRejectChangeEmailSchema,
+  adminConfirmChangeEmailSchema,
+  adminLockAccountSchema,
 } from "../schemas/account.schema";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
+import {
+  createFailureLimiter,
+  createRateLimiter,
+  createSuccessLimiter,
+  RateLimitPolicies,
+} from "../middlewares/limiter.middleware";
 
 const accountRouter = express.Router();
 const path = "/account";
+const adminPath = "/admin/account";
 
 // GET /account/me
 accountRouter.get(
@@ -74,6 +85,38 @@ accountRouter.patch(
   validate(updateUserEmailSchema),
   authorize([Role.USER]),
   accountController.updateUserEmail,
+);
+
+// POST /admin/account/change-email/request
+accountRouter.post(
+  adminPath + "/change-email/request",
+  createRateLimiter(RateLimitPolicies.REQUEST_CHANGE_EMAIL_BY_IP),
+  jwtMiddleware,
+  authorize([Role.ADMIN]),
+  createRateLimiter(RateLimitPolicies.REQUEST_CHANGE_EMAIL_BY_USER),
+  validate(adminRequestChangeEmailSchema),
+  accountController.adminRequestChangeEmail,
+);
+
+// POST /admin/account/change-email/reject
+accountRouter.post(
+  adminPath + "/change-email/reject",
+  validate(adminRejectChangeEmailSchema),
+  accountController.adminRejectChangeEmail,
+);
+
+// POST /admin/account/change-email/confirm
+accountRouter.post(
+  adminPath + "/change-email/confirm",
+  validate(adminConfirmChangeEmailSchema),
+  accountController.adminConfirmChangeEmail,
+);
+
+// POST /admin/account/lock
+accountRouter.post(
+  adminPath + "/lock",
+  validate(adminLockAccountSchema),
+  accountController.adminLockAccount,
 );
 
 export default accountRouter;

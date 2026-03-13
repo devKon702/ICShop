@@ -66,6 +66,18 @@ export const RateLimitPolicies = {
     max: 10,
     type: "CAPTCHA",
   },
+  REQUEST_CHANGE_EMAIL_BY_IP: {
+    name: "REQUEST_CHANGE_EMAIL_BY_IP",
+    windowMs: 60_000,
+    max: 10,
+    type: "BLOCK",
+  },
+  REQUEST_CHANGE_EMAIL_BY_USER: {
+    name: "REQUEST_CHANGE_EMAIL_BY_USER",
+    windowMs: 10 * 60_000,
+    max: 5,
+    type: "BLOCK",
+  },
 } satisfies Record<
   string,
   { name: string; windowMs: number; max: number; type: "BLOCK" | "CAPTCHA" }
@@ -75,7 +87,7 @@ export const createRateLimiter = (
   policy: (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies],
   configs?: {
     skipIncrement?: (req: Request, res: Response) => boolean;
-  }
+  },
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const rateLimitService: IRateLimitService = new RedisRateLimitService();
@@ -91,7 +103,7 @@ export const createRateLimiter = (
         await rateLimitService.handleExceed(
           policy,
           actor,
-          req.headers["x-captcha-token"] as string | undefined
+          req.headers["x-captcha-token"] as string | undefined,
         );
       }
       if (!configs?.skipIncrement?.(req, res)) {
@@ -171,10 +183,10 @@ export const createFailureLimiter = (
   controller: (
     req: Request,
     res: Response,
-    next?: NextFunction
+    next?: NextFunction,
   ) => Promise<void>,
   actorType: "IP" | "USER" = "IP",
-  excludedCodes?: string[]
+  excludedCodes?: string[],
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const rateLimitService: IRateLimitService = new RedisRateLimitService();
@@ -198,8 +210,8 @@ export const createSuccessLimiter = (
   controller: (
     req: Request,
     res: Response,
-    next?: NextFunction
-  ) => Promise<void>
+    next?: NextFunction,
+  ) => Promise<void>,
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const rateLimitService: IRateLimitService = new RedisRateLimitService();
@@ -215,7 +227,7 @@ export const createSuccessLimiter = (
 };
 
 export const createEnforceRateLimiter = (
-  policy: (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies]
+  policy: (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies],
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {};
 };

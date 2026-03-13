@@ -11,6 +11,10 @@ import {
   changeAccountStatusSchema,
   updateUserEmailSchema,
   sendUpdateUserEmailOtpSchema,
+  adminRequestChangeEmailSchema,
+  adminRejectChangeEmailSchema,
+  adminConfirmChangeEmailSchema,
+  adminLockAccountSchema,
 } from "../schemas/account.schema";
 import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt.util";
@@ -23,6 +27,9 @@ import {
   OtpPurpose,
   otpService,
 } from "../services/otp";
+import { Role } from "../constants/db";
+import accountService from "../services/account.service";
+import { maskEmail } from "../utils/string.util";
 
 class AccountController {
   public getInfo = async (req: Request, res: Response) => {
@@ -282,7 +289,76 @@ class AccountController {
     );
   };
 
-  public async adminUpdateEmail(req: Request, res: Response) {}
+  public adminRequestChangeEmail = async (req: Request, res: Response) => {
+    const {
+      body: { password },
+    } = adminRequestChangeEmailSchema.parse(req);
+    const { sub } = res.locals.auth as AccessTokenPayload;
+    const account = await accountRepository.findByUserIdAndRole(
+      sub,
+      Role.ADMIN,
+    );
+    // For sure, account must be exists and available due to access token verify
+    if (!account)
+      throw new Error(
+        "Unexpected error: Valid JWT provided but account does not exist in the database.",
+      );
+    await accountService.adminRequestChangeEmail({
+      password,
+      account: { password: account.password!, email: account.email },
+    });
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AccountResponseCode.OK,
+          `Đã gửi yêu cầu cập nhật đến ${maskEmail(account.email)}`,
+        ),
+      );
+  };
+
+  public adminRejectChangeEmail = async (req: Request, res: Response) => {
+    const {
+      body: { token },
+    } = adminRejectChangeEmailSchema.parse(req);
+    await accountService.adminRejectChangeEmail(token);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AccountResponseCode.OK,
+          "Từ chối yêu cầu cập nhật email thành công",
+        ),
+      );
+  };
+
+  public adminConfirmChangeEmail = async (req: Request, res: Response) => {
+    const {
+      body: { token, newEmail, otp },
+    } = adminConfirmChangeEmailSchema.parse(req);
+    await accountService.adminConfirmChangeEmail({
+      confirmToken: token,
+      newEmail,
+      otp,
+    });
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(AccountResponseCode.OK, "Cập nhật email thành công"),
+      );
+  };
+
+  public adminLockAccount = async (req: Request, res: Response) => {
+    const {
+      body: { token },
+    } = adminLockAccountSchema.parse(req);
+    await accountService.adminLockAccount(token);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(AccountResponseCode.OK, "Đã khóa tài khoản thành công"),
+      );
+  };
 }
 
 export default new AccountController();
