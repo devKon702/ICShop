@@ -15,6 +15,8 @@ import {
   adminRejectChangeEmailSchema,
   adminConfirmChangeEmailSchema,
   adminLockAccountSchema,
+  adminRequestChangePasswordSchema,
+  adminConfirmChangePasswordSchema,
 } from "../schemas/account.schema";
 import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt.util";
@@ -357,6 +359,38 @@ class AccountController {
       .status(HttpStatus.OK)
       .json(
         successResponse(AccountResponseCode.OK, "Đã khóa tài khoản thành công"),
+      );
+  };
+
+  public adminRequestChangePassword = async (req: Request, res: Response) => {
+    const {
+      body: { newPassword, oldPassword },
+    } = adminRequestChangePasswordSchema.parse(req);
+    const { sub } = res.locals.auth as AccessTokenPayload;
+    await accountService.adminRequestChangePassword({
+      oldPassword,
+      newPassword,
+      userId: sub,
+    });
+
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          AccountResponseCode.OK,
+          "Thư xác thực được gửi đến email của bạn",
+        ),
+      );
+  };
+  public adminConfirmChangePassword = async (req: Request, res: Response) => {
+    const {
+      body: { token },
+    } = adminConfirmChangePasswordSchema.parse(req);
+    await accountService.adminConfirmChangePassword(token);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(AccountResponseCode.OK, "Cập nhật mật khẩu thành công"),
       );
   };
 }

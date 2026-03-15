@@ -6,13 +6,15 @@ import { HttpStatus } from "../constants/http-status";
 import { AppError } from "../errors/app.error";
 import { NotFoundError } from "../errors/not-found.error";
 import accountRepository from "../repositories/account.repository";
-import { compareString } from "../utils/bcrypt.util";
+import { compareString, hashString } from "../utils/bcrypt.util";
 import {
   generateAdminChangeEmailRequest,
+  generateAdminConfirmChangePassword,
   generateAdminLockAccount,
 } from "../utils/html.util";
 import mailService from "./mail.service";
 import { OtpChannel, OtpPurpose, otpService } from "./otp";
+import { redisKeys } from "./redis.service";
 import { SecurityAction } from "./security";
 import securityTokenService from "./security/security-token.service";
 
@@ -49,8 +51,8 @@ class AccountService {
       },
       ttlSeconds,
     );
-    const confirmLink = `${env.APP_NAME}/admin/change-email/confirm?token=${confirmToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000)}`;
-    const rejectLink = `${env.APP_NAME}/admin/change-email/reject?token=${rejectToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000)}`;
+    const confirmLink = `${env.APP_NAME}/admin/change-email/confirm?token=${confirmToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
+    const rejectLink = `${env.APP_NAME}/admin/change-email/reject?token=${rejectToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
 
     await mailService.send({
       to: data.account.email,
@@ -65,6 +67,7 @@ class AccountService {
   }
 
   public async adminRejectChangeEmail(rejectToken: string) {
+    // Veiry reject token from user
     const rejectPayload = await securityTokenService.verify(
       rejectToken,
       SecurityAction.REJECT_CHANGE_EMAIL,
@@ -77,6 +80,7 @@ class AccountService {
         true,
       );
     }
+    // Revoken reject and confirm token (saved in payload of reject token)
     const confirmToken = rejectPayload.metadata.token;
     if (!confirmToken)
       throw new Error("Cannot find token in security payload from redis");
@@ -92,6 +96,7 @@ class AccountService {
     newEmail: string;
     otp: string;
   }) {
+    // Verify confirm token from user
     const confirmPayload = await securityTokenService.verify(
       input.confirmToken,
       SecurityAction.CONFIRM_CHANGE_EMAIL,
@@ -124,7 +129,7 @@ class AccountService {
         true,
       );
     }
-    // Check if email is used
+    // Check if new email is used
     const emailExisted = !!(await accountRepository.findByEmail(
       input.newEmail,
     ));
@@ -136,7 +141,7 @@ class AccountService {
         true,
       );
     }
-    // Check if OTP is valid
+    // Check if OTP (for verifying new email) is valid
     const emailValid = await otpService.verifyOtp({
       target: input.newEmail,
       channel: OtpChannel.EMAIL,
@@ -155,13 +160,21 @@ class AccountService {
     await accountRepository.update(account.id, account.user!.id, {
       email: input.newEmail,
     });
-    // Revoke OTP
-    await otpService.revokeOtp({
-      target: input.newEmail,
-      channel: OtpChannel.EMAIL,
-      purpose: OtpPurpose.ADMIN_CHANGE_EMAIL,
+    // Revoke confirm token and OTP
+    const revokeResults = await Promise.allSettled([
+      securityTokenService.revoke(input.confirmToken),
+      otpService.revokeOtp({
+        target: input.newEmail,
+        channel: OtpChannel.EMAIL,
+        purpose: OtpPurpose.ADMIN_CHANGE_EMAIL,
+      }),
+    ]);
+    // Log out error if some fail
+    revokeResults.forEach((item) => {
+      if (item.status === "rejected")
+        console.error("Revoke error: " + item.reason);
     });
-    // Send notification email and lock account form to old email
+    // Send notification email and lock-account form to old email
     const lockTokenExpiresInHours = 6;
     const { token, expiresAt } = await securityTokenService.create(
       {
@@ -172,7 +185,7 @@ class AccountService {
       },
       lockTokenExpiresInHours * 60 * 60,
     );
-    const lockLink = `${env.APP_BASE_URL}/admin/account/lock?token=${token}&expiresAt=${expiresAt}`;
+    const lockLink = `${env.APP_BASE_URL}/admin/account/lock?token=${token}&expiresAt=${expiresAt.toISOString()}`;
     await mailService.send({
       to: oldEmail,
       subject: `${env.APP_NAME} - Thông báo email thay đổi`,
@@ -209,6 +222,100 @@ class AccountService {
     }
     await accountRepository.update(account.id, account.user!.id, {
       isActive: false,
+    });
+  }
+
+  public async adminRequestChangePassword(input: {
+    userId: number;
+    oldPassword: string;
+    newPassword: string;
+  }) {
+    const ttlMinutes = 180;
+    // Get account
+    const account = await accountRepository.findByUserId(input.userId);
+    if (!account)
+      throw new NotFoundError(
+        AccountResponseCode.NOT_FOUND,
+        "Không tìm thấy tài khoản",
+      );
+    // Check password
+    if (
+      !account.password ||
+      !compareString(input.oldPassword, account.password)
+    ) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        AccountResponseCode.WRONG_PASSWORD,
+        "Mật khẩu hiện tại không đúng",
+        true,
+      );
+    }
+    // Create confirm and lock token
+    const { token: confirmToken, expiresAt: confirmExpiresAt } =
+      await securityTokenService.create(
+        {
+          action: SecurityAction.ADMIN_CHANGE_PASSWORD,
+          metadata: {
+            userId: input.userId,
+            password: await hashString(input.newPassword),
+          },
+        },
+        ttlMinutes * 60,
+      );
+    const { token: lockToken, expiresAt: lockExpiresAt } =
+      await securityTokenService.create(
+        {
+          action: SecurityAction.LOCK_ACCOUNT,
+          metadata: {
+            userId: input.userId,
+          },
+        },
+        ttlMinutes * 60,
+      );
+    // Create magic links and send to email
+    const confirmLink = `${env.APP_BASE_URL}/admin/change-password?token=${confirmToken}&expiresAt=${confirmExpiresAt.toISOString()}`;
+    const lockLink = `${env.APP_BASE_URL}/admin/change-password?token=${lockToken}&expiresAt=${lockExpiresAt.toISOString()}`;
+    await mailService.send({
+      to: account.email,
+      subject: `${env.APP_NAME} - Thay đổi mật khẩu`,
+      html: generateAdminConfirmChangePassword({
+        appName: env.APP_NAME,
+        confirmLink,
+        lockLink,
+        expireMinutes: Math.round(ttlMinutes),
+      }),
+    });
+  }
+
+  public async adminConfirmChangePassword(token: string) {
+    const confirmPayload = await securityTokenService.verify(
+      token,
+      SecurityAction.ADMIN_CHANGE_PASSWORD,
+    );
+    if (!confirmPayload) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        SecurityResponseCode.INVALID_TOKEN,
+        "Token không hợp lệ",
+        true,
+      );
+    }
+    // userId and password should be provided when request
+    const { userId, password: hashedPassword } = confirmPayload.metadata;
+    if (!userId) {
+      throw new Error("Expected userId missing from payload");
+    }
+    if (!hashedPassword) {
+      throw new Error("Expected password missing from payload");
+    }
+
+    // Update password
+    const account = await accountRepository.findByUserId(userId);
+    if (!account) {
+      throw new NotFoundError(AccountResponseCode.NOT_FOUND);
+    }
+    await accountRepository.update(account.id, userId, {
+      password: hashedPassword,
     });
   }
 }

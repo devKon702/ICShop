@@ -8,7 +8,7 @@ import { AppError } from "../../errors/app.error";
 import { HttpStatus } from "../../constants/http-status";
 
 class OTPService {
-  private generateOTP(length: number): string {
+  public generateOTP(length: number): string {
     const otp = crypto
       .randomInt(10 ** (length - 1), 10 ** length - 1)
       .toString();

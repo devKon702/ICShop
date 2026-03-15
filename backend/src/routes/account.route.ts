@@ -13,6 +13,8 @@ import {
   adminRejectChangeEmailSchema,
   adminConfirmChangeEmailSchema,
   adminLockAccountSchema,
+  adminRequestChangePasswordSchema,
+  adminConfirmChangePasswordSchema,
 } from "../schemas/account.schema";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
@@ -101,6 +103,7 @@ accountRouter.post(
 // POST /admin/account/change-email/reject
 accountRouter.post(
   adminPath + "/change-email/reject",
+  createRateLimiter(RateLimitPolicies.REJECT_CHANGE_EMAIL),
   validate(adminRejectChangeEmailSchema),
   accountController.adminRejectChangeEmail,
 );
@@ -108,6 +111,7 @@ accountRouter.post(
 // POST /admin/account/change-email/confirm
 accountRouter.post(
   adminPath + "/change-email/confirm",
+  createRateLimiter(RateLimitPolicies.CONFIRM_CHANGE_EMAIL),
   validate(adminConfirmChangeEmailSchema),
   accountController.adminConfirmChangeEmail,
 );
@@ -115,8 +119,30 @@ accountRouter.post(
 // POST /admin/account/lock
 accountRouter.post(
   adminPath + "/lock",
+  createRateLimiter(RateLimitPolicies.LOCK_ADMIN_ACCOUNT),
   validate(adminLockAccountSchema),
   accountController.adminLockAccount,
+);
+
+// POST /admin/account/change-password/request
+accountRouter.post(
+  adminPath + "/change-password/request",
+  createRateLimiter(RateLimitPolicies.ADMIN_REQUEST_CHANGE_PASSWORD),
+  jwtMiddleware,
+  authorize([Role.ADMIN]),
+  validate(adminRequestChangePasswordSchema),
+  createFailureLimiter(
+    RateLimitPolicies.FAILURE_REQUEST_CHANGE_PASSWORD,
+    accountController.adminRequestChangePassword,
+  ),
+);
+
+// POST /admin/account/change-password/confirm
+accountRouter.post(
+  adminPath + "/change-password/confirm",
+  createRateLimiter(RateLimitPolicies.ADMIN_CONFIRM_CHANGE_PASSWORD),
+  validate(adminConfirmChangePasswordSchema),
+  accountController.adminConfirmChangePassword,
 );
 
 export default accountRouter;

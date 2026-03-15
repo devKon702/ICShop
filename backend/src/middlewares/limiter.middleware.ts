@@ -78,6 +78,48 @@ export const RateLimitPolicies = {
     max: 5,
     type: "BLOCK",
   },
+  REJECT_CHANGE_EMAIL: {
+    name: "REJECT_CHANGE_EMAIL",
+    windowMs: 60_000,
+    max: 5,
+    type: "BLOCK",
+  },
+  CONFIRM_CHANGE_EMAIL: {
+    name: "CONFIRM_CHANGE_EMAIL",
+    windowMs: 30 * 60_000,
+    max: 5,
+    type: "BLOCK",
+  },
+  LOCK_ADMIN_ACCOUNT: {
+    name: "LOCK_ADMIN_ACCOUNT",
+    windowMs: 60_000,
+    max: 5,
+    type: "BLOCK",
+  },
+  REQUEST_CHANGE_PASSWORD: {
+    name: "REQUEST_CHANGE_PASSWORD",
+    windowMs: 10 * 60_000,
+    max: 10,
+    type: "BLOCK",
+  },
+  FAILURE_REQUEST_CHANGE_PASSWORD: {
+    name: "REQUEST_CHANGE_PASSWORD",
+    windowMs: 10 * 60_000,
+    max: 5,
+    type: "BLOCK",
+  },
+  ADMIN_REQUEST_CHANGE_PASSWORD: {
+    name: "CONFIRM_CHANGE_PASSWORD",
+    windowMs: 30 * 60_000,
+    max: 5,
+    type: "BLOCK",
+  },
+  ADMIN_CONFIRM_CHANGE_PASSWORD: {
+    name: "ADMIN_CONFIRM_CHANGE_PASSWORD",
+    windowMs: 30 * 60_000,
+    max: 3,
+    type: "BLOCK",
+  },
 } satisfies Record<
   string,
   { name: string; windowMs: number; max: number; type: "BLOCK" | "CAPTCHA" }

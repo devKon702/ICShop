@@ -94,4 +94,21 @@ export const adminLockAccountSchema = requestSchema({
   }),
 });
 
+export const adminRequestChangePasswordSchema = requestSchema({
+  body: z
+    .object({
+      oldPassword: z.string().nonempty(),
+      newPassword: z.string().nonempty(),
+    })
+    .refine(
+      (value) => value.oldPassword !== value.newPassword,
+      "Mật khẩu mới không được giống với mật khẩu cũ",
+    ),
+});
+
+export const adminConfirmChangePasswordSchema = requestSchema({
+  body: z.object({
+    token: z.string().nonempty(),
+  }),
+});
 export type LockAccountIType = z.infer<typeof changeAccountStatusSchema>;
