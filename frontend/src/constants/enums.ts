@@ -22,3 +22,12 @@ export enum HighlightType {
   HOT = "hot",
   BEST_SELL = "bestsell",
 }
+
+export enum PaymentType {
+  VietQR = "VietQR",
+}
+
+export enum PaymentEnvironment {
+  SANDBOX = "sandbox",
+  PRODUCTION = "production",
+}

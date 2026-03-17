@@ -23,7 +23,7 @@ class PaymentController {
         "Lấy phương thức thanh toán thành công",
         sanitizeData(payments, {
           useDefault: true,
-          omit: ["isActive"],
+          omit: ["isActive", "privateConfig", "environment"],
         }),
       ),
     );
