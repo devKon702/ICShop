@@ -16,10 +16,10 @@ export type OtpPolicy = {
 };
 
 export const otpPolicies = {
-  REGISTER: {
+  VERIFY_EMAIL_REGISTER: {
     ttlSecs: 5 * 60,
     channels: [OtpChannel.EMAIL],
-    purpose: OtpPurpose.REGISTER,
+    purpose: OtpPurpose.VERIFY_EMAIL_REGISTER,
     templates: {
       EMAIL: (ttlSecs, code) =>
         generateOTPHtml({
@@ -29,10 +29,10 @@ export const otpPolicies = {
         }),
     },
   },
-  CHANGE_EMAIL: {
+  VERIFY_EMAIL_CHANGE_EMAIL: {
     ttlSecs: 5 * 60,
     channels: [OtpChannel.EMAIL],
-    purpose: OtpPurpose.CHANGE_EMAIL,
+    purpose: OtpPurpose.VERIFY_EMAIL_CHANGE_EMAIL,
     templates: {
       EMAIL: (ttlSecs, code) =>
         generateOTPHtml({
@@ -42,10 +42,10 @@ export const otpPolicies = {
         }),
     },
   },
-  ADMIN_CHANGE_EMAIL: {
+  VERIFY_EMAIL_ADMIN_CHANGE_EMAIL: {
     ttlSecs: 5 * 60,
     channels: [OtpChannel.EMAIL],
-    purpose: OtpPurpose.ADMIN_CHANGE_EMAIL,
+    purpose: OtpPurpose.VERIFY_EMAIL_ADMIN_CHANGE_EMAIL,
     templates: {
       EMAIL: (ttlSecs, code) =>
         generateOTPHtml({

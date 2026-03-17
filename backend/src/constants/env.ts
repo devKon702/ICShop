@@ -9,6 +9,7 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.string().default("3000"),
   APP_BASE_URL: z.string().url(),
+  ADMIN_BASE_URL: z.string().url(),
   APP_NAME: z.string(),
   DATABASE_URL: z.string().url(),
   JWT_ACCESS_KEY: z.string().min(32, "KEY phải có ít nhất 32 ký tự"),
@@ -30,7 +31,8 @@ const isDev = process.env.NODE_ENV === "development";
 const envVariables = {
   NODE_ENV: isDev ? "development" : process.env.NODE_ENV,
   PORT: isDev ? "3001" : process.env.PORT,
-  APP_BASE_URL: isDev ? "http://localhost:3000" : process.env.APP_BASE_URL,
+  APP_BASE_URL: process.env.APP_BASE_URL,
+  ADMIN_BASE_URL: process.env.ADMIN_BASE_URL,
   APP_NAME: process.env.APP_NAME + (isDev ? " (Dev)" : ""),
   DATABASE_URL: process.env.DATABASE_URL,
   JWT_ACCESS_KEY: process.env.JWT_ACCESS_KEY,

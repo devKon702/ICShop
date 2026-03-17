@@ -72,7 +72,7 @@ authRouter.post(
   authController.refresh,
 );
 
-// POST /auth/otp
+// POST /auth/otp/verify-email
 authRouter.post(
   path + "/signup/send-otp",
   createRateLimiter(RateLimitPolicies.SENT_OTP),

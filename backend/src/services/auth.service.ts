@@ -242,13 +242,13 @@ class AuthService {
     otp: string;
   }) => {
     // Verify OTP
-    const savedOtp = await otpService.verifyOtp({
+    const savePayload = await otpService.verifyOtp({
       channel: OtpChannel.EMAIL,
       target: email,
       code: otp,
-      purpose: OtpPurpose.REGISTER,
+      purpose: OtpPurpose.VERIFY_EMAIL_REGISTER,
     });
-    if (!savedOtp) {
+    if (!savePayload) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
         AuthResponseCode.INVALID_OTP,
@@ -279,7 +279,7 @@ class AuthService {
     await otpService.revokeOtp({
       target: email,
       channel: OtpChannel.EMAIL,
-      purpose: OtpPurpose.REGISTER,
+      purpose: OtpPurpose.VERIFY_EMAIL_REGISTER,
     });
     return newAccount;
   };
@@ -350,14 +350,14 @@ class AuthService {
   public async sendUserRegisterOtp(
     email: string,
   ): Promise<{ expiresAt: Date }> {
-    const policy = otpPolicies.REGISTER;
+    const policy = otpPolicies.VERIFY_EMAIL_REGISTER;
     const existAccount = await accountRepository.findByEmail(email);
     // Send OTP If email not used
     if (!existAccount) {
       const expiresAt = await otpService.sendOtp({
         target: email,
         channel: OtpChannel.EMAIL,
-        purpose: OtpPurpose.CHANGE_EMAIL,
+        purpose: OtpPurpose.VERIFY_EMAIL_CHANGE_EMAIL,
       });
       return { expiresAt };
     }

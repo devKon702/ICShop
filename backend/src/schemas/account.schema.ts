@@ -2,7 +2,6 @@ import { resourceLimits } from "worker_threads";
 import { z } from "zod";
 import { Role } from "../constants/db";
 import { requestSchema } from "./shared.schema";
-import { otpService } from "../services/otp";
 
 export const changePasswordSchema = z.object({
   body: z

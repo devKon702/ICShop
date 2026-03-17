@@ -7,7 +7,7 @@ interface SecurityTokenPayload {
   metadata: {
     userId?: number;
     email?: string;
-    password?: string;
+    hashedPassword?: string;
     token?: string;
   };
 }

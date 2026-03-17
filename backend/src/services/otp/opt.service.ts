@@ -7,6 +7,11 @@ import { OtpChannel, otpPolicies, OtpPurpose } from "../otp";
 import { AppError } from "../../errors/app.error";
 import { HttpStatus } from "../../constants/http-status";
 
+type OTPPayload = {
+  hashOtp: string;
+  payload: any;
+};
+
 class OTPService {
   public generateOTP(length: number): string {
     const otp = crypto
@@ -17,7 +22,10 @@ class OTPService {
 
   /**
    * Hàm thực hiện tạo, lưu và gửi OTP cho client (Email, Sms,...)
-   * @param input
+   * @param target Địa chỉ email hoặc phone
+   * @param channel Kênh xác thực OTP (email, phone,...)
+   * @param purpose Mục đích của OTP
+   * @param payload Dữ liệu lưu kèm theo OTP, mặc định là null
    * @returns Thời gian hết hạn của OTP
    */
   public async sendOtp(input: {
@@ -27,6 +35,8 @@ class OTPService {
     channel: OtpChannel;
     /** Mục đích của OTP */
     purpose: OtpPurpose;
+    /** Dữ liệu lưu kèm với OTP */
+    payload?: any;
   }): Promise<Date> {
     const policy = otpPolicies[input.purpose];
 
@@ -57,16 +67,23 @@ class OTPService {
 
     // Save to redis
     const hashOtp = await hashString(otp);
-    await redisService.setValue(otpKey!, hashOtp, policy.ttlSecs);
+    await redisService.setValue<OTPPayload>(
+      otpKey!,
+      { hashOtp, payload: input.payload ?? null },
+      policy.ttlSecs,
+    );
     return new Date(Date.now() + policy.ttlSecs * 1000);
   }
 
   /**
    * Hàm verify otp token theo purpose
-   * @param input Object chứa thông tin cần thiết để verify
-   * @returns True nếu OTP hợp lệ, false nếu không
+   * @param target Địa chỉ email hoặc phone
+   * @param channel Kênh xác thực OTP (email, phone,...)
+   * @param purpose Mục đích của OTP
+   * @param code Chuỗi OTP cần xác thực
+   * @returns Trả về {payload: T} nếu hợp lệ, null nếu không
    */
-  public async verifyOtp(input: {
+  public async verifyOtp<T = null>(input: {
     /** Phone hoặc email */
     target: string;
     /** Kênh xác thực */
@@ -75,7 +92,7 @@ class OTPService {
     purpose: OtpPurpose;
     /** Mã OTP */
     code: string;
-  }): Promise<boolean> {
+  }): Promise<{ payload: T } | null> {
     let otpKey = null;
     // Lấy OTP lưu trong redis
     switch (input.channel) {
@@ -85,11 +102,13 @@ class OTPService {
       }
       default:
     }
-    const hashOtp = !!otpKey && (await redisService.getValue<string>(otpKey));
+    const otpPayload =
+      !!otpKey &&
+      (await redisService.getValue<{ hashOtp: string; payload: T }>(otpKey));
     // Nếu otpKey == null hoặc không tìm thấy
-    if (!hashOtp) return false;
-    const result = await compareString(input.code, hashOtp);
-    return result;
+    if (!otpPayload) return null;
+    const result = await compareString(input.code, otpPayload.hashOtp);
+    return result ? { payload: otpPayload.payload } : null;
   }
 
   public async revokeOtp(input: {

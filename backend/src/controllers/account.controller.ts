@@ -213,13 +213,13 @@ class AccountController {
     const {
       body: { email },
     } = sendUpdateUserEmailOtpSchema.parse(req);
-    const policy = otpPolicies.CHANGE_EMAIL;
+    const policy = otpPolicies.VERIFY_EMAIL_CHANGE_EMAIL;
     const account = await accountRepository.findByEmail(email);
     const expiresAt = !account
       ? await otpService.sendOtp({
           target: email,
           channel: OtpChannel.EMAIL,
-          purpose: OtpPurpose.CHANGE_EMAIL,
+          purpose: OtpPurpose.VERIFY_EMAIL_CHANGE_EMAIL,
         })
       : new Date(Date.now() + policy.ttlSecs * 1000);
     res.status(HttpStatus.OK).json(
@@ -254,7 +254,7 @@ class AccountController {
       !(await otpService.verifyOtp({
         target: email,
         channel: OtpChannel.EMAIL,
-        purpose: OtpPurpose.CHANGE_EMAIL,
+        purpose: OtpPurpose.VERIFY_EMAIL_CHANGE_EMAIL,
         code: otp,
       }))
     ) {
@@ -281,7 +281,7 @@ class AccountController {
     await otpService.revokeOtp({
       target: email,
       channel: OtpChannel.EMAIL,
-      purpose: OtpPurpose.CHANGE_EMAIL,
+      purpose: OtpPurpose.VERIFY_EMAIL_CHANGE_EMAIL,
     });
 
     res.status(HttpStatus.OK).json(

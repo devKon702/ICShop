@@ -14,7 +14,6 @@ import {
 } from "../utils/html.util";
 import mailService from "./mail.service";
 import { OtpChannel, OtpPurpose, otpService } from "./otp";
-import { redisKeys } from "./redis.service";
 import { SecurityAction } from "./security";
 import securityTokenService from "./security/security-token.service";
 
@@ -51,8 +50,8 @@ class AccountService {
       },
       ttlSeconds,
     );
-    const confirmLink = `${env.APP_NAME}/admin/change-email/confirm?token=${confirmToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
-    const rejectLink = `${env.APP_NAME}/admin/change-email/reject?token=${rejectToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
+    const confirmLink = `${env.ADMIN_BASE_URL}/change-email/confirm?token=${confirmToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
+    const rejectLink = `${env.ADMIN_BASE_URL}/change-email/reject?token=${rejectToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
 
     await mailService.send({
       to: data.account.email,
@@ -142,13 +141,13 @@ class AccountService {
       );
     }
     // Check if OTP (for verifying new email) is valid
-    const emailValid = await otpService.verifyOtp({
+    const savePayload = await otpService.verifyOtp({
       target: input.newEmail,
       channel: OtpChannel.EMAIL,
-      purpose: OtpPurpose.ADMIN_CHANGE_EMAIL,
+      purpose: OtpPurpose.VERIFY_EMAIL_ADMIN_CHANGE_EMAIL,
       code: input.otp,
     });
-    if (!emailValid) {
+    if (!savePayload) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,
         AccountResponseCode.INVALID_OTP,
@@ -166,7 +165,7 @@ class AccountService {
       otpService.revokeOtp({
         target: input.newEmail,
         channel: OtpChannel.EMAIL,
-        purpose: OtpPurpose.ADMIN_CHANGE_EMAIL,
+        purpose: OtpPurpose.VERIFY_EMAIL_ADMIN_CHANGE_EMAIL,
       }),
     ]);
     // Log out error if some fail
@@ -185,7 +184,7 @@ class AccountService {
       },
       lockTokenExpiresInHours * 60 * 60,
     );
-    const lockLink = `${env.APP_BASE_URL}/admin/account/lock?token=${token}&expiresAt=${expiresAt.toISOString()}`;
+    const lockLink = `${env.ADMIN_BASE_URL}/lock-account?token=${token}&expiresAt=${expiresAt.toISOString()}`;
     await mailService.send({
       to: oldEmail,
       subject: `${env.APP_NAME} - Thông báo email thay đổi`,
@@ -257,7 +256,7 @@ class AccountService {
           action: SecurityAction.ADMIN_CHANGE_PASSWORD,
           metadata: {
             userId: input.userId,
-            password: await hashString(input.newPassword),
+            hashedPassword: await hashString(input.newPassword),
           },
         },
         ttlMinutes * 60,
@@ -273,8 +272,8 @@ class AccountService {
         ttlMinutes * 60,
       );
     // Create magic links and send to email
-    const confirmLink = `${env.APP_BASE_URL}/admin/change-password?token=${confirmToken}&expiresAt=${confirmExpiresAt.toISOString()}`;
-    const lockLink = `${env.APP_BASE_URL}/admin/change-password?token=${lockToken}&expiresAt=${lockExpiresAt.toISOString()}`;
+    const confirmLink = `${env.ADMIN_BASE_URL}/change-password?token=${confirmToken}&expiresAt=${confirmExpiresAt.toISOString()}`;
+    const lockLink = `${env.ADMIN_BASE_URL}/change-password?token=${lockToken}&expiresAt=${lockExpiresAt.toISOString()}`;
     await mailService.send({
       to: account.email,
       subject: `${env.APP_NAME} - Thay đổi mật khẩu`,
@@ -301,7 +300,7 @@ class AccountService {
       );
     }
     // userId and password should be provided when request
-    const { userId, password: hashedPassword } = confirmPayload.metadata;
+    const { userId, hashedPassword: hashedPassword } = confirmPayload.metadata;
     if (!userId) {
       throw new Error("Expected userId missing from payload");
     }
