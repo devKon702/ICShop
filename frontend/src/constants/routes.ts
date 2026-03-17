@@ -17,5 +17,9 @@ export const ROUTE = {
   adminCollection: "/collection",
   adminCategory: "/category",
   adminUser: "/user",
+  adminPaymentConfig: "/payment",
+  adminChangeEmail: "/change-email",
+  adminChangePassword: "/change-password",
+  adminLockAccount: "/lock",
   adminLogin: "/login",
 } as const;

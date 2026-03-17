@@ -1,5 +1,6 @@
 "use client";
 import CustomInput from "@/components/common/custom-input";
+import TurnstileWidget from "@/components/common/turnstile-widget";
 import {
   Form,
   FormControl,
@@ -22,6 +23,7 @@ import { z } from "zod";
 const formSchema = z.object({
   email: z.string().email("Email không đúng định dạng"),
   password: z.string().min(6, "Tối thiểu 6 kí tự").max(25, "Tối đa 25 kí tự"),
+  captchaToken: z.string(),
 });
 
 export default function AdminLoginForm() {
@@ -36,15 +38,15 @@ export default function AdminLoginForm() {
   // }, [user, router, isAuthenticated]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    mode: "onSubmit",
   });
 
   const { mutate: adminLoginMutate } = useMutation({
-    mutationFn: async (data: { email: string; password: string }) =>
-      authService.adminLogin(data.email, data.password),
+    mutationFn: async (data: {
+      email: string;
+      password: string;
+      captchaToken: string;
+    }) => authService.adminLogin(data),
     onSuccess: ({ data, message }) => {
       login(
         {
@@ -54,7 +56,7 @@ export default function AdminLoginForm() {
           role: data.account.role,
           phone: data.account.user.phone,
         },
-        data.token
+        data.token,
       );
       toast.success(message);
       router.replace(params.get("redirect") || ROUTE.admin);
@@ -66,12 +68,13 @@ export default function AdminLoginForm() {
   return (
     <Form {...form}>
       <form
-        className="space-y-5"
+        className="space-y-5 relative"
         onSubmit={form.handleSubmit((values) =>
           adminLoginMutate({
             email: values.email,
             password: values.password,
-          })
+            captchaToken: values.captchaToken,
+          }),
         )}
       >
         <FormField
@@ -114,6 +117,14 @@ export default function AdminLoginForm() {
             </FormItem>
           )}
         />
+        <div className="flex justify-center">
+          <TurnstileWidget
+            onVerify={async (token) => {
+              console.log("Turnstile token:", token);
+              form.setValue("captchaToken", token);
+            }}
+          />
+        </div>
         <button className="flex bg-black font-semibold text-white cursor-pointer opacity-80 hover:opacity-100 p-2 rounded-lg ms-auto">
           Đăng nhập
         </button>

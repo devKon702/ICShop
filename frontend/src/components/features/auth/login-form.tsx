@@ -24,8 +24,9 @@ import TurnstileWidget from "@/components/common/turnstile-widget";
 import { createErrorHandler } from "@/utils/response-handler";
 
 const formSchema = z.object({
-  email: z.string().email("Email không đúng định dạng"),
+  email: z.string().nonempty().email("Email không đúng định dạng"),
   password: z.string().min(6, "Tối thiểu 6 kí tự").max(25, "Tối đa 25 kí tự"),
+  captchaToken: z.string().nonempty(),
 });
 
 interface LoginFormProps {
@@ -41,15 +42,14 @@ export default function LoginForm({
   const { closeModal, openModal } = useModalActions();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
     mode: "onSubmit",
   });
   const { mutate: loginMutate } = useMutation({
-    mutationFn: async (data: { email: string; password: string }) =>
-      authService.login(data.email, data.password),
+    mutationFn: async (data: {
+      email: string;
+      password: string;
+      captchaToken: string;
+    }) => authService.login(data),
     onSuccess: ({ data }) => {
       login(
         {
@@ -59,7 +59,7 @@ export default function LoginForm({
           role: data.account.role,
           phone: data.account.user.phone,
         },
-        data.token
+        data.token,
       );
       onLogin?.();
       toast.success("Đăng nhập thành công");
@@ -94,7 +94,7 @@ export default function LoginForm({
           role: data.account.role,
           phone: data.account.user.phone,
         },
-        data.token
+        data.token,
       );
       toast.success(message);
       onLogin?.();
@@ -107,7 +107,7 @@ export default function LoginForm({
           API: (message) => {
             toast.error(message);
           },
-        }
+        },
       );
       handler(error);
     },
@@ -118,7 +118,11 @@ export default function LoginForm({
       <form
         className="space-y-4"
         onSubmit={form.handleSubmit((data: z.infer<typeof formSchema>) => {
-          loginMutate({ email: data.email, password: data.password });
+          loginMutate({
+            email: data.email,
+            password: data.password,
+            captchaToken: data.captchaToken,
+          });
         })}
       >
         <FormField
@@ -213,10 +217,14 @@ export default function LoginForm({
           <TurnstileWidget
             onVerify={async (token) => {
               console.log("Turnstile token:", token);
+              form.setValue("captchaToken", token);
             }}
           />
         </div>
-        <button className="bg-black text-white rounded-sm px-4 py-2 cursor-pointer opacity-80 hover:opacity-100 ms-auto block">
+        <button
+          className="bg-black text-white rounded-sm px-4 py-2 enabled:cursor-pointer opacity-80 enabled:hover:opacity-100 ms-auto block"
+          disabled={!form.formState.isValid}
+        >
           Đăng nhập
         </button>
       </form>

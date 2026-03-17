@@ -11,26 +11,34 @@ export const authService = {
   test: async (captchaToken?: string) =>
     fetchHandler(
       apiFetch("/v1/auth/test", {
-        headers: { "X-Captcha-Token": captchaToken },
+        headers: { "X-Captcha-Token": captchaToken ?? "" },
       }),
-      ApiResponseSchema(z.object({}))
+      ApiResponseSchema(z.object({})),
     ),
 
   refresh: async () =>
     axiosHandler(
       apiAxios.post("/v1/auth/refresh"),
-      ApiResponseSchema(RefreshSchema)
+      ApiResponseSchema(RefreshSchema),
     ),
 
-  login: async (email: string, password: string) =>
+  login: async (input: {
+    email: string;
+    password: string;
+    captchaToken: string;
+  }) =>
     axiosHandler(
-      apiAxios.post("/v1/auth/login", { email, password }),
+      apiAxios.post("/v1/auth/login", {
+        email: input.email,
+        password: input.password,
+        captchaToken: input.captchaToken,
+      }),
       ApiResponseSchema(
         z.object({
           account: AccountBaseSchema.extend({ user: UserBaseSchema }),
           token: z.string(),
-        })
-      )
+        }),
+      ),
     ),
 
   loginWithGoogle: async (token: string, captchaToken?: string) =>
@@ -38,20 +46,24 @@ export const authService = {
       apiAxios.post(
         "/v1/auth/google",
         { token },
-        { headers: captchaToken ? { "X-Captcha-Token": captchaToken } : {} }
+        { headers: captchaToken ? { "X-Captcha-Token": captchaToken } : {} },
       ),
       ApiResponseSchema(
         z.object({
           account: AccountBaseSchema.extend({ user: UserBaseSchema }),
           token: z.string(),
-        })
-      )
+        }),
+      ),
     ),
 
-  adminLogin: async (email: string, password: string) =>
+  adminLogin: async (input: {
+    email: string;
+    password: string;
+    captchaToken: string;
+  }) =>
     axiosHandler(
-      apiAxios.post("/v1/admin/auth/login", { email, password }),
-      ApiResponseSchema(LoginSchema)
+      apiAxios.post("/v1/admin/auth/login", input),
+      ApiResponseSchema(LoginSchema),
     ),
 
   signup: async (data: {
@@ -63,7 +75,7 @@ export const authService = {
   }) =>
     axiosHandler(
       apiAxios.post("/v1/auth/signup", data),
-      ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema }))
+      ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema })),
     ),
 
   logout: async () =>
@@ -74,18 +86,18 @@ export const authService = {
       apiAxios.post(
         "/v1/auth/otp",
         { email },
-        { headers: token ? { "X-Captcha-Token": token } : {} }
+        { headers: token ? { "X-Captcha-Token": token } : {} },
       ),
       ApiResponseSchema(
-        z.object({ email: z.string(), expiresAt: z.string().datetime() })
-      )
+        z.object({ email: z.string(), expiresAt: z.string().datetime() }),
+      ),
     );
   },
 
   forgotPassword: async (email: string) => {
     return axiosHandler(
       apiAxios.post("/v1/auth/forgot-password", { email }),
-      ApiResponseSchema(z.undefined())
+      ApiResponseSchema(z.undefined()),
     );
   },
 
@@ -96,7 +108,7 @@ export const authService = {
   }) => {
     return axiosHandler(
       apiAxios.post("/v1/auth/reset-password", data),
-      ApiResponseSchema(z.undefined())
+      ApiResponseSchema(z.undefined()),
     );
   },
 };

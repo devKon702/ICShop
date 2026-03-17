@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   ChartArea,
   CircleArrowLeft,
+  LandmarkIcon,
   Microchip,
   Shapes,
   SquareMenu,
@@ -69,6 +70,16 @@ const sidebarMenu: {
         href: ROUTE.adminUser,
         title: "Người dùng",
         icon: <Users className="p-1" />,
+      },
+    ],
+  },
+  {
+    group: "Cài đặt",
+    items: [
+      {
+        href: ROUTE.adminPaymentConfig,
+        title: "Thanh toán",
+        icon: <LandmarkIcon className="p-1" />,
       },
     ],
   },

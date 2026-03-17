@@ -5,7 +5,7 @@ import { z, ZodSchema } from "zod";
 
 export async function axiosHandler<T>(
   request: Promise<AxiosResponse>,
-  schema: ZodSchema<T>
+  schema: ZodSchema<T>,
 ): Promise<T> {
   try {
     const res = await request;
@@ -54,13 +54,13 @@ export async function axiosHandler<T>(
 
 export async function fetchHandler<T>(
   request: Promise<Response>,
-  schema: ZodSchema<T>
+  schema: ZodSchema<T>,
 ): Promise<T> {
   try {
     const res = await request;
     const contentType = res.headers.get("Content-Type");
     if (!res.ok) {
-      if (contentType.includes("application/json")) {
+      if (contentType?.includes("application/json")) {
         const errorData = await res.json();
         const parsedError = ApiErrorResponseSchema.safeParse(errorData);
         // If the error response is from API, throw an API Error
@@ -106,22 +106,22 @@ export function createErrorHandler(
   apiHandlers: {
     [code: string]: (
       message: string,
-      errors?: z.infer<typeof ApiErrorResponseSchema.shape.errors>
+      errors?: z.infer<typeof ApiErrorResponseSchema.shape.errors>,
     ) => void;
   },
-  options?: { [type in ApiErrorType]?: (message: string) => void }
+  options?: { [type in ApiErrorType]?: (message: string) => void },
 ) {
   return (error: ApiError | unknown) => {
     if (error instanceof ApiError) {
       if (error.type === "API") {
-        const matchedHandler = apiHandlers[error.code];
+        const matchedHandler = apiHandlers[`${error.code}`];
         if (matchedHandler) {
           matchedHandler(error.message, error.errors);
           return;
         }
       }
       // Check error type to see if it matches any provided options
-      const option = options[error.type];
+      const option = options ? options[`${error.type}`] : null;
       if (option) {
         option(error.message);
         return;
