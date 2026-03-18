@@ -81,6 +81,9 @@ const sidebarMenu: {
         title: "Thanh toán",
         icon: <LandmarkIcon className="p-1" />,
       },
+      {
+        href: ROUTE.adminA,
+      },
     ],
   },
 ] as const;

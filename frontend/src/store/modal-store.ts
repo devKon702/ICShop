@@ -1,17 +1,9 @@
-import {
-  DeliveryType,
-  PaymentEnvironment,
-  PaymentType,
-} from "@/constants/enums";
+import { DeliveryType, PaymentType } from "@/constants/enums";
 import { CreateAttributeSchema } from "@/libs/schemas/attribute.schema";
 import {
   CategoryBaseSchema,
   CreateCategoryType,
 } from "@/libs/schemas/category.schema";
-import {
-  PaymentPrivateConfigSchema,
-  PaymentPublicConfigSchema,
-} from "@/libs/schemas/payment/payment.schema";
 import { z } from "zod";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -147,12 +139,7 @@ type ModalType =
       "updatePaymentConfig",
       {
         id: number;
-        defaultValues: {
-          isActive: boolean;
-          environment: PaymentEnvironment;
-          publicConfig: z.infer<typeof PaymentPublicConfigSchema>;
-          privateConfig: z.infer<typeof PaymentPrivateConfigSchema>;
-        };
+        paymentType: PaymentType;
       }
     >;
 

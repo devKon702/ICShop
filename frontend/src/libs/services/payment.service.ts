@@ -46,6 +46,18 @@ const paymentService = {
         ),
       );
     },
+    getMethodById: (id: number) => {
+      return axiosHandler(
+        apiAxios.get(adminPath + "/" + id),
+        ApiResponseSchema(PaymentMethodSchema),
+      );
+    },
+    getConfigById: (id: number) => {
+      return axiosHandler(
+        apiAxios.get(adminPath + "/configs/" + id),
+        ApiResponseSchema(PaymentConfigSchema),
+      );
+    },
     createMethod: (input: {
       code: PaymentType;
       name: string;
@@ -91,7 +103,6 @@ const paymentService = {
     updateConfig: (
       id: number,
       input: {
-        paymentMethodId: number;
         environment: PaymentEnvironment;
         publicConfig: z.infer<typeof PaymentPublicConfigSchema>;
         privateConfig: z.infer<typeof PaymentPrivateConfigSchema>;
@@ -113,7 +124,7 @@ const paymentService = {
 
     deleteConfig: (id: number) => {
       return axiosHandler(
-        apiAxios.delete(`${adminPath}/configs${id}`),
+        apiAxios.delete(`${adminPath}/configs/${id}`),
         ApiResponseSchema(z.null()),
       );
     },

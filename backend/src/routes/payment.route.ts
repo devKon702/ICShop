@@ -27,19 +27,23 @@ paymentRouter.get(
   paymentController.adminGetAllPayments,
 );
 
-// // GET /payments/:id
-// paymentRouter.get(
-//   path + "/:id",
-//   validate(findByIdSchema),
-//   paymentController.getPaymentDetail,
-// );
+// GET /admin/payments/:id
+paymentRouter.get(
+  adminPath + "/:id",
+  jwtMiddleware,
+  authorize([Role.ADMIN]),
+  validate(findByIdSchema),
+  paymentController.adminGetPaymentDetail,
+);
 
-// // GET /admin/payments/:id
-// paymentRouter.get(
-//   adminPath + "/:id",
-//   validate(findByIdSchema),
-//   paymentController.adminGetPaymentDetail,
-// );
+// GET /admin/payments/configs/:id
+paymentRouter.get(
+  adminPath + "/configs/:id",
+  jwtMiddleware,
+  authorize([Role.ADMIN]),
+  validate(findByIdSchema),
+  paymentController.adminGetConfigDetail,
+);
 
 // POST /admin/payments
 paymentRouter.post(
@@ -69,7 +73,7 @@ paymentRouter.patch(
 );
 
 // PATCH /admin/payments/configs/:id
-paymentRouter.put(
+paymentRouter.patch(
   adminPath + "/configs/:id",
   jwtMiddleware,
   authorize([Role.ADMIN]),

@@ -1,9 +1,13 @@
 import { PaymentEnvironment, PaymentType } from "@/constants/enums";
 import { PaymentPublicConfigSchema } from "@/libs/schemas/payment/payment.schema";
 import { VietQrPublicConfigSchema } from "@/libs/schemas/payment/vietqr.schema";
+import paymentService from "@/libs/services/payment.service";
+import { useModalActions } from "@/store/modal-store";
 import { formatTimeAgo } from "@/utils/date";
-import { PencilIcon } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { PencilIcon, TrashIcon } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 type FieldConfig<T> = {
@@ -22,6 +26,7 @@ const configUI = {
 } as const;
 
 interface Props {
+  paymentType: PaymentType;
   data: {
     id: number;
     publicConfig: z.infer<typeof PaymentPublicConfigSchema>;
@@ -31,8 +36,21 @@ interface Props {
   };
 }
 
-function PaymentConfigItem({ data }: Props) {
+function PaymentConfigItem({ paymentType, data }: Props) {
   const configFields = configUI[data.publicConfig.type];
+  const { openModal } = useModalActions();
+
+  const queryClient = useQueryClient();
+  const { mutate: deleteConfig } = useMutation({
+    mutationFn: async () => paymentService.admin.deleteConfig(data.id),
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
   return (
     <div className="bg-white rounded-md p-2 gap-2 w-full text-sm flex items-center justify-between">
       <div className="flex flex-col space-y-1">
@@ -69,8 +87,29 @@ function PaymentConfigItem({ data }: Props) {
           ))}
         </div>
       </div>
-      <button className="p-2 bg-background cursor-pointer rounded-md">
+      <button
+        className="p-2 bg-background cursor-pointer rounded-md ms-auto"
+        onClick={() => {
+          openModal({
+            type: "updatePaymentConfig",
+            props: {
+              id: data.id,
+              paymentType: paymentType,
+            },
+          });
+        }}
+      >
         <PencilIcon className="size-4" />
+      </button>
+      <button
+        className="p-2 bg-red-400/10 text-red-400 cursor-pointer rounded-md"
+        onClick={() => {
+          if (confirm("Xác nhận xóa cấu hình này?")) {
+            deleteConfig();
+          }
+        }}
+      >
+        <TrashIcon className="size-4" />
       </button>
     </div>
   );

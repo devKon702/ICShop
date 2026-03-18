@@ -6,22 +6,14 @@ class PaymentMethodRepository {
     id: number,
     options?: {
       includeConfig?: boolean;
-      isActive?: boolean;
-      environment?: Environment;
     },
   ) {
     return prisma.paymentMethod.findUnique({
       where: {
         id,
-        isActive: options?.isActive,
       },
       include: {
-        paymentConfigs: {
-          where: {
-            isActive: options?.isActive,
-            environment: options?.environment,
-          },
-        },
+        paymentConfigs: options?.includeConfig,
       },
     });
   }

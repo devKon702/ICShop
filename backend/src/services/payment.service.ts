@@ -31,12 +31,9 @@ class PaymentService {
     return payments;
   }
 
-  public async getPaymentDetail(id: number, role: Role) {
+  public async adminGetMethodDetail(id: number) {
     const paymentMethod = await paymentMethodRepository.findById(id, {
       includeConfig: true,
-      isActive: role === Role.USER ? true : undefined,
-      environment:
-        env.NODE_ENV === "production" ? Environment.production : undefined,
     });
     if (!paymentMethod) {
       throw new NotFoundError(
@@ -45,6 +42,17 @@ class PaymentService {
       );
     }
     return paymentMethod;
+  }
+
+  public async adminGetConfigDetail(id: number) {
+    const paymentConfig = await paymentConfigRepository.findById(id);
+    if (!paymentConfig) {
+      throw new NotFoundError(
+        PaymentResponseCode.NOT_FOUND,
+        "Không tìm thấy cấu hình",
+      );
+    }
+    return paymentConfig;
   }
 
   public async createPaymentMethod(data: {

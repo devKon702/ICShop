@@ -57,28 +57,11 @@ class PaymentController {
       );
   }
 
-  public async getPaymentDetail(req: Request, res: Response) {
-    const {
-      params: { id },
-    } = findByIdSchema.parse(req);
-    const detail = await paymentService.getPaymentDetail(id, Role.USER);
-    res.status(HttpStatus.OK).json(
-      successResponse(
-        PaymentResponseCode.OK,
-        "Lấy thông tin phương thức thanh toán thành công",
-        sanitizeData(detail, {
-          useDefault: true,
-          omit: ["isActive", "privateConfig", "environment"],
-        }),
-      ),
-    );
-  }
-
   public async adminGetPaymentDetail(req: Request, res: Response) {
     const {
       params: { id },
     } = findByIdSchema.parse(req);
-    const detail = await paymentService.getPaymentDetail(id, Role.ADMIN);
+    const detail = await paymentService.adminGetMethodDetail(id);
     res
       .status(HttpStatus.OK)
       .json(
@@ -86,6 +69,27 @@ class PaymentController {
           PaymentResponseCode.OK,
           "Lấy thông tin phương thức thanh toán thành công",
           detail,
+        ),
+      );
+  }
+
+  public async adminGetConfigDetail(req: Request, res: Response) {
+    const {
+      params: { id },
+    } = findByIdSchema.parse(req);
+    const config = await paymentService.adminGetConfigDetail(id);
+    const transformed = {
+      ...config,
+      publicConfig: JSON.parse(config.publicConfig),
+      privateConfig: JSON.parse(config.privateConfig),
+    };
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(
+          PaymentResponseCode.OK,
+          "Lấy chi tiết cấu hình thành công",
+          transformed,
         ),
       );
   }
