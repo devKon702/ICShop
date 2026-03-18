@@ -1,4 +1,4 @@
-import { PaymentEnvironment } from "@/constants/enums";
+import { PaymentEnvironment, PaymentType } from "@/constants/enums";
 import {
   VietQrPrivateConfigSchema,
   VietQrPublicConfigSchema,
@@ -15,7 +15,7 @@ import { z } from "zod";
 
 export const PaymentMethodSchema = z.object({
   id: ID,
-  code: z.string(),
+  code: z.nativeEnum(PaymentType),
   name: TinyText,
   desc: Text,
   position: UnsignedTinyInt,

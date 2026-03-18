@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const VietQrPublicConfigSchema = z.object({
   type: z.literal(PaymentType.VietQR),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500),
   bankName: z.string(),
   bankCode: z.string(),
   accountNumber: z.string(),

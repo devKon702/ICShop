@@ -16,12 +16,20 @@ import { AccessTokenPayload } from "../services/jwt.service";
 
 class PaymentController {
   public async getPayments(req: Request, res: Response) {
-    const payments = paymentService.getPayments();
+    const payments = await paymentService.getPayments();
+    const transformed = payments.map((item) => ({
+      ...item,
+      paymentConfigs: item.paymentConfigs.map((conf) => ({
+        ...conf,
+        publicConfig: JSON.parse(conf.publicConfig),
+        privateConfig: JSON.parse(conf.privateConfig),
+      })),
+    }));
     res.status(HttpStatus.OK).json(
       successResponse(
         PaymentResponseCode.OK,
         "Lấy phương thức thanh toán thành công",
-        sanitizeData(payments, {
+        sanitizeData(transformed, {
           useDefault: true,
           omit: ["isActive", "privateConfig", "environment"],
         }),
@@ -31,13 +39,20 @@ class PaymentController {
 
   public async adminGetAllPayments(req: Request, res: Response) {
     const payments = await paymentService.adminGetPayments();
+    const transformed = payments.map((item) => ({
+      ...item,
+      paymentConfigs: item.paymentConfigs.map((conf) => ({
+        ...conf,
+        publicConfig: JSON.parse(conf.publicConfig),
+      })),
+    }));
     res
       .status(HttpStatus.OK)
       .json(
         successResponse(
           PaymentResponseCode.OK,
           "Lấy danh sách phương thức thanh toán thành công",
-          payments,
+          transformed,
         ),
       );
   }
@@ -153,7 +168,7 @@ class PaymentController {
       },
     } = createPaymentConfigSchema.parse(req);
     const { sub } = res.locals.auth as AccessTokenPayload;
-    const created = paymentService.createPaymentConfig({
+    const created = await paymentService.createPaymentConfig({
       creatorId: sub,
       environment,
       isActive,
@@ -161,6 +176,11 @@ class PaymentController {
       privateConfig,
       publicConfig,
     });
+    const transformed = {
+      ...created,
+      publicConfig: JSON.parse(created.publicConfig),
+      privateConfig: JSON.parse(created.privateConfig),
+    };
 
     res
       .status(HttpStatus.OK)
@@ -168,7 +188,7 @@ class PaymentController {
         successResponse(
           PaymentResponseCode.OK,
           "Thêm cấu hình thanh toán thành công",
-          created,
+          transformed,
         ),
       );
   }
@@ -187,6 +207,11 @@ class PaymentController {
       publicConfig,
       privateConfig,
     });
+    const transformed = {
+      ...updated,
+      publicConfig: JSON.parse(updated.publicConfig),
+      privateConfig: JSON.parse(updated.privateConfig),
+    };
 
     res
       .status(HttpStatus.OK)
@@ -194,7 +219,7 @@ class PaymentController {
         successResponse(
           PaymentResponseCode.OK,
           "Cập nhật cấu hình thành công",
-          updated,
+          transformed,
         ),
       );
   }

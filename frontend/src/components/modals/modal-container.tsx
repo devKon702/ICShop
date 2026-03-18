@@ -29,6 +29,8 @@ import ChangeOrderAddressForm from "@/components/features/address/change-order-a
 import AdminProductOrders from "@/components/features/order/admin/admin-product-orders";
 import ForgotPasswordForm from "@/components/features/auth/forgot-password-form";
 import TurnstileWidget from "@/components/common/turnstile-widget";
+import CreatePaymentMethodForm from "@/components/features/payment/create-payment-method-form";
+import CreatePaymentConfigForm from "@/components/features/payment/create-payment-config-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -219,6 +221,26 @@ export default function ModalContainer() {
                 return (
                   <FormModal title="Tạo bộ sưu tập" index={index}>
                     <CreateCollectionForm {...item.props} />
+                  </FormModal>
+                );
+              case "createPaymentMethod":
+                return (
+                  <FormModal
+                    title="Tạo phương thức thanh toán"
+                    index={index}
+                    useCloseButton
+                  >
+                    <CreatePaymentMethodForm />
+                  </FormModal>
+                );
+              case "createPaymentConfig":
+                return (
+                  <FormModal
+                    title="Cấu hình thanh toán"
+                    index={index}
+                    useCloseButton
+                  >
+                    <CreatePaymentConfigForm {...item.props} />
                   </FormModal>
                 );
               case "forgotPassword":

@@ -16,6 +16,7 @@ import {
 class PaymentService {
   public async getPayments() {
     const payments = await paymentMethodRepository.findMany({
+      excludePrivateConfig: true,
       isActive: true,
       environment:
         env.NODE_ENV === "production" ? Environment.production : undefined,
@@ -24,7 +25,9 @@ class PaymentService {
   }
 
   public async adminGetPayments() {
-    const payments = await paymentMethodRepository.findMany();
+    const payments = await paymentMethodRepository.findMany({
+      excludePrivateConfig: true,
+    });
     return payments;
   }
 

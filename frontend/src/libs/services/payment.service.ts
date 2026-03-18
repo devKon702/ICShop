@@ -12,8 +12,8 @@ import { ApiResponseSchema } from "@/libs/schemas/response.schema";
 import { axiosHandler } from "@/utils/response-handler";
 import { z } from "zod";
 
-const path = "/payments";
-const adminPath = "/admin/payments";
+const path = "/v1/payments";
+const adminPath = "/v1/admin/payments";
 
 const paymentService = {
   user: {
@@ -36,7 +36,11 @@ const paymentService = {
         ApiResponseSchema(
           z.array(
             PaymentMethodSchema.extend({
-              paymentConfigs: z.array(PaymentConfigSchema),
+              paymentConfigs: z.array(
+                PaymentConfigSchema.omit({
+                  privateConfig: true,
+                }),
+              ),
             }),
           ),
         ),
@@ -62,7 +66,7 @@ const paymentService = {
       privateConfig: z.infer<typeof PaymentPrivateConfigSchema>;
       isActive?: boolean;
     }) => {
-      axiosHandler(
+      return axiosHandler(
         apiAxios.post(adminPath + "/configs", input),
         ApiResponseSchema(PaymentConfigSchema),
       );

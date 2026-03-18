@@ -28,17 +28,19 @@ class PaymentMethodRepository {
 
   public findMany(options?: {
     isActive?: boolean;
-    includeConfig?: boolean;
+    excludePrivateConfig?: boolean;
     environment?: Environment;
   }) {
     return prisma.paymentMethod.findMany({
       where: {
         isActive: options?.isActive,
-        paymentConfigs: {
-          some: {
-            environment: options?.environment,
-          },
-        },
+        paymentConfigs: options?.environment
+          ? {
+              some: {
+                environment: options?.environment,
+              },
+            }
+          : undefined,
       },
       include: {
         paymentConfigs: {
@@ -46,6 +48,7 @@ class PaymentMethodRepository {
             environment: options?.environment,
             isActive: options?.isActive,
           },
+          omit: { privateConfig: options?.excludePrivateConfig },
         },
       },
     });

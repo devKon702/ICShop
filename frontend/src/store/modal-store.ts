@@ -1,4 +1,4 @@
-import { DeliveryType } from "@/constants/enums";
+import { DeliveryType, PaymentType } from "@/constants/enums";
 import { CreateAttributeSchema } from "@/libs/schemas/attribute.schema";
 import {
   CategoryBaseSchema,
@@ -119,7 +119,12 @@ type ModalType =
     >
   | Modal<"createCollection", { onSuccess?: () => void }>
   | Modal<"forgotPassword", unknown>
-  | Modal<"captcha", { onVerify: (token: string) => Promise<void> }>;
+  | Modal<"captcha", { onVerify: (token: string) => Promise<void> }>
+  | Modal<"createPaymentMethod", null>
+  | Modal<
+      "createPaymentConfig",
+      { paymentType: PaymentType; methodId: number }
+    >;
 
 interface modalState {
   modal: ModalType[];
@@ -143,7 +148,7 @@ const useModalStore = create<modalState>()(
         console.log("Removed modal at index:", index);
       },
     },
-  }))
+  })),
 );
 
 export const useModal = () => useModalStore((state) => state.modal);
