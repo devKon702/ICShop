@@ -16,6 +16,7 @@ import { z } from "zod";
 interface Props {
   onChange: (data: z.infer<typeof VietQrPublicConfigSchema>) => void;
   showError: boolean;
+  defaultValue?: z.infer<typeof VietQrPublicConfigSchema>;
 }
 
 const ConfigFields = {
@@ -37,10 +38,14 @@ const ConfigFields = {
   }
 >;
 
-function VietQrPublicConfigFields({ onChange, showError }: Props) {
+function VietQrPublicConfigFields({
+  onChange,
+  showError,
+  defaultValue,
+}: Props) {
   const form = useForm({
     resolver: zodResolver(VietQrPublicConfigSchema),
-    defaultValues: {
+    defaultValues: defaultValue ?? {
       type: PaymentType.VietQR,
     },
     mode: "all",

@@ -1,6 +1,7 @@
 import { PaymentEnvironment, PaymentType } from "@/constants/enums";
 import { PaymentPublicConfigSchema } from "@/libs/schemas/payment/payment.schema";
 import { VietQrPublicConfigSchema } from "@/libs/schemas/payment/vietqr.schema";
+import { formatTimeAgo } from "@/utils/date";
 import { PencilIcon } from "lucide-react";
 import React from "react";
 import { z } from "zod";
@@ -37,12 +38,12 @@ function PaymentConfigItem({ data }: Props) {
       <div className="flex flex-col space-y-1">
         <div className="flex space-x-2 items-center">
           {data.isActive ? (
-            <div className="bg-green-400 text-white font-semibold rounded-full px-2 py-1">
-              Kích hoạt
+            <div className="bg-green-400 text-white font-semibold rounded-full px-2 py-1 text-xs">
+              Active
             </div>
           ) : (
-            <div className="bg-background rounded-full font-semibold text-black/50 px-2 py-1">
-              Ẩn
+            <div className="bg-background rounded-full font-semibold text-black/50 px-2 py-1 text-xs">
+              Inactive
             </div>
           )}
           <p className="font-semibold opacity-50">
@@ -50,6 +51,12 @@ function PaymentConfigItem({ data }: Props) {
               ? "Sandbox"
               : "Production"}
           </p>
+          <div className="flex items-center gap-2 ms-2 text-xs">
+            <span className="font-semibold">Updated:</span>
+            <span className="font-semibold opacity-50">
+              {formatTimeAgo(data.updatedAt)}
+            </span>{" "}
+          </div>
         </div>
         <div className="flex space-x-4">
           {configFields.map((item, index) => (

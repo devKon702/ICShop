@@ -11,14 +11,24 @@ import {
 import { PaymentType } from "@/constants/enums";
 import paymentService from "@/libs/services/payment.service";
 import { useModalActions } from "@/store/modal-store";
-import { createErrorHandler } from "@/utils/response-handler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+interface Props {
+  id: number;
+  defaultValues: {
+    code: PaymentType;
+    name: string;
+    desc: string;
+    isActive: boolean;
+    position: number;
+  };
+}
 
 const formSchema = z.object({
   code: z.nativeEnum(PaymentType, {
@@ -30,37 +40,24 @@ const formSchema = z.object({
   position: z.number(),
 });
 
-function CreatePaymentMethodForm() {
-  const defaultValues = {
-    code: PaymentType.VietQR,
-    isActive: true,
-    position: 1,
-  };
+function UpdatePaymentMethodForm({ id, defaultValues }: Props) {
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      code: defaultValues.code,
-      isActive: defaultValues.isActive,
-      position: defaultValues.position,
-    },
+    defaultValues,
     mode: "onSubmit",
   });
-  const { closeModal } = useModalActions();
   const queryClient = useQueryClient();
+  const { closeModal } = useModalActions();
   const { mutate } = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) =>
-      paymentService.admin.createMethod(data),
+      paymentService.admin.updateMethod(id, data),
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["payments"] });
       closeModal();
     },
     onError: (error) => {
-      const handler = createErrorHandler(
-        {},
-        { API: (message) => toast.error(message) },
-      );
-      handler(error);
+      toast.error(error.message);
     },
   });
   return (
@@ -135,7 +132,7 @@ function CreatePaymentMethodForm() {
                       { label: "Ẩn", value: "0" },
                     ] as const
                   }
-                  defaultValue={defaultValues.isActive ? "1" : "0"}
+                  defaultValue={field.value ? "1" : "0"}
                   onValueChange={(value) => field.onChange(!!Number(value))}
                 />
               </FormControl>
@@ -159,11 +156,11 @@ function CreatePaymentMethodForm() {
           )}
         />
         <Button className="flex items-center justify-center ms-auto">
-          <PlusIcon /> <span>Tạo</span>
+          <PencilIcon /> <span>Cập nhật</span>
         </Button>
       </form>
     </Form>
   );
 }
 
-export default CreatePaymentMethodForm;
+export default UpdatePaymentMethodForm;

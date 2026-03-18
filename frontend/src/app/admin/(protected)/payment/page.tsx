@@ -161,6 +161,7 @@ function PaymentPage() {
                       publicConfig: config.publicConfig,
                       updatedAt: new Date(config.updatedAt),
                     })),
+                  position: item.position,
                   desc: item.desc,
                   isActive: item.isActive,
                   name: item.name,

@@ -31,6 +31,7 @@ import ForgotPasswordForm from "@/components/features/auth/forgot-password-form"
 import TurnstileWidget from "@/components/common/turnstile-widget";
 import CreatePaymentMethodForm from "@/components/features/payment/create-payment-method-form";
 import CreatePaymentConfigForm from "@/components/features/payment/create-payment-config-form";
+import UpdatePaymentMethodForm from "@/components/features/payment/update-payment-method-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -241,6 +242,16 @@ export default function ModalContainer() {
                     useCloseButton
                   >
                     <CreatePaymentConfigForm {...item.props} />
+                  </FormModal>
+                );
+              case "updatePaymentMethod":
+                return (
+                  <FormModal
+                    title="Cập nhật phương thức thanh toán"
+                    index={index}
+                    useCloseButton
+                  >
+                    <UpdatePaymentMethodForm {...item.props} />
                   </FormModal>
                 );
               case "forgotPassword":

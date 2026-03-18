@@ -9,6 +9,7 @@ import { z } from "zod";
 interface Props {
   onChange: (data: z.infer<typeof VietQrPrivateConfigSchema>) => void;
   showError: boolean;
+  defaultValue?: z.infer<typeof VietQrPrivateConfigSchema>;
 }
 
 function VietQrPrivateConfigFields({}: Props) {

@@ -2,6 +2,7 @@ import PaymentConfigItem from "@/components/features/payment/payment-config-item
 import { PaymentEnvironment, PaymentType } from "@/constants/enums";
 import { PaymentPublicConfigSchema } from "@/libs/schemas/payment/payment.schema";
 import { useModalActions } from "@/store/modal-store";
+import { formatTimeAgo } from "@/utils/date";
 import { PencilIcon, PlusIcon } from "lucide-react";
 import React from "react";
 import { z } from "zod";
@@ -14,6 +15,7 @@ interface Props {
     desc: string;
     updateAt: Date;
     isActive: boolean;
+    position: number;
     configs: {
       id: number;
       environment: PaymentEnvironment;
@@ -33,7 +35,22 @@ function PaymentMethodItem({ data }: Props) {
       </div>
       <div className="flex flex-col space-y-1 flex-1">
         <div className="flex justify-between">
-          <p className="font-semibold">{data.name}</p>
+          <div className="flex items-center gap-4">
+            <p className="font-semibold">{data.name}</p>
+            {data.isActive ? (
+              <span className="bg-green-400 text-white font-semibold rounded-full px-2 py-1 h-fit text-xs">
+                Active
+              </span>
+            ) : (
+              <span className="bg-background rounded-full font-semibold text-black/50 px-2 py-1 text-xs">
+                Inactive
+              </span>
+            )}
+            <p className="font-semibold space-x-2 text-xs">
+              <span>Updated:</span>
+              <span className="opacity-50">{formatTimeAgo(data.updateAt)}</span>
+            </p>
+          </div>
           <div className="absolute flex space-x-2 items-center top-2 right-2">
             <button
               className="flex rounded-sm items-center space-x-2 p-2 cursor-pointer bg-primary/80 text-white"
@@ -47,7 +64,24 @@ function PaymentMethodItem({ data }: Props) {
               <PlusIcon className="size-4" />
               <span className="text-xs">Thêm cấu hình</span>
             </button>
-            <button className="p-2 rounded-sm cursor-pointer bg-white">
+            <button
+              className="p-2 rounded-sm cursor-pointer bg-white"
+              onClick={() => {
+                openModal({
+                  type: "updatePaymentMethod",
+                  props: {
+                    id: data.id,
+                    defaultValues: {
+                      code: data.code,
+                      desc: data.desc,
+                      isActive: data.isActive,
+                      name: data.name,
+                      position: data.position,
+                    },
+                  },
+                });
+              }}
+            >
               <PencilIcon className="size-4" />
             </button>
           </div>

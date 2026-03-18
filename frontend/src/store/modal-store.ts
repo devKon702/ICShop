@@ -1,9 +1,17 @@
-import { DeliveryType, PaymentType } from "@/constants/enums";
+import {
+  DeliveryType,
+  PaymentEnvironment,
+  PaymentType,
+} from "@/constants/enums";
 import { CreateAttributeSchema } from "@/libs/schemas/attribute.schema";
 import {
   CategoryBaseSchema,
   CreateCategoryType,
 } from "@/libs/schemas/category.schema";
+import {
+  PaymentPrivateConfigSchema,
+  PaymentPublicConfigSchema,
+} from "@/libs/schemas/payment/payment.schema";
 import { z } from "zod";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -121,9 +129,31 @@ type ModalType =
   | Modal<"forgotPassword", unknown>
   | Modal<"captcha", { onVerify: (token: string) => Promise<void> }>
   | Modal<"createPaymentMethod", null>
+  | Modal<"createPaymentConfig", { paymentType: PaymentType; methodId: number }>
   | Modal<
-      "createPaymentConfig",
-      { paymentType: PaymentType; methodId: number }
+      "updatePaymentMethod",
+      {
+        id: number;
+        defaultValues: {
+          code: PaymentType;
+          name: string;
+          desc: string;
+          isActive: boolean;
+          position: number;
+        };
+      }
+    >
+  | Modal<
+      "updatePaymentConfig",
+      {
+        id: number;
+        defaultValues: {
+          isActive: boolean;
+          environment: PaymentEnvironment;
+          publicConfig: z.infer<typeof PaymentPublicConfigSchema>;
+          privateConfig: z.infer<typeof PaymentPrivateConfigSchema>;
+        };
+      }
     >;
 
 interface modalState {

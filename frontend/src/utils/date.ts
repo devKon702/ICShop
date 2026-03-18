@@ -43,7 +43,7 @@ export function getEndOfDay(date: Date): Date {
 
 export function formatIsoDateTime(
   isoString: string | Date,
-  options: { date: boolean; time: boolean } = { date: true, time: true }
+  options: { date: boolean; time: boolean } = { date: true, time: true },
 ): string {
   const date = new Date(isoString).toLocaleString("vi-VI", {
     ...(options.date
@@ -68,7 +68,7 @@ export function getDateBeforeDays(date: Date, days: number): Date {
 
 export function formatTime(
   seconds: number,
-  include?: { hours?: boolean; minutes?: boolean; seconds?: boolean }
+  include?: { hours?: boolean; minutes?: boolean; seconds?: boolean },
 ): string {
   const hours = Math.floor(seconds / 3600)
     .toString()
@@ -88,4 +88,33 @@ export function formatTime(
     result += `${secs}`;
   }
   return result;
+}
+
+export function formatTimeAgo(input: Date | string | number): string {
+  const date = input instanceof Date ? input : new Date(input);
+  const now = new Date();
+
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+
+  if (diffSec < 5) return "vừa xong";
+  if (diffSec < 60) return `${diffSec} giây trước`;
+
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} phút trước`;
+
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} giờ trước`;
+
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay < 7) return `${diffDay} ngày trước`;
+
+  const diffWeek = Math.floor(diffDay / 7);
+  if (diffWeek < 4) return `${diffWeek} tuần trước`;
+
+  const diffMonth = Math.floor(diffDay / 30);
+  if (diffMonth < 12) return `${diffMonth} tháng trước`;
+
+  const diffYear = Math.floor(diffDay / 365);
+  return `${diffYear} năm trước`;
 }
