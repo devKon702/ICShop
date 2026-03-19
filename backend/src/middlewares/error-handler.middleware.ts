@@ -7,7 +7,6 @@ import { ValidateError } from "../errors/validate.error";
 import { JWTError } from "../errors/jwt.error";
 import { Prisma } from "@prisma/client";
 import { DBResponseCode } from "../constants/codes/db.code";
-import { Http } from "winston/lib/winston/transports";
 import RateLimitError from "../errors/rate-limit.error";
 
 export function errorHandler(

@@ -307,21 +307,6 @@ class AccountController {
       );
   };
 
-  public adminRejectChangeEmail = async (req: Request, res: Response) => {
-    const {
-      body: { token },
-    } = adminRejectChangeEmailSchema.parse(req);
-    await accountService.adminRejectChangeEmail(token);
-    res
-      .status(HttpStatus.OK)
-      .json(
-        successResponse(
-          AccountResponseCode.OK,
-          "Từ chối yêu cầu cập nhật email thành công",
-        ),
-      );
-  };
-
   public adminConfirmChangeEmail = async (req: Request, res: Response) => {
     const {
       body: { token, newEmail, otp },

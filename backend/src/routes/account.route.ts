@@ -101,14 +101,6 @@ accountRouter.post(
   accountController.adminRequestChangeEmail,
 );
 
-// POST /admin/account/change-email/reject
-accountRouter.post(
-  adminPath + "/change-email/reject",
-  createRateLimiter(RateLimitPolicies.REJECT_CHANGE_EMAIL),
-  validate(adminRejectChangeEmailSchema),
-  accountController.adminRejectChangeEmail,
-);
-
 // POST /admin/account/change-email/confirm
 accountRouter.post(
   adminPath + "/change-email/confirm",

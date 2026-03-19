@@ -38,7 +38,7 @@ class AccountService {
     const lockTtlSeconds = 3 * 60 * 60;
     const { token: confirmToken } = await securityTokenService.create(
       {
-        action: SecurityAction.CONFIRM_CHANGE_EMAIL,
+        action: SecurityAction.ADMIN_CONFIRM_CHANGE_EMAIL,
         metadata: { email: data.account.email },
       },
       ttlSeconds,
@@ -68,31 +68,6 @@ class AccountService {
     });
   }
 
-  public async adminRejectChangeEmail(rejectToken: string) {
-    // Veiry reject token from user
-    const rejectPayload = await securityTokenService.verify(
-      rejectToken,
-      SecurityAction.REJECT_CHANGE_EMAIL,
-    );
-    if (!rejectPayload) {
-      throw new AppError(
-        HttpStatus.UNPROCESSABLE_ENTITY,
-        SecurityResponseCode.INVALID_TOKEN,
-        "Token không hợp lệ",
-        true,
-      );
-    }
-    // Revoken reject and confirm token (saved in payload of reject token)
-    const confirmToken = rejectPayload.metadata.token;
-    if (!confirmToken)
-      throw new Error("Cannot find token in security payload from redis");
-    // Revoke both confirm and reject token
-    await Promise.all([
-      securityTokenService.revoke(confirmToken),
-      securityTokenService.revoke(rejectToken),
-    ]);
-  }
-
   public async adminConfirmChangeEmail(input: {
     confirmToken: string;
     newEmail: string;
@@ -101,7 +76,7 @@ class AccountService {
     // Verify confirm token from user
     const confirmPayload = await securityTokenService.verify(
       input.confirmToken,
-      SecurityAction.CONFIRM_CHANGE_EMAIL,
+      SecurityAction.ADMIN_CONFIRM_CHANGE_EMAIL,
     );
     if (!confirmPayload) {
       throw new AppError(
@@ -125,7 +100,7 @@ class AccountService {
     // Check if account is locked
     if (account.isActive) {
       throw new AppError(
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.FORBIDDEN,
         AccountResponseCode.LOCKED,
         "Tài khoản đã bị khóa",
         true,
@@ -330,11 +305,21 @@ class AccountService {
       throw new Error("Expected password missing from payload");
     }
 
-    // Update password
     const account = await accountRepository.findByUserId(userId);
+    // Check exist
     if (!account) {
       throw new NotFoundError(AccountResponseCode.NOT_FOUND);
     }
+    // Check if account locked
+    if (!account.isActive) {
+      throw new AppError(
+        HttpStatus.FORBIDDEN,
+        AccountResponseCode.LOCKED,
+        "Tài khoản đã bị khóa",
+        true,
+      );
+    }
+    // Update password
     await accountRepository.update(account.id, userId, {
       password: hashedPassword,
     });
