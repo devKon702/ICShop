@@ -207,7 +207,8 @@ export const generateAdminChangeEmailRequest = (config: {
   appName: string;
   confirmLink: string;
   lockLink: string;
-  expiresInMins: number;
+  confirmExpireInMins: number;
+  lockExpireHours: number;
 }) => {
   return `
 <!DOCTYPE html>
@@ -274,7 +275,14 @@ export const generateAdminChangeEmailRequest = (config: {
             <tr>
               <td>
                 <p style="font-size:13px;color:#777;">
-                Thao tác hết hạn sau <strong>${config.expiresInMins} phút</strong>.
+                Xác nhận hết hạn sau <strong>${config.confirmExpireInMins} phút</strong>.
+                </p>
+              </td>  
+            </tr>
+            <tr>
+              <td>
+                <p style="font-size:13px;color:#777;">
+                Khóa tài khoản hết hạn sau <strong>${config.lockExpireHours} giờ</strong>.
                 </p>
               </td>  
             </tr>

@@ -34,6 +34,7 @@ class AccountService {
 
     // Send link to email
     const ttlSeconds = 30 * 60;
+    const lockTtlSeconds = 3 * 60 * 60;
     const { token: confirmToken } = await securityTokenService.create(
       {
         action: SecurityAction.CONFIRM_CHANGE_EMAIL,
@@ -48,10 +49,10 @@ class AccountService {
           userId: data.account.userId,
         },
       },
-      ttlSeconds,
+      lockTtlSeconds,
     );
     const confirmLink = `${env.ADMIN_BASE_URL}/change-email?token=${confirmToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
-    const lockLink = `${env.ADMIN_BASE_URL}/lock-account?token=${lockToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
+    const lockLink = `${env.ADMIN_BASE_URL}/lock-account?token=${lockToken}&expiresAt=${new Date(Date.now() + lockTtlSeconds * 1000).toISOString()}`;
 
     await mailService.send({
       to: data.account.email,
@@ -60,7 +61,8 @@ class AccountService {
         appName: env.APP_NAME,
         confirmLink,
         lockLink: lockLink,
-        expiresInMins: Math.round(ttlSeconds / 60),
+        confirmExpireInMins: Math.round(ttlSeconds / 60),
+        lockExpireHours: Math.round(lockTtlSeconds / 360),
       }),
     });
   }

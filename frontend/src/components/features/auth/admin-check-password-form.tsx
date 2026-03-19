@@ -36,8 +36,8 @@ function AdminCheckPasswordForm({ onSubmit, submitting }: Props) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(async (val) => {
-          await onSubmit(val.password);
+        onSubmit={form.handleSubmit((val) => {
+          onSubmit(val.password);
         })}
         className="w-[30dvw] p-2 space-y-2"
       >
