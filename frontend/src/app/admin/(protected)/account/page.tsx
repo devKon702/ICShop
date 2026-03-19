@@ -1,28 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import accountService from "@/libs/services/account.service";
 import { useUser } from "@/store/auth-store";
 import { useModalActions } from "@/store/modal-store";
-import { useMutation } from "@tanstack/react-query";
 import { Mail, RectangleEllipsisIcon } from "lucide-react";
 import React from "react";
-import { toast } from "sonner";
 
 function AdminAccountPage() {
   const user = useUser();
-  const { openModal, closeModal } = useModalActions();
+  const { openModal } = useModalActions();
 
-  const { mutate: requestChangeEmail } = useMutation({
-    mutationFn: async (password: string) =>
-      accountService.adminRequestChangeEmail(password),
-    onSuccess: (data) => {
-      toast.success(data.message);
-      closeModal();
-    },
-    onError: (e) => {
-      toast.error(e.message);
-    },
-  });
   return (
     <div className="flex flex-col gap-4">
       {/* Info */}
@@ -47,7 +33,7 @@ function AdminAccountPage() {
           onClick={() =>
             openModal({
               type: "adminRequestChangeEmail",
-              props: { onSubmit: (text) => requestChangeEmail(text) },
+              props: null,
             })
           }
         >

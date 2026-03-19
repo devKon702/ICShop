@@ -15,6 +15,7 @@ import {
   adminLockAccountSchema,
   adminRequestChangePasswordSchema,
   adminConfirmChangePasswordSchema,
+  adminSendOtp2ChangeEmailSchema,
 } from "../schemas/account.schema";
 import { authorize } from "../middlewares/authorize.middleware";
 import { Role } from "../constants/db";
@@ -114,6 +115,14 @@ accountRouter.post(
   createRateLimiter(RateLimitPolicies.CONFIRM_CHANGE_EMAIL),
   validate(adminConfirmChangeEmailSchema),
   accountController.adminConfirmChangeEmail,
+);
+
+// POST /admin/account/change-email/send-otp
+accountRouter.post(
+  adminPath + "/change-email/send-otp",
+  createRateLimiter(RateLimitPolicies.SENT_OTP),
+  validate(adminSendOtp2ChangeEmailSchema),
+  accountController.adminSendOtp2ChangeEmail,
 );
 
 // POST /admin/account/lock

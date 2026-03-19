@@ -206,7 +206,7 @@ export const generateOTPHtml = (config: {
 export const generateAdminChangeEmailRequest = (config: {
   appName: string;
   confirmLink: string;
-  rejectLink: string;
+  lockLink: string;
   expiresInMins: number;
 }) => {
   return `
@@ -256,7 +256,7 @@ export const generateAdminChangeEmailRequest = (config: {
                 Xác nhận
                 </a>
 
-                <a href="${config.rejectLink}"
+                <a href="${config.lockLink}"
                   style="
                     background:#e53935;
                     color:white;
@@ -266,7 +266,7 @@ export const generateAdminChangeEmailRequest = (config: {
                     display:inline-block;
                     font-weight:bold;"
                 >
-                Không phải tôi
+                Khóa tài khoản
                 </a>
               </td>
             </tr>
@@ -281,7 +281,7 @@ export const generateAdminChangeEmailRequest = (config: {
 
             <tr>
               <td style="padding-top:30px;font-size:12px;color:#999;line-height:1.5;">
-              Nếu bạn không phải người gửi yêu cầu này, vui lòng ấn "Không phải tôi" hoặc bỏ qua email này.
+              Nếu bạn không phải người gửi yêu cầu này, mật khẩu của bạn đã bị lộ, hãy khóa tài khoản ngay lập tức.
               </td>
             </tr>
           </table>

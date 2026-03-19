@@ -20,7 +20,7 @@ import securityTokenService from "./security/security-token.service";
 class AccountService {
   public async adminRequestChangeEmail(data: {
     password: string;
-    account: { password: string; email: string };
+    account: { password: string; email: string; userId: number };
   }) {
     // Check password
     if (!(await compareString(data.password, data.account.password))) {
@@ -41,17 +41,17 @@ class AccountService {
       },
       ttlSeconds,
     );
-    const { token: rejectToken } = await securityTokenService.create(
+    const { token: lockToken } = await securityTokenService.create(
       {
-        action: SecurityAction.REJECT_CHANGE_EMAIL,
+        action: SecurityAction.LOCK_ACCOUNT,
         metadata: {
-          token: confirmToken,
+          userId: data.account.userId,
         },
       },
       ttlSeconds,
     );
-    const confirmLink = `${env.ADMIN_BASE_URL}/change-email/confirm?token=${confirmToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
-    const rejectLink = `${env.ADMIN_BASE_URL}/change-email/reject?token=${rejectToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
+    const confirmLink = `${env.ADMIN_BASE_URL}/change-email?token=${confirmToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
+    const lockLink = `${env.ADMIN_BASE_URL}/lock-account?token=${lockToken}&expiresAt=${new Date(Date.now() + ttlSeconds * 1000).toISOString()}`;
 
     await mailService.send({
       to: data.account.email,
@@ -59,7 +59,7 @@ class AccountService {
       html: generateAdminChangeEmailRequest({
         appName: env.APP_NAME,
         confirmLink,
-        rejectLink,
+        lockLink: lockLink,
         expiresInMins: Math.round(ttlSeconds / 60),
       }),
     });
@@ -193,6 +193,24 @@ class AccountService {
         expiresInHours: lockTokenExpiresInHours,
         link: lockLink,
       }),
+    });
+  }
+
+  public async adminSendOtp2ChangeEmail(email: string) {
+    const account = await accountRepository.findByEmail(email);
+    if (account) {
+      throw new AppError(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        AccountResponseCode.EMAIL_EXISTS,
+        "Email đã được sử dụng",
+        true,
+      );
+    }
+
+    await otpService.sendOtp({
+      channel: OtpChannel.EMAIL,
+      purpose: OtpPurpose.VERIFY_EMAIL_ADMIN_CHANGE_EMAIL,
+      target: email,
     });
   }
 

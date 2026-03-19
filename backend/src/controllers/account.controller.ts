@@ -17,6 +17,7 @@ import {
   adminLockAccountSchema,
   adminRequestChangePasswordSchema,
   adminConfirmChangePasswordSchema,
+  adminSendOtp2ChangeEmailSchema,
 } from "../schemas/account.schema";
 import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt.util";
@@ -307,7 +308,11 @@ class AccountController {
       );
     await accountService.adminRequestChangeEmail({
       password,
-      account: { password: account.password!, email: account.email },
+      account: {
+        password: account.password!,
+        email: account.email,
+        userId: sub,
+      },
     });
     res
       .status(HttpStatus.OK)
@@ -359,6 +364,18 @@ class AccountController {
       .status(HttpStatus.OK)
       .json(
         successResponse(AccountResponseCode.OK, "Đã khóa tài khoản thành công"),
+      );
+  };
+
+  public adminSendOtp2ChangeEmail = async (req: Request, res: Response) => {
+    const {
+      body: { email },
+    } = adminSendOtp2ChangeEmailSchema.parse(req);
+    await accountService.adminSendOtp2ChangeEmail(email);
+    res
+      .status(HttpStatus.OK)
+      .json(
+        successResponse(AccountResponseCode.OK, "Đã gửi OTP đến email của bạn"),
       );
   };
 

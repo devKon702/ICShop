@@ -23,9 +23,10 @@ const formSchema = z.object({
 
 interface Props {
   onSubmit: (password: string) => void;
+  submitting: boolean;
 }
 
-function AdminCheckPasswordForm({ onSubmit }: Props) {
+function AdminCheckPasswordForm({ onSubmit, submitting }: Props) {
   const [showPassword, setShowPassword] = React.useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -35,7 +36,9 @@ function AdminCheckPasswordForm({ onSubmit }: Props) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((val) => onSubmit(val.password))}
+        onSubmit={form.handleSubmit(async (val) => {
+          await onSubmit(val.password);
+        })}
         className="w-[30dvw] p-2 space-y-2"
       >
         <FormField
@@ -67,7 +70,7 @@ function AdminCheckPasswordForm({ onSubmit }: Props) {
             </FormItem>
           )}
         />
-        <Button className="flex ms-auto" disabled={form.formState.isSubmitting}>
+        <Button className="flex ms-auto" disabled={submitting}>
           Xác nhận
         </Button>
       </form>

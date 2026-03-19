@@ -34,7 +34,7 @@ import CreatePaymentConfigForm from "@/components/features/payment/create-paymen
 import UpdatePaymentMethodForm from "@/components/features/payment/update-payment-method-form";
 import UpdatePaymentConfigForm from "@/components/features/payment/update-payment-config-form";
 import AdminChangePasswordForm from "@/components/features/auth/admin-change-password-form";
-import AdminCheckPasswordForm from "@/components/features/auth/admin-check-password-form";
+import AdminRequestChangeEmailForm from "@/components/features/auth/admin-request-change-email-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -276,7 +276,7 @@ export default function ModalContainer() {
               case "adminRequestChangeEmail":
                 return (
                   <FormModal title="Xác nhận mật khẩu" index={index}>
-                    <AdminCheckPasswordForm {...item.props} />
+                    <AdminRequestChangeEmailForm />
                   </FormModal>
                 );
               case "forgotPassword":

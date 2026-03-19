@@ -87,6 +87,11 @@ export const adminConfirmChangeEmailSchema = requestSchema({
   }),
 });
 
+export const adminSendOtp2ChangeEmailSchema = requestSchema({
+  body: z.object({
+    email: z.string().email(),
+  }),
+});
 export const adminLockAccountSchema = requestSchema({
   body: z.object({
     token: z.string().nonempty(),

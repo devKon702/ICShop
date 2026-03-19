@@ -143,7 +143,7 @@ type ModalType =
       }
     >
   | Modal<"adminRequestChangePassword", null>
-  | Modal<"adminRequestChangeEmail", { onSubmit: (text: string) => void }>;
+  | Modal<"adminRequestChangeEmail", null>;
 
 interface modalState {
   modal: ModalType[];

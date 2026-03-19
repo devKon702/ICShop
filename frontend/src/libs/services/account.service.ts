@@ -90,6 +90,13 @@ const accountService = {
     );
   },
 
+  adminSendOtp2ChangeEmail: async (email: string) => {
+    return axiosHandler(
+      apiAxios.post(adminPath + "/change-email/send-otp", { email }),
+      ApiResponseSchema(z.undefined()),
+    );
+  },
+
   adminConfirmChangeEmail: async (input: {
     token: string;
     newEmail: string;
