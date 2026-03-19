@@ -32,13 +32,19 @@ class SessionService {
         version: 1,
         role: Role.USER,
       },
-      this.SESSION_CACHE_TTL_SECONDS
+      this.SESSION_CACHE_TTL_SECONDS,
     );
     return session;
   };
+  /**
+   * Hàm lấy session (refresh token + payload) từ redis. Nếu không có, tự động tìm trong sql database và lưu mới vào redis.
+   * @param sessionId Id của session lưu trong sql database
+   * @param role Phân quyền của account, để lưu redis nếu cần
+   * @returns payload của refresh token đã lưu, null nếu không tìm thấy
+   */
   public getOrLoadSession(
     sessionId: string,
-    role: Role
+    role: Role,
   ): Promise<RefreshTokenPayload | null> {
     return redisService
       .getValue<RefreshTokenPayload>(redisKeys.session(sessionId))
@@ -59,12 +65,16 @@ class SessionService {
           await redisService.setValue<RefreshTokenPayload>(
             redisKeys.session(session.id),
             sessionData,
-            this.SESSION_CACHE_TTL_SECONDS
+            this.SESSION_CACHE_TTL_SECONDS,
           );
           return sessionData;
         });
       });
   }
+  /**
+   * Hàm cập nhật session trong sql database, tự đồng bộ với trong redis
+   * @param payload Payload mới cho session
+   */
   public updateSessionAndSync = async (payload: {
     sessionId: string;
     version: number;
@@ -79,7 +89,7 @@ class SessionService {
         rtJti: payload.rtJti,
         version: payload.version,
         expiresAt: payload.expiresAt,
-      }
+      },
     );
     await redisService.setValue<RefreshTokenPayload>(
       redisKeys.session(sessionUpdated.id),
@@ -90,8 +100,22 @@ class SessionService {
         sessionId: sessionUpdated.id,
         version: sessionUpdated.version,
       },
-      this.SESSION_CACHE_TTL_SECONDS
+      this.SESSION_CACHE_TTL_SECONDS,
     );
+  };
+
+  /**
+   * Hàm xóa thông tin session trong sql database và redis
+   * @param userId ID của user
+   */
+  public deleteSessionByUserId = async (userId: number) => {
+    const sessions = await sessionRepository.findManyByUserId(userId);
+    await Promise.allSettled([
+      sessions.forEach((item) =>
+        redisService.deleteKey(redisKeys.session(item.id)),
+      ),
+      sessionRepository.deleteByUserId(userId),
+    ]);
   };
 }
 

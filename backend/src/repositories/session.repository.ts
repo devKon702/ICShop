@@ -28,7 +28,7 @@ class SessionRepository {
 
   public updateById = (
     id: string,
-    data: Pick<Session, "rtJti" | "expiresAt" | "version">
+    data: Pick<Session, "rtJti" | "expiresAt" | "version">,
   ) => {
     return prisma.session.update({
       where: { id },
@@ -45,6 +45,12 @@ class SessionRepository {
   public deleteManyByIds = (ids: string[]) => {
     return prisma.session.deleteMany({
       where: { id: { in: ids } },
+    });
+  };
+
+  public deleteByUserId = (userId: number) => {
+    return prisma.session.deleteMany({
+      where: { userId },
     });
   };
 }

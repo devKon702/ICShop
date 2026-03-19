@@ -5,6 +5,11 @@ import { AuthResponseCode } from "../constants/codes/auth.code";
 import { AccessTokenPayload } from "../services/jwt.service";
 import accountRepository from "../repositories/account.repository";
 
+/**
+ * Middleware kiểm tra phân quyền, bao gồm tài khoản tồn tại, không bị khóa và thuộc có role hợp lệ
+ * @param allowedRoles Mảng các Role hợp lệ
+ * @returns
+ */
 export const authorize = (allowedRoles: AccessTokenPayload["role"][]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const payload = res.locals.auth as AccessTokenPayload;

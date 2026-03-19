@@ -16,6 +16,7 @@ import mailService from "./mail.service";
 import { OtpChannel, OtpPurpose, otpService } from "./otp";
 import { SecurityAction } from "./security";
 import securityTokenService from "./security/security-token.service";
+import sessionService from "./session.service";
 
 class AccountService {
   public async adminRequestChangeEmail(data: {
@@ -242,6 +243,7 @@ class AccountService {
     await accountRepository.update(account.id, account.user!.id, {
       isActive: false,
     });
+    await sessionService.deleteSessionByUserId(account.user!.id);
   }
 
   public async adminRequestChangePassword(input: {
