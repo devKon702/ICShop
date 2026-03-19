@@ -33,6 +33,8 @@ import CreatePaymentMethodForm from "@/components/features/payment/create-paymen
 import CreatePaymentConfigForm from "@/components/features/payment/create-payment-config-form";
 import UpdatePaymentMethodForm from "@/components/features/payment/update-payment-method-form";
 import UpdatePaymentConfigForm from "@/components/features/payment/update-payment-config-form";
+import AdminChangePasswordForm from "@/components/features/auth/admin-change-password-form";
+import AdminCheckPasswordForm from "@/components/features/auth/admin-check-password-form";
 
 export default function ModalContainer() {
   const modal = useModal();
@@ -263,6 +265,18 @@ export default function ModalContainer() {
                     useCloseButton
                   >
                     <UpdatePaymentConfigForm {...item.props} />
+                  </FormModal>
+                );
+              case "adminRequestChangePassword":
+                return (
+                  <FormModal title="Đổi mật khẩu" index={index}>
+                    <AdminChangePasswordForm />
+                  </FormModal>
+                );
+              case "adminRequestChangeEmail":
+                return (
+                  <FormModal title="Xác nhận mật khẩu" index={index}>
+                    <AdminCheckPasswordForm {...item.props} />
                   </FormModal>
                 );
               case "forgotPassword":

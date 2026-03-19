@@ -11,6 +11,7 @@ import {
   Shapes,
   SquareMenu,
   SquareStack,
+  SquareUserIcon,
   Star,
   Users,
 } from "lucide-react";
@@ -82,7 +83,9 @@ const sidebarMenu: {
         icon: <LandmarkIcon className="p-1" />,
       },
       {
-        href: ROUTE.adminA,
+        href: ROUTE.adminAccount,
+        title: "Tài khoản",
+        icon: <SquareUserIcon className="p-1" />,
       },
     ],
   },

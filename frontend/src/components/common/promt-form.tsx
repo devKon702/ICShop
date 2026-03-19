@@ -36,7 +36,7 @@ export default function PromptForm({
           .max(maxLength, `Tối đa ${maxLength} ký tự`)
           .trim()
           .nonempty("Không được bỏ trống"),
-      })
+      }),
     ),
     defaultValues: {
       text: defaultValue,

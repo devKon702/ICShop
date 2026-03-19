@@ -24,6 +24,8 @@ const pageTitles = [
   { href: ROUTE.adminHighlight, title: "Quản lí sản phẩm nổi bật" },
   { href: ROUTE.adminCollection, title: "Quản lí bộ sưu tập" },
   { href: ROUTE.adminUser, title: "Quản lí người dùng" },
+  { href: ROUTE.adminPaymentConfig, title: "Quản lí thanh toán" },
+  { href: ROUTE.adminAccount, title: "Quản lí tài khoản cá nhân" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

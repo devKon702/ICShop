@@ -316,6 +316,9 @@ class AccountService {
     await accountRepository.update(account.id, userId, {
       password: hashedPassword,
     });
+
+    // Revoken confirm token
+    await securityTokenService.revoke(token);
   }
 }
 

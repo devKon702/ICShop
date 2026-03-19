@@ -8,17 +8,20 @@ import { UserBaseSchema } from "@/libs/schemas/user.schema";
 import { axiosHandler } from "@/utils/response-handler";
 import { z } from "zod";
 
+const path = "/v1/account";
+const adminPath = "/v1/admin/account";
+
 const accountService = {
   getMe: async () =>
     axiosHandler(
       apiAxios.get("/v1/account/me"),
-      ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema }))
+      ApiResponseSchema(AccountBaseSchema.extend({ user: UserBaseSchema })),
     ),
 
   updateEmail: async (data: { email: string; otp: string }) =>
     axiosHandler(
       apiAxios.patch("/v1/account/email", data),
-      ApiResponseSchema(z.object({ email: z.string() }))
+      ApiResponseSchema(z.object({ email: z.string() })),
     ),
 
   filter: async (opts: {
@@ -38,17 +41,17 @@ const accountService = {
     if (opts.sortBy) query.append("sortBy", opts.sortBy);
 
     return axiosHandler(
-      apiAxios.get(`/v1/account?${query.toString()}`),
+      apiAxios.get(path + `?${query.toString()}`),
       PaginatedResponseSchema(
-        AccountBaseSchema.extend({ user: UserBaseSchema })
-      )
+        AccountBaseSchema.extend({ user: UserBaseSchema }),
+      ),
     );
   },
 
   changeStatus: async (data: { accountId: number; isActive: boolean }) =>
     axiosHandler(
-      apiAxios.patch(`/v1/account/status`, data),
-      ApiResponseSchema(AccountBaseSchema)
+      apiAxios.patch(path + `/status`, data),
+      ApiResponseSchema(AccountBaseSchema),
     ),
 
   changePassword: async (data: {
@@ -56,9 +59,61 @@ const accountService = {
     newPassword: string;
   }) =>
     axiosHandler(
-      apiAxios.patch(`/v1/account/password`, data),
-      ApiResponseSchema(z.undefined())
+      apiAxios.patch(path + `/password`, data),
+      ApiResponseSchema(z.undefined()),
     ),
+
+  adminRequestChangePassword: async (input: {
+    password: string;
+    newPassword: string;
+  }) => {
+    return axiosHandler(
+      apiAxios.post(adminPath + "/change-password/request", {
+        oldPassword: input.password,
+        newPassword: input.newPassword,
+      }),
+      ApiResponseSchema(z.undefined()),
+    );
+  },
+
+  adminConfirmChangePassword: async (token: string) => {
+    return axiosHandler(
+      apiAxios.post(adminPath + "/change-password/confirm", { token }),
+      ApiResponseSchema(z.undefined()),
+    );
+  },
+
+  adminRequestChangeEmail: async (password: string) => {
+    return axiosHandler(
+      apiAxios.post(adminPath + "/change-email/request", { password }),
+      ApiResponseSchema(z.undefined()),
+    );
+  },
+
+  adminConfirmChangeEmail: async (input: {
+    token: string;
+    newEmail: string;
+    otp: string;
+  }) => {
+    return axiosHandler(
+      apiAxios.post(adminPath + "/change-email/confirm", input),
+      ApiResponseSchema(z.undefined()),
+    );
+  },
+
+  adminRejectChangeEmail: async (token: string) => {
+    return axiosHandler(
+      apiAxios.post(adminPath + "/change-email/reject", { token }),
+      ApiResponseSchema(z.undefined()),
+    );
+  },
+
+  adminLockAccount: async (token: string) => {
+    return axiosHandler(
+      apiAxios.post(adminPath + "/lock", { token }),
+      ApiResponseSchema(z.undefined()),
+    );
+  },
 };
 
 export default accountService;

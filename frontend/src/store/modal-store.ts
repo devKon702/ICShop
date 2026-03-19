@@ -141,7 +141,9 @@ type ModalType =
         id: number;
         paymentType: PaymentType;
       }
-    >;
+    >
+  | Modal<"adminRequestChangePassword", null>
+  | Modal<"adminRequestChangeEmail", { onSubmit: (text: string) => void }>;
 
 interface modalState {
   modal: ModalType[];
