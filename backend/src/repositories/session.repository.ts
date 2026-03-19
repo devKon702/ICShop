@@ -53,6 +53,16 @@ class SessionRepository {
       where: { userId },
     });
   };
+
+  public deleteExpired = () => {
+    return prisma.session.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date(),
+        },
+      },
+    });
+  };
 }
 
 export default new SessionRepository();

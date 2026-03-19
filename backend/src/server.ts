@@ -10,6 +10,7 @@ import {
   createRateLimiter,
   RateLimitPolicies,
 } from "./middlewares/limiter.middleware";
+import { startCleanUpSesssion } from "./cron/clean-session";
 
 const app = express();
 
@@ -26,7 +27,7 @@ app.use(
       "http://myapp.local:3000",
     ],
     credentials: true,
-  })
+  }),
 );
 
 // Body parser
@@ -49,7 +50,7 @@ app.use(
     origin: "*",
     credentials: false,
   }),
-  express.static(env.STORAGE_PATH)
+  express.static(env.STORAGE_PATH),
 );
 
 // Routes
@@ -57,6 +58,9 @@ app.use("/api", router);
 
 // Error handling
 app.use(errorHandler);
+
+// Cron job
+startCleanUpSesssion();
 
 app.listen(env.PORT, () => {
   console.log(`Server running on port ${env.PORT}`);

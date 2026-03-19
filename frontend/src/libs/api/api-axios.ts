@@ -66,13 +66,13 @@ apiAxios.interceptors.response.use(
         });
       });
     }
-    // Handle Unauthorized error
-    else if (response?.status === 401) {
+    // Handle Unauthorized adn Forbidden errors
+    else if (response?.status === 401 || response?.status === 403) {
       useAuthStore.getState().actions.clearAuth();
       window.dispatchEvent(new CustomEvent("needlogin"));
     }
     return Promise.reject(err);
-  }
+  },
 );
 
 export default apiAxios;
