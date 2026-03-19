@@ -44,7 +44,7 @@ export default function UserLayout({
           <CategoryBar />
         </div>
         <TopBreadcrump />
-        <div className="mx-24 my-2">{children}</div>
+        <main className="mx-24 my-2">{children}</main>
         <Footer />
         <FloatButton />
       </>

@@ -88,7 +88,7 @@ export default function Header() {
   });
 
   return (
-    <div className="flex items-center p-3 bg-primary shadow-lg">
+    <header className="flex items-center p-3 bg-primary shadow-lg">
       <Link href="/" className="text-white font-bold text-2xl px-4">
         IoT Shop
       </Link>
@@ -253,6 +253,6 @@ export default function Header() {
           </div>
         )}
       </div>
-    </div>
+    </header>
   );
 }

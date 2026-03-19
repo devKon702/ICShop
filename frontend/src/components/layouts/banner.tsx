@@ -37,7 +37,7 @@ export default function Banner() {
   }, [api, current, total, hover]);
 
   return (
-    <div
+    <aside
       className="w-full mx-auto relative rounded-md overflow-hidden"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -70,6 +70,6 @@ export default function Banner() {
           ))}
         </ul>
       </Carousel>
-    </div>
+    </aside>
   );
 }

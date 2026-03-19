@@ -58,7 +58,7 @@ const queryCache = createSearchParamsCache({
   limit: parseAsInteger.withDefault(20),
   vids: parseAsArrayOf(parseAsInteger).withDefault([]),
   order: parseAsStringLiteral(["price_asc", "price_desc"]).withDefault(
-    "price_asc"
+    "price_asc",
   ),
 });
 
@@ -84,7 +84,7 @@ export default async function CategoryPage({
         <div className="flex flex-col space-y-4">
           <SetBreadCrump breadcrumps={breadcrumps}></SetBreadCrump>
           <div className="grid grid-cols-12 space-x-4">
-            <div className="col-span-3 space-y-4">
+            <aside className="col-span-3 space-y-4">
               {category.level !== 3 ? (
                 category.children && (
                   <SideCategoryFilter data={category.children} />
@@ -92,7 +92,7 @@ export default async function CategoryPage({
               ) : (
                 <SideAttributeFilter attributes={category.attributes || []} />
               )}
-            </div>
+            </aside>
             <div className="col-span-9 space-y-2">
               {category.level === 3 ? (
                 <>

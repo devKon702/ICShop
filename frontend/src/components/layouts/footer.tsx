@@ -4,7 +4,7 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <div className="px-24 min-h-52 bg-white grid grid-cols-3 space-x-4 text-sm py-4">
+    <footer className="px-24 min-h-52 bg-white grid grid-cols-3 space-x-4 text-sm py-4">
       {/* Công ty */}
       <div>
         <h2 className="font-bold mb-4">Về công ty</h2>
@@ -54,6 +54,6 @@ export default function Footer() {
           0922.468.323
         </div>
       </div>
-    </div>
+    </footer>
   );
 }

@@ -19,10 +19,10 @@ interface Props {
 
 export default function CollectionCarousel({ collection }: Props) {
   return (
-    <div className="p-4 rounded-md border shadow bg-white">
-      <p className="font-semibold text-lg">{collection.name}</p>
+    <article className="p-4 rounded-md border shadow bg-white">
+      <h2 className="font-semibold text-lg">{collection.name}</h2>
       <p className="font-semibold text-sm opacity-50 mb-2">{collection.desc}</p>
       <ProductCarousel products={collection.products} />
-    </div>
+    </article>
   );
 }

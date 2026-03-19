@@ -23,7 +23,7 @@ export async function generateMetadata({
   return {
     title: product.name,
     description: `${product.name} mua ngay với giá chỉ ${formatPrice(
-      Number(product.price)
+      Number(product.price),
     )}`,
     keywords: product.name,
   };
@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ]}
         />
         <div className="col-span-8 p-2 rounded-md bg-white space-y-2">
-          <p className="text-3xl">{product.data.name}</p>
+          <h1 className="text-3xl">{product.data.name}</h1>
           {product.data.datasheetLink && (
             <Link
               href={product.data.datasheetLink}

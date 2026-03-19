@@ -9,7 +9,7 @@ function groupValues(
     id: number;
     value: string;
     attribute: { id: number; name: string };
-  }[]
+  }[],
 ) {
   const attributeGroups = new Map<number, { name: string; values: number[] }>();
 
@@ -29,7 +29,7 @@ function groupValues(
       attributeId,
       attributeName: name,
       values,
-    })
+    }),
   );
 }
 
@@ -54,7 +54,7 @@ export default function SelectedAttributeValueFilter() {
       page: parseAsInteger.withDefault(1),
       vids: parseAsArrayOf(parseAsInteger).withDefault([]),
     },
-    { shallow: false }
+    { shallow: false },
   );
   useEffect(() => {
     // Group selected attribute values by their attribute
@@ -63,14 +63,14 @@ export default function SelectedAttributeValueFilter() {
         attributeId: group.attributeId,
         attributeName: group.attributeName,
         values: selectedAttributeValues.filter((v) =>
-          group.values.includes(v.id)
+          group.values.includes(v.id),
         ),
-      }))
+      })),
     );
     setDone(true);
   }, [selectedAttributeValues]);
   return (
-    <div className="p-3 bg-white rounded-md shadow-xl text-sm">
+    <aside className="p-3 bg-white rounded-md shadow-xl text-sm">
       <ul className="space-y-3">
         {done &&
           filteringAttributes.map((item) => (
@@ -105,7 +105,7 @@ export default function SelectedAttributeValueFilter() {
           onClick={() => {
             let attrids = "";
             selectedAttributeValues.forEach(
-              (item) => (attrids += item.id + ",")
+              (item) => (attrids += item.id + ","),
             );
             setQuery({
               ...query,
@@ -127,6 +127,6 @@ export default function SelectedAttributeValueFilter() {
           <span>Xóa tất cả</span>
         </button>
       </div>
-    </div>
+    </aside>
   );
 }
