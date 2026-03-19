@@ -14,9 +14,16 @@ async function main() {
   // Kiểm tra nếu chưa có admin thì tạo mới
   const admin = await accountRepository.findFirstAdmin();
   if (!admin) {
+    const { email, password } = {
+      email: process.env.BOOTSTRAP_ADMIN_EMAIL,
+      password: process.env.BOOTSTRAP_ADMIN_PASSWORD,
+    };
+    if (!email || !password) {
+      throw new Error("Missing bootstrap admin information");
+    }
     await accountRepository.create({
-      email: "nhatkha117@gmail.com",
-      password: await hashString("123456"),
+      email: email,
+      password: await hashString(password),
       name: "Admin",
       role: Role.ADMIN,
       provider: "local",
