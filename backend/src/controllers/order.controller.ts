@@ -249,9 +249,9 @@ class OrderController {
     // Check order belong to user
     if (order.userId !== sub)
       throw new AppError(
-        HttpStatus.FORBIDDEN,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         OrderResponseCode.FORBIDDEN,
-        "Không có đủ quyền hạn",
+        "Không thể thao tác trên đơn hàng này",
         true,
       );
     // Check order status changeable

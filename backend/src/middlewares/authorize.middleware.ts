@@ -28,7 +28,7 @@ export const authorize = (allowedRoles: AccessTokenPayload["role"][]) => {
     if (!account?.isActive) {
       return next(
         new AppError(
-          HttpStatus.UNAUTHORIZED,
+          HttpStatus.FORBIDDEN,
           AuthResponseCode.USER_BLOCKED,
           "Tài khoản đã bị khóa",
           true,

@@ -26,7 +26,7 @@ class AccountService {
     // Check password
     if (!(await compareString(data.password, data.account.password))) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.WRONG_PASSWORD,
         "Mật khẩu không chính xác",
         true,
@@ -76,7 +76,7 @@ class AccountService {
     );
     if (!rejectPayload) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         SecurityResponseCode.INVALID_TOKEN,
         "Token không hợp lệ",
         true,
@@ -105,7 +105,7 @@ class AccountService {
     );
     if (!confirmPayload) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         SecurityResponseCode.INVALID_TOKEN,
         "Token không hợp lệ",
         true,
@@ -125,7 +125,7 @@ class AccountService {
     // Check if account is locked
     if (account.isActive) {
       throw new AppError(
-        HttpStatus.FORBIDDEN,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.LOCKED,
         "Tài khoản đã bị khóa",
         true,
@@ -152,7 +152,7 @@ class AccountService {
     });
     if (!savePayload) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.INVALID_OTP,
         "OTP không hợp lệ",
         true,
@@ -224,7 +224,7 @@ class AccountService {
     );
     if (!lockPayload) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         SecurityResponseCode.INVALID_TOKEN,
         "Token không hợp lệ",
         true,
@@ -265,7 +265,7 @@ class AccountService {
       !compareString(input.oldPassword, account.password)
     ) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.WRONG_PASSWORD,
         "Mật khẩu hiện tại không đúng",
         true,
@@ -315,7 +315,7 @@ class AccountService {
     );
     if (!confirmPayload) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         SecurityResponseCode.INVALID_TOKEN,
         "Token không hợp lệ",
         true,

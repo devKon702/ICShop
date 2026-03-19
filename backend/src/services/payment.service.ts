@@ -101,7 +101,7 @@ class PaymentService {
     // Check valid config for payment method
     if (method.code !== data.publicConfig.type) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         PaymentResponseCode.PUBLIC_CONFIG_INVALID,
         "Loại cấu hình không khớp với phương thức thanh toán",
         true,
@@ -109,7 +109,7 @@ class PaymentService {
     }
     if (method.code !== data.privateConfig.type) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         PaymentResponseCode.PRIVATE_CONFIG_INVALID,
         "Loại cấu hình không khớp với phương thức thanh toán",
         true,

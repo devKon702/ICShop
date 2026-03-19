@@ -96,19 +96,10 @@ class AccountController {
         "Không tìm thấy tài khoản",
       );
     }
-    // Kiểm tra tài khoản bị khóa
-    if (!account.isActive) {
-      throw new AppError(
-        HttpStatus.FORBIDDEN,
-        AccountResponseCode.LOCKED,
-        "Tài khoản đang bị khóa",
-        true,
-      );
-    }
     // Check if account is local account
     if (account.provider !== "local") {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.WRONG_PASSWORD,
         "Tài khoản tạo với Google không thể đổi mật khẩu",
         true,
@@ -120,7 +111,7 @@ class AccountController {
       !(await compareString(currentPassword, account.password))
     ) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.WRONG_PASSWORD,
         "Mật khẩu hiện tại không đúng",
         true,
@@ -175,7 +166,7 @@ class AccountController {
     // Kiểm tra tự khóa bản thân
     if (sub === accountId)
       throw new AppError(
-        HttpStatus.FORBIDDEN,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.SELF_LOCK,
         "Không thể thao tác trên tài khoản bản thân",
         true,
@@ -242,14 +233,6 @@ class AccountController {
         "Không tìm thấy tài khoản",
       );
     }
-    if (account.isActive === false) {
-      throw new AppError(
-        HttpStatus.FORBIDDEN,
-        AccountResponseCode.LOCKED,
-        "Tài khoản đang bị khóa",
-        true,
-      );
-    }
     // Check OTP
     if (
       !(await otpService.verifyOtp({
@@ -260,7 +243,7 @@ class AccountController {
       }))
     ) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AccountResponseCode.INVALID_OTP,
         "Mã OTP không hợp lệ",
         true,

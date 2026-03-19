@@ -26,7 +26,7 @@ export const verifyTurnstileCaptcha = async (
   const isValid = await captchaService.verifyCaptcha(token);
   if (!isValid) {
     return res
-      .status(HttpStatus.BAD_REQUEST)
+      .status(HttpStatus.UNPROCESSABLE_ENTITY)
       .json(
         failResponse(
           SecurityResponseCode.INVALID_CAPTCHA,

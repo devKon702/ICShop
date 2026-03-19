@@ -102,7 +102,7 @@ class AddressController {
     // Kiểm tra địa chỉ là của user
     if (address.userId !== sub)
       throw new AppError(
-        HttpStatus.FORBIDDEN,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddressResponseCode.NOT_ALLOWED,
         "Không có thể cập nhật địa chỉ này",
         true,
@@ -159,7 +159,7 @@ class AddressController {
     // Kiểm tra địa chỉ là của user
     if (address.userId !== sub)
       throw new AppError(
-        HttpStatus.FORBIDDEN,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AddressResponseCode.NOT_ALLOWED,
         "Không thể xóa địa chỉ này",
         true,

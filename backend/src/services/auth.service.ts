@@ -250,9 +250,9 @@ class AuthService {
     });
     if (!savePayload) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AuthResponseCode.INVALID_OTP,
-        "Mã OTP không hợp lệ hoặc đã hết hạn",
+        "Mã OTP không hợp lệ",
         true,
       );
     }
@@ -260,7 +260,7 @@ class AuthService {
     // If email already exists
     if (existAccount)
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
         AuthResponseCode.EMAIL_EXIST,
         "Email đã được sử dụng",
         true,
@@ -404,9 +404,9 @@ class AuthService {
     );
     if (!savedHashedToken || !(await compareString(token, savedHashedToken))) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         AuthResponseCode.INVALID_RESET_TOKEN,
-        "Token không hợp lệ hoặc đã hết hạn",
+        "Token không hợp lệ",
         true,
       );
     }

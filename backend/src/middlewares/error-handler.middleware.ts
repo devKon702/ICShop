@@ -74,7 +74,7 @@ export function errorHandler(
     // Record not found
     if (err.code === "P2025") {
       res
-        .status(HttpStatus.CONFLICT)
+        .status(HttpStatus.NOT_FOUND)
         .json(failResponse(DBResponseCode.NOT_FOUND, "Không tìm thấy dữ liệu"));
       return;
     }
