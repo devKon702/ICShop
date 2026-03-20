@@ -33,11 +33,11 @@ export default function CategoryBar() {
             </PopoverTrigger>
             <PopoverContent className="w-fit mx-3">
               <ul
-                className={`grid ${
+                className={`grid grid-cols-1 ${
                   (item.children?.length as number) < 4
-                    ? "grid-cols-" + item.children?.length
-                    : "grid-cols-4"
-                } space-x-8 space-y-2 list-none`}
+                    ? "md:grid-cols-" + item.children?.length
+                    : "md:grid-cols-4"
+                } max-h-[50dvh] overflow-y-scroll app space-x-8 space-y-2 list-none`}
               >
                 {item.children.map((lv2) => (
                   <div key={lv2.id} className="flex flex-col border-l-2 px-2">

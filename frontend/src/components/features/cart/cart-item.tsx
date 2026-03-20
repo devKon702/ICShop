@@ -50,7 +50,7 @@ export default function CartItem({ cartId, product }: CartItemProps) {
   });
   return (
     <div className="flex items-center justify-between space-x-6 p-2 border-b-2 hover:bg-primary-light rounded-sm">
-      <div className="flex-1 flex items-center space-x-5">
+      <div className="flex-1 flex items-center gap-5">
         <div
           className="size-5 border rounded-full cursor-pointer bg-white border-primary data-[checked=true]:bg-primary shrink-0"
           data-checked={selectedProducts.some((p) => p.cartId === cartId)}
@@ -116,8 +116,8 @@ export default function CartItem({ cartId, product }: CartItemProps) {
               cartId,
               Math.max(
                 product.wholesale.min_quantity,
-                product.quantity - product.wholesale.quantity_step
-              )
+                product.quantity - product.wholesale.quantity_step,
+              ),
             );
           }}
           onUpClick={(e) => {
@@ -126,8 +126,8 @@ export default function CartItem({ cartId, product }: CartItemProps) {
               cartId,
               Math.min(
                 product.wholesale.max_quantity,
-                product.quantity + product.wholesale.quantity_step
-              )
+                product.quantity + product.wholesale.quantity_step,
+              ),
             );
           }}
           onInputChange={(e) => {
@@ -136,8 +136,8 @@ export default function CartItem({ cartId, product }: CartItemProps) {
               cartId,
               Math.max(
                 product.wholesale.min_quantity,
-                Math.min(product.wholesale.max_quantity, +e.target.value)
-              )
+                Math.min(product.wholesale.max_quantity, +e.target.value),
+              ),
             );
           }}
         ></Counter>
@@ -145,13 +145,13 @@ export default function CartItem({ cartId, product }: CartItemProps) {
       <div className="flex flex-col min-w-24">
         <span className="font-semi opacity-50 text-sm">
           {`${formatPrice(
-            getUnitPrice(product.quantity, product.wholesale.details)
+            getUnitPrice(product.quantity, product.wholesale.details),
           )} / ${product.wholesale.unit}`}
         </span>
         <span className="font-bold text-xl">
           {formatPrice(
             getUnitPrice(product.quantity, product.wholesale.details) *
-              product.quantity
+              product.quantity,
           )}
         </span>
       </div>

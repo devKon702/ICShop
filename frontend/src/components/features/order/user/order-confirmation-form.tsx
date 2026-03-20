@@ -98,8 +98,8 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
   });
 
   return (
-    <div className="flex p-4 bg-white">
-      <div className="space-y-2 min-w-lg">
+    <div className="flex flex-col md:flex-row p-4 bg-white w-[90dvw] gap-4">
+      <div className="space-y-2 w-full md:min-w-lg">
         <Select
           value={selectedDeliveryType.toString()}
           onValueChange={(value) => setSelectedDeliveryType(Number(value))}
@@ -121,34 +121,6 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
         </Select>
         {selectedDeliveryType === DeliveryType.POST ? (
           <div>
-            {/* <Select
-              onValueChange={(val) => {
-                setSelectedAddressId(Number(val));
-              }}
-              defaultValue={selectedAddressId?.toString()}
-            >
-              <SelectTrigger className="w-full h-fit py-6 cursor-pointer">
-                <SelectValue placeholder="Chọn địa chỉ nhận hàng" />
-              </SelectTrigger>
-              <SelectContent>
-                {addressData?.data.map((item) => (
-                  <SelectItem
-                    key={item.id}
-                    value={item.id.toString()}
-                    className="cursor-pointer"
-                  >
-                    <div className="flex flex-col items-start">
-                      <p className="font-medium">{item.alias}</p>
-                      <ClampText
-                        lines={1}
-                        text={`${item.detail}, ${item.ward.name}, ${item.district.name}, ${item.province.name}`}
-                        showTitle
-                      />
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select> */}
             <AddressSelector
               data={
                 addressData?.data.map((item) => ({
@@ -175,7 +147,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <CustomInput
               icon={<User />}
               type="text"
@@ -186,7 +158,8 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
                 setReceiver((prev) => ({ ...prev, name: e.target.value }))
               }
               value={receiver.name}
-            ></CustomInput>
+              className="w-full"
+            />
 
             <CustomInput
               icon={<Phone />}
@@ -198,11 +171,12 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
                 setReceiver((prev) => ({ ...prev, phone: e.target.value }))
               }
               value={receiver.phone}
-            ></CustomInput>
+              className="w-full"
+            />
           </div>
         )}
       </div>
-      <div className="border-s-4 ms-4 ps-4 flex flex-col w-[350px]">
+      <div className="md:border-s-4 md:ms-4 md:ps-4 flex flex-col w-full">
         <div className="min-h-[200px] max-h-[250px] overflow-y-scroll app space-y-2">
           {selectedProducts.map((item) => (
             <ProductItem
@@ -215,7 +189,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
                   item.wholesale.details.map((d) => ({
                     min: d.min,
                     price: d.price,
-                  }))
+                  })),
                 ),
                 posterUrl: item.posterUrl,
                 unit: item.wholesale.unit,
@@ -236,10 +210,10 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
                       item.wholesale.details.map((d) => ({
                         min: d.min,
                         price: d.price,
-                      }))
-                    ) * item.quantity
+                      })),
+                    ) * item.quantity,
                 )
-                .reduce((a, b) => a + b, 0)
+                .reduce((a, b) => a + b, 0),
             )}
             VNĐ
           </span>
@@ -262,7 +236,7 @@ export default function OrderConfirmationForm({}: OrderConfirmationFormProps) {
               }
               if (phoneRegex().test(receiver.phone) === false) {
                 toast.error(
-                  "Số diện thoại không hợp lệ theo định dạng Việt Nam"
+                  "Số diện thoại không hợp lệ theo định dạng Việt Nam",
                 );
                 return;
               }

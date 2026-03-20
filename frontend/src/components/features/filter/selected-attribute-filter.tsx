@@ -70,11 +70,14 @@ export default function SelectedAttributeValueFilter() {
     setDone(true);
   }, [selectedAttributeValues]);
   return (
-    <aside className="p-3 bg-white rounded-md shadow-xl text-sm">
+    <aside className="p-3 bg-white rounded-md shadow-xl text-sm space-y-2">
       <ul className="space-y-3">
         {done &&
           filteringAttributes.map((item) => (
-            <li key={item.attributeId} className="flex items-center space-x-2">
+            <li
+              key={item.attributeId}
+              className="flex items-center space-x-2 flex-wrap"
+            >
               <span className="font-bold">{item.attributeName}:</span>
               {item.values.map((value) => (
                 <span

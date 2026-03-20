@@ -2,11 +2,6 @@
 import React from "react";
 import Link from "next/link";
 import { ROUTE } from "@/constants/routes";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { useAuthActions, useUser } from "@/store/auth-store";
 import { useModalActions } from "@/store/modal-store";
 import { toast } from "sonner";
@@ -27,6 +22,7 @@ import {
   Popover,
   PopoverAnchor,
   PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import useDebounce from "@/libs/hooks/useDebouce";
 import productService from "@/libs/services/product.service";
@@ -89,7 +85,11 @@ export default function Header() {
 
   return (
     <header className="flex items-center p-3 bg-primary shadow-lg">
-      <Link href="/" className="text-white font-bold text-2xl px-4">
+      <Link
+        href="/"
+        className={`text-white font-bold text-2xl px-4 data-[show=false]:hidden md:inline`}
+        data-show={!showSearch}
+      >
         IoT Shop
       </Link>
       <Popover
@@ -98,15 +98,16 @@ export default function Header() {
       >
         <PopoverAnchor asChild>
           <InputGroup
-            className="bg-white w-1/4 mr-auto has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0"
+            className="bg-white flex-1 md:w-1/4 mr-auto has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0"
             ref={searchInutRef}
+            onClick={() => setShowSearch(true)}
           >
-            <InputGroupAddon align="inline-start">
+            <InputGroupAddon align="inline-start" className="m-0">
               <Search />
             </InputGroupAddon>
             <InputGroupInput
               placeholder="Tìm kiếm..."
-              className="w-full"
+              className="md:w-full"
               onChange={(e) => {
                 const value = e.currentTarget.value;
                 setSearchTerm(value);
@@ -190,8 +191,8 @@ export default function Header() {
           </div>
         </Link>
         {user ? (
-          <HoverCard openDelay={0} closeDelay={20}>
-            <HoverCardTrigger>
+          <Popover>
+            <PopoverTrigger>
               <div className="size-10 cursor-pointer flex flex-col items-center">
                 <SafeImage
                   key={user.avatarUrl}
@@ -203,9 +204,9 @@ export default function Header() {
                   className="rounded-full aspect-square"
                 />
               </div>
-            </HoverCardTrigger>
+            </PopoverTrigger>
 
-            <HoverCardContent side="left" align="start" className="w-fit">
+            <PopoverContent side="left" align="start" className="w-fit">
               <ul>
                 <ClampText
                   className="px-2"
@@ -234,8 +235,8 @@ export default function Header() {
                   Đăng xuất
                 </p>
               </ul>
-            </HoverCardContent>
-          </HoverCard>
+            </PopoverContent>
+          </Popover>
         ) : (
           <div
             className="cursor-pointer text-center"

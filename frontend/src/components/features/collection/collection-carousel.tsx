@@ -1,3 +1,4 @@
+import ClampText from "@/components/common/clamp-text";
 import ProductCarousel from "@/components/features/product/user/product-carousel";
 import React from "react";
 
@@ -20,8 +21,16 @@ interface Props {
 export default function CollectionCarousel({ collection }: Props) {
   return (
     <article className="p-4 rounded-md border shadow bg-white">
-      <h2 className="font-semibold text-lg">{collection.name}</h2>
-      <p className="font-semibold text-sm opacity-50 mb-2">{collection.desc}</p>
+      <ClampText
+        className="font-semibold text-lg"
+        text={collection.name}
+        lines={1}
+      />
+      <ClampText
+        className="font-semibold text-sm opacity-50 mb-2"
+        text={collection.desc}
+        lines={2}
+      />
       <ProductCarousel products={collection.products} />
     </article>
   );

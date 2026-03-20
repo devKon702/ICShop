@@ -32,7 +32,7 @@ export default function ProductMediaGallery({
   }, [selectedIndex, imageUrls]);
 
   return (
-    <div className="col-span-4 p-2 rounded-md bg-white">
+    <div className="col-span-12 md:col-span-4 p-2 rounded-md bg-white">
       <ImageMagnifier
         src={`${env.NEXT_PUBLIC_FILE_URL}/${mainImage}`}
         imageAlt="IC"

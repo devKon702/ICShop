@@ -18,12 +18,12 @@ export default function ProductList({
 }: ProductListProps) {
   const colsClass =
     {
-      1: "grid-cols-1",
-      4: "grid-cols-4",
-      5: "grid-cols-5",
+      1: "md:grid-cols-1",
+      4: "md:grid-cols-4",
+      5: "md:grid-cols-5",
     }[cols] || "grid-cols-5";
   return (
-    <div className={`grid gap-4 ${colsClass}`}>
+    <div className={`grid grid-cols-2 gap-4 ${colsClass}`}>
       {products.map((item) => (
         <ProductCard key={item.id} product={item}></ProductCard>
       ))}

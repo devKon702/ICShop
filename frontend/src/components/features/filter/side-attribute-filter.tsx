@@ -18,14 +18,19 @@ interface SideAttributeFilterProps {
     name: string;
     values: { id: number; value: string }[];
   }[];
+  popup?: {
+    align: "start" | "center" | "end";
+    side: "right" | "left" | "top" | "bottom";
+  };
 }
 
 export default function SideAttributeFilter({
   attributes,
+  popup,
 }: SideAttributeFilterProps) {
   const [vids] = useQueryState(
     "vids",
-    parseAsArrayOf(parseAsInteger).withDefault([])
+    parseAsArrayOf(parseAsInteger).withDefault([]),
   );
   const { setSelectedAttributeValues } = useAttributeFilterContext();
   useEffect(() => {
@@ -56,7 +61,11 @@ export default function SideAttributeFilter({
       </div>
       <div>
         {attributes.map((item) => (
-          <AttributeItem key={item.id} attribute={item}></AttributeItem>
+          <AttributeItem
+            key={item.id}
+            attribute={item}
+            popup={popup}
+          ></AttributeItem>
         ))}
         {attributes.length === 0 && (
           <div className="p-4 text-center text-sm text-muted-foreground">
@@ -74,9 +83,13 @@ interface AttributeItemProps {
     name: string;
     values: { id: number; value: string }[];
   };
+  popup?: {
+    align: "start" | "center" | "end";
+    side: "right" | "left" | "top" | "bottom";
+  };
 }
 
-function AttributeItem({ attribute }: AttributeItemProps) {
+function AttributeItem({ attribute, popup }: AttributeItemProps) {
   const [highlight, setHighlight] = React.useState(false);
   const { toggleAttributeValues } = useAttributeFilterContext();
   const searchParams = useSearchParams();
@@ -105,11 +118,7 @@ function AttributeItem({ attribute }: AttributeItemProps) {
           <i className="bx bx-chevron-right"></i>
         </div>
       </PopoverTrigger>
-      <PopoverContent
-        side="right"
-        align="start"
-        className="shadow-2xl border-2"
-      >
+      <PopoverContent {...popup} className="shadow-2xl border-2">
         <AttributeValuePopup
           values={
             attribute.values.map((item) => ({

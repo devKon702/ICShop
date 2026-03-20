@@ -86,7 +86,7 @@ export default function UpdateAddressForm({ address }: UpdateAddressFormProps) {
           }
           updateAddressMutate(data);
         })}
-        className="space-y-4 rounded-md p-3 bg-white shadow-xl w-3xl max-h-[80dvh] overflow-y-auto"
+        className="space-y-4 rounded-md p-3 bg-white shadow-xl w-[90dvw] md:w-3xl max-h-[80dvh] overflow-y-auto"
       >
         <FormField
           name="alias"

@@ -20,7 +20,7 @@ export default function ProductCard({
   product: { name, posterUrl, price, slug },
 }: ProductCardProps) {
   return (
-    <article className="shadow-sm rounded-lg bg-white border hover:border-primary overflow-hidden cursor-pointer">
+    <article className="h-full shadow-sm rounded-lg bg-white border hover:border-primary overflow-hidden cursor-pointer">
       <Link
         href={`${ROUTE.product}/${slug}`}
         className="flex h-full flex-col space-y-1 "

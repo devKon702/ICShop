@@ -57,7 +57,7 @@ export default function CartPage() {
         </>
       ) : (
         <>
-          <div className="col-span-9 rounded-md bg-white p-2 shadow-md">
+          <div className="col-span-12 md:col-span-9 rounded-md bg-white p-2 shadow-md">
             <h1 className="font-medium text-2xl p-2">Giỏ hàng</h1>
             <CartHeader />
             <CartList
@@ -85,7 +85,7 @@ export default function CartPage() {
               }
             />
           </div>
-          <div className="col-span-3 rounded-md bg-white px-2 py-4 h-fit shadow-md sticky top-5">
+          <div className="col-span-12 md:col-span-3 rounded-md bg-white px-2 py-4 h-fit shadow-md sticky top-5">
             <CartSummary />
           </div>
         </>

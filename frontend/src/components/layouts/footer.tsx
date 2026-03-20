@@ -4,10 +4,10 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="px-24 min-h-52 bg-white grid grid-cols-3 space-x-4 text-sm py-4">
+    <footer className="px-2 md:px-24 min-h-52 bg-white grid grid-cols-1 gap-4 md:grid-cols-3 text-sm py-4">
       {/* Công ty */}
       <div>
-        <h2 className="font-bold mb-4">Về công ty</h2>
+        <h2 className="font-bold mb-1">Về công ty</h2>
         <ul>
           <Link href="">
             <Image
@@ -24,7 +24,7 @@ export default function Footer() {
       </div>
       {/* Chính sách */}
       <div>
-        <h2 className="font-bold mb-4">Chính sách - Quy định</h2>
+        <h2 className="font-bold mb-1">Chính sách - Quy định</h2>
         <ul className="flex flex-col space-y-2">
           <Link href="" className="hover:text-primary">
             Chính sách đổi trả
@@ -44,7 +44,7 @@ export default function Footer() {
 
       {/* Liên hệ */}
       <div>
-        <h2 className="font-bold mb-4">Địa chỉ liên hệ</h2>
+        <h2 className="font-bold mb-1">Địa chỉ liên hệ</h2>
         <div>
           <i className="bx bxs-map mr-2"></i>
           1042 Quang Trung, Gò Vấp, Hồ Chí Minh

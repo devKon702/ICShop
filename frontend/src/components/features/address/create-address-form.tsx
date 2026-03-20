@@ -60,7 +60,7 @@ export default function CreateAddressForm() {
   return (
     <Form {...form}>
       <form
-        className="space-y-4 rounded-md p-3 bg-white shadow-xl w-3xl max-h-[80dvh] overflow-y-auto"
+        className="space-y-4 rounded-md p-3 bg-white shadow-xl w-[90dvw] md:w-3xl max-h-[80dvh] overflow-y-auto"
         onSubmit={form.handleSubmit((data) => {
           let valid = true;
           if (data.provinceId == 0) {

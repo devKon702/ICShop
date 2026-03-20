@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AddressList() {
   const { data: addressResponse, isLoading } = useQuery({
-    queryKey: ["address", "me"],
+    queryKey: ["addresses", "me"],
     queryFn: addressService.getMyAddresses,
   });
   return (

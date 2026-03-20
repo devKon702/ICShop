@@ -11,7 +11,7 @@ interface AuthTabsProps {
 export default function AuthTabs({ onLoginSuccess }: AuthTabsProps) {
   const [tab, setTab] = React.useState<"login" | "register">("login");
   return (
-    <div className="w-2xl p-2">
+    <div className="w-full md:2xl p-2">
       <Tabs
         defaultValue="login"
         className="flex flex-col"

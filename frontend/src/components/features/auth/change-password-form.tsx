@@ -24,21 +24,21 @@ const formSchema = z
       .min(6, "Mật khẩu hiện tại phải có ít nhất 6 ký tự")
       .refine(
         (val) => !val.includes(" "),
-        "Mật khẩu không được chứa khoảng trắng"
+        "Mật khẩu không được chứa khoảng trắng",
       ),
     newPassword: z
       .string()
       .min(6, "Mật khẩu mới phải có ít nhất 6 ký tự")
       .refine(
         (val) => !val.includes(" "),
-        "Mật khẩu không được chứa khoảng trắng"
+        "Mật khẩu không được chứa khoảng trắng",
       ),
     confirmNewPassword: z
       .string()
       .min(6, "Xác nhận mật khẩu mới phải có ít nhất 6 ký tự")
       .refine(
         (val) => !val.includes(" "),
-        "Mật khẩu không được chứa khoảng trắng"
+        "Mật khẩu không được chứa khoảng trắng",
       ),
   })
   .refine((data) => data.currentPassword !== data.newPassword, {
@@ -89,7 +89,7 @@ export default function ChangePasswordForm() {
             newPassword: data.newPassword,
           });
         })}
-        className="space-y-4"
+        className="space-y-4 block w-full"
       >
         <FormField
           name="currentPassword"

@@ -1,11 +1,13 @@
 "use client";
 import Counter from "@/components/common/counter";
+import { Button } from "@/components/ui/button";
 import cartService from "@/libs/services/cart.service";
 import { useIsAuthenticated } from "@/store/auth-store";
 import useCartStore from "@/store/cart-store";
 import { useModalActions } from "@/store/modal-store";
 import { cn } from "@/utils/className";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ShoppingCartIcon } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
@@ -58,8 +60,8 @@ export default function AddToCartForm({
           setCount(Math.max(min, Math.min(max, val)));
         }}
       ></Counter>
-      <button
-        className="bg-primary hover:opacity-90 py-2 cursor-pointer rounded-sm w-full mt-2"
+      <Button
+        className="bg-primary hover:opacity-90 cursor-pointer rounded-sm w-full mt-2"
         onClick={() => {
           if (!isAuthenticated) {
             toast.info("Vui lòng đăng nhập để thêm vào giỏ hàng");
@@ -76,9 +78,9 @@ export default function AddToCartForm({
           addToCartMutate();
         }}
       >
-        <i className="bx bxs-cart me-2 pointer-events-none"></i>
+        <ShoppingCartIcon />
         Thêm vào giỏ hàng
-      </button>
+      </Button>
     </div>
   );
 }

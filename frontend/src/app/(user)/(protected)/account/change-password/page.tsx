@@ -12,8 +12,10 @@ export default function ChangePasswordPage() {
           { label: "Đổi mật khẩu", href: "/account/change-password" },
         ]}
       />
-      <h1 className="text-2xl font-semibold mb-4">Đổi mật khẩu</h1>
-      <ChangePasswordForm />
+      <div>
+        <h1 className="text-2xl font-semibold mb-4">Đổi mật khẩu</h1>
+        <ChangePasswordForm />
+      </div>
     </div>
   );
 }

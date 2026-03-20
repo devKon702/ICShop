@@ -14,7 +14,7 @@ export default function TopBreadcrump() {
   const { breadcrump } = useUserContext();
   if (breadcrump.length == 0) return null;
   return (
-    <div className="mx-24 rounded-md bg-white p-2 mt-2 shadow">
+    <div className="mx-2 md:mx-24 rounded-md bg-white p-2 mt-2 shadow">
       <Breadcrumb>
         <BreadcrumbList className="flex overflow-x-auto whitespace-nowrap">
           {breadcrump.map((item, index) =>
@@ -43,7 +43,7 @@ export default function TopBreadcrump() {
                   {item.label}
                 </BreadcrumbPage>
               </BreadcrumbItem>
-            )
+            ),
           )}
         </BreadcrumbList>
       </Breadcrumb>

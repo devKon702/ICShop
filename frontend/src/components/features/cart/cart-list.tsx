@@ -24,7 +24,7 @@ interface CartListProps {
 
 export default function CartList({ items }: CartListProps) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full overflow-x-scroll app">
       {items.map((item) => (
         <CartItem
           key={item.id}

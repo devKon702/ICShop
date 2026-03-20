@@ -63,15 +63,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
           },
         ]}
       />
-      <div className="grid grid-cols-12 w-full space-x-2">
+      <div className="grid grid-cols-12 w-full gap-2">
         <ProductMediaGallery
           imageUrls={[
             product.data.posterUrl || "",
             ...product.data.images.map((img) => img.imageUrl),
           ]}
         />
-        <div className="col-span-8 p-2 rounded-md bg-white space-y-2">
-          <h1 className="text-3xl">{product.data.name}</h1>
+        <div className="col-span-12 md:col-span-8 p-2 rounded-md bg-white space-y-2">
+          <h1 className="text-3xl font-semibold">{product.data.name}</h1>
           {product.data.datasheetLink && (
             <Link
               href={product.data.datasheetLink}
@@ -82,8 +82,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </Link>
           )}
 
-          <div className="flex justify-between w-full space-x-2">
-            <div className="flex flex-col space-y-2 w-5/12 mt-auto">
+          <div className="flex flex-wrap-reverse justify-between w-full gap-2 mt-2">
+            <div className="flex flex-col space-y-2 w-full md:w-5/12 mt-auto">
               <span className="font-bold">Số lượng:</span>
               <AddToCartForm
                 min={product.data.wholesale.min_quantity}
@@ -92,7 +92,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 productId={product.data.id}
               />
             </div>
-            <div className="w-5/12">
+            <div className="w-full md:w-5/12">
               <ProductWholesaleTable
                 detail={product.data.wholesale.details.map((item) => ({
                   min: item.min,

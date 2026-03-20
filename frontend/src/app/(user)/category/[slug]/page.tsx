@@ -1,6 +1,7 @@
 import ClampText from "@/components/common/clamp-text";
 import OrderSelector from "@/components/common/order-selector";
 import SetBreadCrump from "@/components/common/set-breadcrump";
+import AttributeFilterDrawer from "@/components/features/filter/attribute-filter-drawer";
 import SelectedAttributeValueFilter from "@/components/features/filter/selected-attribute-filter";
 import SideAttributeFilter from "@/components/features/filter/side-attribute-filter";
 import SideCategoryFilter from "@/components/features/filter/side-category-filter";
@@ -82,25 +83,31 @@ export default async function CategoryPage({
     return (
       <AttributeFilterProvider>
         <div className="flex flex-col space-y-4">
-          <SetBreadCrump breadcrumps={breadcrumps}></SetBreadCrump>
+          <SetBreadCrump breadcrumps={breadcrumps} />
           <div className="grid grid-cols-12 space-x-4">
-            <aside className="col-span-3 space-y-4">
+            <aside className="hidden md:block col-span-3 space-y-4">
               {category.level !== 3 ? (
                 category.children && (
                   <SideCategoryFilter data={category.children} />
                 )
               ) : (
-                <SideAttributeFilter attributes={category.attributes || []} />
+                <SideAttributeFilter
+                  attributes={category.attributes || []}
+                  popup={{ align: "start", side: "right" }}
+                />
               )}
             </aside>
-            <div className="col-span-9 space-y-2">
+            <div className="col-span-12 md:col-span-9 space-y-2">
               {category.level === 3 ? (
                 <>
-                  <SelectedAttributeValueFilter />
+                  <div className="hidden md:block">
+                    <SelectedAttributeValueFilter />
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold opacity-50 text-sm px-2">
                       {category.products.length} sản phẩm
                     </span>
+
                     <OrderSelector
                       data={[
                         { value: "price_asc", label: "Giá Thấp Đến Cao" },
@@ -110,6 +117,7 @@ export default async function CategoryPage({
                       className="ms-auto"
                     />
                   </div>
+                  <AttributeFilterDrawer attributes={category.attributes} />
                   {category.products.length === 0 ? (
                     <div className="w-full h-40 flex flex-col items-center justify-center bg-white rounded-md space-y-2 shadow">
                       <Search strokeWidth={4} className="opacity-50" />
