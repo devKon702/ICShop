@@ -45,8 +45,8 @@ export default function AccountLayout({
   return (
     <div className="flex flex-col items-start gap-2 md:flex-row w-full">
       <Drawer direction="left">
-        <DrawerTrigger>
-          <Button className="me-auto">
+        <DrawerTrigger className="me-auto md:hidden">
+          <Button>
             <Menu />
           </Button>
         </DrawerTrigger>

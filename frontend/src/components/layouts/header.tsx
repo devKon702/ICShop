@@ -192,20 +192,17 @@ export default function Header() {
         </Link>
         {user ? (
           <Popover>
-            <PopoverTrigger>
-              <div className="size-10 cursor-pointer flex flex-col items-center">
-                <SafeImage
-                  key={user.avatarUrl}
-                  src={user.avatarUrl || undefined}
-                  avatarPlaceholderName={user.name}
-                  appFileBase
-                  width={40}
-                  height={40}
-                  className="rounded-full aspect-square"
-                />
-              </div>
+            <PopoverTrigger className="size-10 cursor-pointer mr-0">
+              <SafeImage
+                key={user.avatarUrl}
+                src={user.avatarUrl || undefined}
+                avatarPlaceholderName={user.name}
+                appFileBase
+                width={40}
+                height={40}
+                className="rounded-full aspect-square"
+              />
             </PopoverTrigger>
-
             <PopoverContent side="left" align="start" className="w-fit">
               <ul>
                 <ClampText
