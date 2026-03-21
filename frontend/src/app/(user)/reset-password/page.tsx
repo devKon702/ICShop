@@ -1,15 +1,17 @@
 import ResetPasswordForm from "@/components/features/auth/reset-password-form";
+import { notFound } from "next/navigation";
 import React from "react";
 
 interface Props {
-  searchParams: {
+  searchParams: Promise<{
     email: string;
     token: string;
-  };
+  }>;
 }
 
-export default function ResetPasswordPage({ searchParams }: Props) {
-  const { email, token } = searchParams;
+export default async function ResetPasswordPage({ searchParams }: Props) {
+  const { email, token } = await searchParams;
+  if (!email || !token) notFound();
 
   return (
     <div className="w-full min-h-[70dvh] bg-white rounded-md p-6 grid place-items-center">

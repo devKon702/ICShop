@@ -1,7 +1,7 @@
 "use client";
 import AdminLoginForm from "@/components/features/auth/admin-login-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import React from "react";
+import React, { Suspense } from "react";
 
 export default function AdminLoginPage() {
   return (
@@ -13,7 +13,9 @@ export default function AdminLoginPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <AdminLoginForm></AdminLoginForm>
+          <Suspense fallback={<div></div>}>
+            <AdminLoginForm />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

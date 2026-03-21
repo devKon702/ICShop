@@ -104,8 +104,8 @@ function PaymentPage() {
           <p className="font-semibold text-sm mb-1">Trạng thái</p>
           <AppSelector
             data={[
-              { label: "Kích hoạt", value: 1 },
-              { label: "Ẩn", value: 0 },
+              { label: "Kích hoạt", value: "1" },
+              { label: "Ẩn", value: "0" },
               { label: "Tất cả", value: "all" },
             ]}
             defaultValue={"all"}

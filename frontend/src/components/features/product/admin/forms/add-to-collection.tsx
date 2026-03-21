@@ -31,7 +31,7 @@ export default function AddToCollection({ productId }: Props) {
     onError: (error) => {
       toast.error(
         error.message ||
-          "Thêm sản phẩm vào bộ sưu tập thất bại. Vui lòng thử lại."
+          "Thêm sản phẩm vào bộ sưu tập thất bại. Vui lòng thử lại.",
       );
     },
   });
@@ -43,12 +43,12 @@ export default function AddToCollection({ productId }: Props) {
           [
             ...(data?.data.map((collection) => ({
               label: collection.name,
-              value: collection.id,
+              value: collection.id.toString(),
             })) ?? []),
           ] as const
         }
         onValueChange={(value) => {
-          setSelectedCollectionId(value);
+          setSelectedCollectionId(Number(value));
         }}
         className="w-full"
       />

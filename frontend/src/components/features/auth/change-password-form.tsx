@@ -1,3 +1,4 @@
+"use client";
 import CustomInput from "@/components/common/custom-input";
 import { Button } from "@/components/ui/button";
 import {

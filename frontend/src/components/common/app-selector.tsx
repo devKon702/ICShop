@@ -16,9 +16,9 @@ type Option<T extends string> = {
   label: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface SelectorProps<T extends readonly Option<any>[]>
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface SelectorProps<
+  T extends readonly Option<string>[],
+> extends ButtonHTMLAttributes<HTMLButtonElement> {
   data: T;
   defaultValue?: T[number]["value"];
   className?: string;
@@ -27,8 +27,7 @@ interface SelectorProps<T extends readonly Option<any>[]>
   disableOutsideClick?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function AppSelector<T extends readonly Option<any>[]>({
+export default function AppSelector<T extends readonly Option<string>[]>({
   data,
   defaultValue,
   className,

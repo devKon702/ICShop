@@ -1,4 +1,5 @@
 import SetBreadCrump from "@/components/common/set-breadcrump";
+import ForceLoginListener from "@/components/features/auth/force-login-listener";
 import CollectionCarousel from "@/components/features/collection/collection-carousel";
 import ProductHighlightTabs from "@/components/features/product/user/product-highlight-tab";
 import Banner from "@/components/layouts/banner";
@@ -6,12 +7,18 @@ import collectionService from "@/libs/services/collection.service";
 import highlightService from "@/libs/services/highlight.service";
 import tryCatch from "@/utils/try-catch";
 
-export default async function Home() {
+interface Props {
+  searchParams: Promise<{ action: string; redirect: string }>;
+}
+
+export default async function Home({ searchParams }: Props) {
   const [collections] = await tryCatch(collectionService.user.getAll());
   const [highlightedProducts] = await tryCatch(highlightService.user.getAll());
+  const { action, redirect } = await searchParams;
   return (
     <div>
       <SetBreadCrump breadcrumps={[]} />
+      <ForceLoginListener searchParams={{ action, redirect }} />
       <Banner />
       <section className="flex flex-col gap-4 my-6">
         {highlightedProducts && (

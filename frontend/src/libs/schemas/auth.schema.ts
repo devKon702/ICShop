@@ -8,8 +8,6 @@ export const LoginSchema = z.object({
     id: true,
     isActive: true,
     role: true,
-    isGoogleSigned: true,
-    isEmailAuth: true,
   }).extend({ user: UserBaseSchema.omit({ accountId: true }) }),
   token: z.string(),
 });

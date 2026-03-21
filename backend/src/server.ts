@@ -20,12 +20,7 @@ app.use(helmet());
 // Cross-origin
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://admin.localhost:3000",
-      "http://localhost",
-      "http://myapp.local:3000",
-    ],
+    origin: [env.APP_BASE_URL, env.ADMIN_BASE_URL],
     credentials: true,
   }),
 );

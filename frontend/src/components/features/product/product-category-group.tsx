@@ -1,6 +1,4 @@
-import ProductList from "@/components/features/product/product-list";
 import { ROUTE } from "@/constants/routes";
-import { Category } from "@/libs/models/category";
 import { SafeCategoryBaseSchema } from "@/libs/schemas/category.schema";
 import {
   HoverCard,
@@ -64,9 +62,9 @@ export default function ProductCategoryGroup({
         </HoverCard>
       </div>
       {/* Product List */}
-      <ProductList
+      {/* <ProductList
         products={catergory?.children?.at(1)?.children?.at(1)?.products}
-      ></ProductList>
+      ></ProductList> */}
     </div>
   );
 }

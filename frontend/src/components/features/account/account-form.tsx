@@ -52,7 +52,7 @@ export default function AccountForm() {
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
   const [otpExpiredAt, setOtpExpiredAt] = React.useState<Date | null>(null);
   const [remainingSeconds, setRemainingSeconds] = React.useState<number | null>(
-    null
+    null,
   );
   const { openModal, closeModal } = useModalActions();
   useInterval(() => {
@@ -60,7 +60,7 @@ export default function AccountForm() {
       const now = new Date();
       const diff = Math.max(
         0,
-        Math.floor((otpExpiredAt.getTime() - now.getTime()) / 1000)
+        Math.floor((otpExpiredAt.getTime() - now.getTime()) / 1000),
       );
       setRemainingSeconds(diff);
     }
@@ -93,7 +93,7 @@ export default function AccountForm() {
         const handler = createErrorHandler(
           {
             [SECURITY_CODE.TOO_MANY_REQUESTS]: (message, errors) => {
-              if (errors.requireCaptcha) {
+              if (errors?.requireCaptcha) {
                 openModal({
                   type: "captcha",
                   props: {
@@ -113,7 +113,7 @@ export default function AccountForm() {
             API: (message) => {
               toast.error(message);
             },
-          }
+          },
         );
         handler(err);
       },
@@ -148,9 +148,9 @@ export default function AccountForm() {
                   .then(() => {
                     form.reset(
                       { ...data, otp: undefined },
-                      { keepDirty: false }
+                      { keepDirty: false },
                     );
-                  })
+                  }),
               );
             }
             // Update profile if changed
@@ -172,12 +172,12 @@ export default function AccountForm() {
                         ...data,
                         otp: undefined,
                       },
-                      { keepDirty: false }
+                      { keepDirty: false },
                     );
                     queryClient.invalidateQueries({
                       queryKey: ["me"],
                     });
-                  })
+                  }),
               );
             }
             Promise.all(ps)
@@ -187,7 +187,7 @@ export default function AccountForm() {
               })
               .catch((e) => {
                 toast.error(
-                  e.message || "Cập nhật thông tin tài khoản thất bại"
+                  e.message || "Cập nhật thông tin tài khoản thất bại",
                 );
               });
           }

@@ -29,7 +29,7 @@ export class RedisRateLimitService implements IRateLimitService {
   ): string {
     if (actorType === "USER") {
       return String(
-        AccessTokenPayloadSchema.parse(res.locals.auth)?.sub ??
+        AccessTokenPayloadSchema.safeParse(res.locals.auth).data?.sub ??
           req.ip ??
           "unknown",
       );

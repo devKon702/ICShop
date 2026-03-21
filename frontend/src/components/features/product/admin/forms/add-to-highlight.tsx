@@ -48,9 +48,9 @@ export default function AddToHighlight({ productId }: Props) {
             confirm(
               `Xác nhận thêm sản phẩm vào mục ${
                 HIGHLIGHT_OPTIONS.find(
-                  (item) => item.value === selectedHighlight
+                  (item) => item.value === selectedHighlight,
                 )?.label
-              }?`
+              }?`,
             )
           ) {
             addToHighlightMutate(selectedHighlight);

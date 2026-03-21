@@ -47,15 +47,12 @@ export default function ResetPasswordForm({ email, token }: Props) {
     },
     onError: (error) => {
       const handler = createErrorHandler(
-        [],
-        [
-          {
-            type: "API",
-            handler(message: string) {
-              toast.error(message);
-            },
+        {},
+        {
+          API: (message: string) => {
+            toast.error(message);
           },
-        ]
+        },
       );
       handler(error);
     },

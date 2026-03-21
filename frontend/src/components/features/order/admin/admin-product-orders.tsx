@@ -67,17 +67,18 @@ export default function AdminProductOrders({ product }: Props) {
             [
               ...ORDER_STATUS_OPTIONS.map((option) => ({
                 label: option.label,
-                value: option.value,
+                value: option.value.toString(),
               })),
               { label: "Tất cả", value: "all" },
             ] as const
           }
-          defaultValue={filter.status ?? "all"}
+          defaultValue={filter.status?.toString() ?? "all"}
           className="flex-1"
           onValueChange={(value) => {
             setFilter({
               ...filter,
-              status: value === "all" ? undefined : (value as OrderStatus),
+              status:
+                value === "all" ? undefined : (Number(value) as OrderStatus),
             });
           }}
         />

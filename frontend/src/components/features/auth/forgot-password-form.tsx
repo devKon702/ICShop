@@ -35,27 +35,18 @@ export default function ForgotPasswordForm() {
     },
     onError: (error) => {
       const handler = createErrorHandler(
-        [],
-        [
-          {
-            type: "API",
-            handler(message: string) {
-              toast.error(message);
-            },
+        {},
+        {
+          API: (message: string) => {
+            toast.error(message);
           },
-          {
-            type: "NETWORK",
-            handler() {
-              toast.error("Lỗi mạng, vui lòng thử lại sau");
-            },
+          NETWORK: () => {
+            toast.error("Lỗi mạng, vui lòng thử lại sau");
           },
-          {
-            type: "UNKNOWN",
-            handler() {
-              toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
-            },
+          UNKNOWN: () => {
+            toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
           },
-        ]
+        },
       );
       handler(error);
     },

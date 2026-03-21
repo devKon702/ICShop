@@ -4,10 +4,10 @@ export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const hostname = req.headers.get("host") || "";
   // Redirect /admin on localhost:3000 to /
-  if (hostname === "localhost" && url.pathname.startsWith("/admin")) {
+  if (hostname === "devkon.click" && url.pathname.startsWith("/admin")) {
     return NextResponse.redirect(
       process.env.NODE_ENV === "development"
-        ? "http://localhost:3000/"
+        ? `http://:3000/`
         : process.env.NEXT_PUBLIC_CLIENT_URL || "/",
     ); // hoặc 404
   }

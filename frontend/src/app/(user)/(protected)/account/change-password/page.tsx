@@ -1,4 +1,3 @@
-"use client";
 import SetBreadCrump from "@/components/common/set-breadcrump";
 import ChangePasswordForm from "@/components/features/auth/change-password-form";
 import React from "react";
