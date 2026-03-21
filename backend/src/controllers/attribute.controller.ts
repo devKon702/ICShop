@@ -11,11 +11,11 @@ import { HttpStatus } from "../constants/http-status";
 import { AttributeResponseCode } from "../constants/codes/attribute.code";
 import { successResponse } from "../utils/response.util";
 import { deleteAddressSchema } from "../schemas/address.schema";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 export class AttributeController {
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { name, categoryId },
     } = createAttributeSchema.parse(req);
@@ -53,7 +53,7 @@ export class AttributeController {
       );
   };
   public update = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { name },
       params: { id },

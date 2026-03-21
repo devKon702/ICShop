@@ -8,11 +8,11 @@ import {
   createCartSchema,
   deleteMultiCartSchema,
 } from "../schemas/cart.schema";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class CartController {
   public getMyCart = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const cart = await cartRepository.getCart(sub);
     res
       .status(HttpStatus.OK)
@@ -22,7 +22,7 @@ class CartController {
   };
 
   public createCart = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { productId },
     } = createCartSchema.parse(req);
@@ -45,7 +45,7 @@ class CartController {
   };
 
   public deleteMultiCart = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { cartIds },
     } = deleteMultiCartSchema.parse(req);

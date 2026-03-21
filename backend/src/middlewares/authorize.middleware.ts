@@ -2,17 +2,20 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/app.error";
 import { HttpStatus } from "../constants/http-status";
 import { AuthResponseCode } from "../constants/codes/auth.code";
-import { AccessTokenPayload } from "../services/jwt.service";
 import accountRepository from "../repositories/account.repository";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
+import { z } from "zod";
 
 /**
  * Middleware kiểm tra phân quyền, bao gồm tài khoản tồn tại, không bị khóa và thuộc có role hợp lệ
  * @param allowedRoles Mảng các Role hợp lệ
  * @returns
  */
-export const authorize = (allowedRoles: AccessTokenPayload["role"][]) => {
+export const authorize = (
+  allowedRoles: z.infer<typeof AccessTokenPayloadSchema>["role"][],
+) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const payload = res.locals.auth as AccessTokenPayload;
+    const payload = AccessTokenPayloadSchema.parse(res.locals.auth);
 
     const account = await accountRepository.findByUserId(payload.sub);
     if (!account) {
@@ -36,7 +39,11 @@ export const authorize = (allowedRoles: AccessTokenPayload["role"][]) => {
       );
     }
 
-    if (!allowedRoles.includes(account.role as AccessTokenPayload["role"])) {
+    if (
+      !allowedRoles.includes(
+        account.role as z.infer<typeof AccessTokenPayloadSchema>["role"],
+      )
+    ) {
       return next(
         new AppError(
           HttpStatus.FORBIDDEN,

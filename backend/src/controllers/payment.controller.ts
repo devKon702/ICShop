@@ -12,7 +12,7 @@ import {
   updatePaymentConfigSchema,
   updatePaymentMethodSchema,
 } from "../schemas/payment";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class PaymentController {
   public async getPayments(req: Request, res: Response) {
@@ -98,7 +98,7 @@ class PaymentController {
     const {
       body: { code, desc, isActive, name, position },
     } = createPaymentMethodSchema.parse(req);
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const created = await paymentService.createPaymentMethod({
       code,
       creatorId: sub,
@@ -124,7 +124,7 @@ class PaymentController {
       params: { id },
       body: { code, desc, isActive, name, position },
     } = updatePaymentMethodSchema.parse(req);
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const updated = await paymentService.updatePaymentMehtod(id, {
       code,
       name,
@@ -171,7 +171,7 @@ class PaymentController {
         publicConfig,
       },
     } = createPaymentConfigSchema.parse(req);
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const created = await paymentService.createPaymentConfig({
       creatorId: sub,
       environment,
@@ -202,7 +202,7 @@ class PaymentController {
       params: { id },
       body: { environment, isActive, privateConfig, publicConfig },
     } = updatePaymentConfigSchema.parse(req);
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
 
     const updated = await paymentService.updatePaymentConfig(id, {
       environment,

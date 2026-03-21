@@ -14,11 +14,11 @@ import { successResponse } from "../utils/response.util";
 import { ValidateError } from "../errors/validate.error";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
 import { NotFoundError } from "../errors/not-found.error";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class ProductImageController {
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { productId },
     } = createProductImageSchema.parse(req);
@@ -65,7 +65,7 @@ class ProductImageController {
       );
   };
   public updatePosition = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { gallery },
     } = updateProductImagePositionSchema.parse(req);
@@ -86,7 +86,7 @@ class ProductImageController {
   };
 
   public updateImage = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
     } = updateProductImageSchema.parse(req);

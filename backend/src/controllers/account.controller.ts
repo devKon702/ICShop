@@ -23,7 +23,6 @@ import { AccountResponseCode } from "../constants/codes/account.code";
 import { compareString, hashString } from "../utils/bcrypt.util";
 import { sanitizeData } from "../utils/sanitize.util";
 import { NotFoundError } from "../errors/not-found.error";
-import { AccessTokenPayload } from "../services/jwt.service";
 import {
   OtpChannel,
   otpPolicies,
@@ -33,6 +32,7 @@ import {
 import { Role } from "../constants/db";
 import accountService from "../services/account.service";
 import { maskEmail } from "../utils/string.util";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class AccountController {
   public getInfo = async (req: Request, res: Response) => {
@@ -61,7 +61,7 @@ class AccountController {
   };
 
   public getMyInformation = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const account = await accountRepository.findByUserId(sub);
     if (!account)
       throw new AppError(
@@ -86,7 +86,7 @@ class AccountController {
     req: Request<any, any, ChangePasswordIType["body"]>,
     res: Response,
   ) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const { currentPassword, newPassword } = req.body;
     // Check account existence
     const account = await accountRepository.findByUserId(sub);
@@ -158,7 +158,7 @@ class AccountController {
   };
 
   public changeStatus = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { accountId, isActive },
     } = changeAccountStatusSchema.parse(req);
@@ -201,7 +201,7 @@ class AccountController {
   };
 
   public sendUpdateUserEmailOtp = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { email },
     } = sendUpdateUserEmailOtpSchema.parse(req);
@@ -222,7 +222,7 @@ class AccountController {
   };
 
   public updateUserEmail = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { email, otp },
     } = updateUserEmailSchema.parse(req);
@@ -279,7 +279,7 @@ class AccountController {
     const {
       body: { password },
     } = adminRequestChangeEmailSchema.parse(req);
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const account = await accountRepository.findByUserIdAndRole(
       sub,
       Role.ADMIN,
@@ -351,7 +351,7 @@ class AccountController {
     const {
       body: { newPassword, oldPassword },
     } = adminRequestChangePasswordSchema.parse(req);
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     await accountService.adminRequestChangePassword({
       oldPassword,
       newPassword,

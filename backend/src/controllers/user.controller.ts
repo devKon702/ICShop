@@ -5,11 +5,11 @@ import { HttpStatus } from "../constants/http-status";
 import { successResponse } from "../utils/response.util";
 import { UserResponseCode } from "../constants/codes/user.code";
 import { handleImagesUpload } from "../utils/file.util";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class UserController {
   public update = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { name, phone },
     } = updateUserSchema.parse(req);

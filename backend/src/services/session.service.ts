@@ -1,7 +1,8 @@
+import { z } from "zod";
 import { Role } from "../constants/db";
 import sessionRepository from "../repositories/session.repository";
-import { RefreshTokenPayload } from "./jwt.service";
 import redisService, { redisKeys } from "./redis.service";
+import { RefreshTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class SessionService {
   private SESSION_CACHE_TTL_SECONDS = 2 * 60 * 60; // 2 hours
@@ -23,7 +24,7 @@ class SessionService {
       version: 1,
       expiresAt: refreshExpiresAt,
     });
-    await redisService.setValue<RefreshTokenPayload>(
+    await redisService.setValue<z.infer<typeof RefreshTokenPayloadSchema>>(
       redisKeys.session(sessionId),
       {
         jti: refreshJti,
@@ -45,16 +46,18 @@ class SessionService {
   public getOrLoadSession(
     sessionId: string,
     role: Role,
-  ): Promise<RefreshTokenPayload | null> {
+  ): Promise<z.infer<typeof RefreshTokenPayloadSchema> | null> {
     return redisService
-      .getValue<RefreshTokenPayload>(redisKeys.session(sessionId))
+      .getValue<
+        z.infer<typeof RefreshTokenPayloadSchema>
+      >(redisKeys.session(sessionId))
       .then((data) => {
         if (data) return data;
         return sessionRepository.findById(sessionId).then(async (session) => {
           if (!session) {
             return null;
           }
-          const sessionData: RefreshTokenPayload = {
+          const sessionData: z.infer<typeof RefreshTokenPayloadSchema> = {
             jti: session.rtJti,
             sub: session.userId,
             role: role,
@@ -62,7 +65,9 @@ class SessionService {
             version: session.version,
           };
           // Save to redis for next time
-          await redisService.setValue<RefreshTokenPayload>(
+          await redisService.setValue<
+            z.infer<typeof RefreshTokenPayloadSchema>
+          >(
             redisKeys.session(session.id),
             sessionData,
             this.SESSION_CACHE_TTL_SECONDS,
@@ -91,7 +96,7 @@ class SessionService {
         expiresAt: payload.expiresAt,
       },
     );
-    await redisService.setValue<RefreshTokenPayload>(
+    await redisService.setValue<z.infer<typeof RefreshTokenPayloadSchema>>(
       redisKeys.session(sessionUpdated.id),
       {
         sub: sessionUpdated.userId,

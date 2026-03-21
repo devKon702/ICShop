@@ -4,25 +4,15 @@ import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { JWTConfig } from "../constants/jwt-config";
 import { JWTError } from "../errors/jwt.error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
-
-export interface RefreshTokenPayload {
-  jti: string;
-  sub: number;
-  role: Role;
-  sessionId: string;
-  version: number;
-}
-
-export interface AccessTokenPayload {
-  sub: number;
-  role: Role;
-  sessionId: string;
-  sessionVersion: number;
-}
+import { z } from "zod";
+import {
+  AccessTokenPayloadSchema,
+  RefreshTokenPayloadSchema,
+} from "../schemas/jwt.schema";
 
 class JwtService {
   public createAccessToken = (
-    payload: AccessTokenPayload
+    payload: z.infer<typeof AccessTokenPayloadSchema>,
   ): { token: string; expiresAt: number } => {
     const expiresIn =
       payload.role === Role.USER
@@ -37,7 +27,7 @@ class JwtService {
   };
 
   public createRefreshToken = (
-    payload: RefreshTokenPayload
+    payload: z.infer<typeof RefreshTokenPayloadSchema>,
   ): { token: string; expiresAt: number } => {
     const expiresIn =
       payload.role === Role.USER
@@ -51,13 +41,12 @@ class JwtService {
     };
   };
 
-  public verifyAccessToken = (token: string): AccessTokenPayload => {
+  public verifyAccessToken = (
+    token: string,
+  ): z.infer<typeof AccessTokenPayloadSchema> => {
     try {
-      const payload = jwt.verify(
-        token,
-        env.JWT_ACCESS_KEY
-      ) as AccessTokenPayload;
-      return payload;
+      const payload = jwt.verify(token, env.JWT_ACCESS_KEY);
+      return AccessTokenPayloadSchema.parse(payload);
     } catch (err) {
       if (err instanceof TokenExpiredError) {
         throw new JWTError(JWTResponseCode.TOKEN_EXPIRED, "Token hết hạn");
@@ -70,13 +59,12 @@ class JwtService {
     }
   };
 
-  public verifyRefreshToken = (token: string): RefreshTokenPayload => {
+  public verifyRefreshToken = (
+    token: string,
+  ): z.infer<typeof RefreshTokenPayloadSchema> => {
     try {
-      const payload = jwt.verify(
-        token,
-        env.JWT_REFRESH_KEY
-      ) as RefreshTokenPayload;
-      return payload;
+      const payload = jwt.verify(token, env.JWT_REFRESH_KEY);
+      return RefreshTokenPayloadSchema.parse(payload);
     } catch (err) {
       if (err instanceof TokenExpiredError) {
         throw new JWTError(JWTResponseCode.TOKEN_EXPIRED, "Token hết hạn");

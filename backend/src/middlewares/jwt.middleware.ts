@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { JWTError } from "../errors/jwt.error";
 import { JWTResponseCode } from "../constants/codes/jwt.code";
-import jwtService, { AccessTokenPayload } from "../services/jwt.service";
+import jwtService from "../services/jwt.service";
 import sessionService from "../services/session.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
+
 export const verifyAccessToken = (
   req: Request,
   res: Response,
@@ -32,7 +34,7 @@ export const validateAccessToken = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const payload = res.locals.auth as AccessTokenPayload;
+  const payload = AccessTokenPayloadSchema.parse(res.locals.auth);
   const session = await sessionService.getOrLoadSession(
     payload.sessionId,
     payload.role,

@@ -10,11 +10,11 @@ import { successResponse } from "../utils/response.util";
 import { HighlightResponseCode } from "../constants/codes/highlight.code";
 import { HighlightType } from "../constants/db";
 import { sanitizeData } from "../utils/sanitize.util";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class HighlightController {
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { productId, highlightType },
     } = createHighlightSchema.parse(req);
@@ -51,7 +51,7 @@ class HighlightController {
   };
 
   public updatePosition = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { data },
     } = updateHighlightPositionSchema.parse(req);

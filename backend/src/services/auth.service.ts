@@ -5,7 +5,7 @@ import { HttpStatus } from "../constants/http-status";
 import { AppError } from "../errors/app.error";
 import accountRepository from "../repositories/account.repository";
 import { compareString, hashString } from "../utils/bcrypt.util";
-import jwtService, { RefreshTokenPayload } from "./jwt.service";
+import jwtService from "./jwt.service";
 import { JWTConfig } from "../constants/jwt-config";
 import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
@@ -21,6 +21,7 @@ import crypto from "crypto";
 import mailService from "./mail.service";
 import { generateResetPasswordHtml } from "../utils/html.util";
 import { OtpChannel, otpPolicies, OtpPurpose, otpService } from "./otp";
+import { RefreshTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class AuthService {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -285,7 +286,7 @@ class AuthService {
   };
 
   public logout = async (res: Response) => {
-    const { sessionId } = res.locals.auth as RefreshTokenPayload;
+    const { sessionId } = RefreshTokenPayloadSchema.parse(res.locals.auth);
     // Delete session from database
     await sessionRepository.deleteById(sessionId);
     // Delete session from redis

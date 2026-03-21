@@ -15,7 +15,7 @@ import { findByIdSchema } from "../schemas/shared.schema";
 import { sanitizeData } from "../utils/sanitize.util";
 import productRepository from "../repositories/product.repository";
 import { NotFoundError } from "../errors/not-found.error";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class CollectionController {
   public getCollections = async (req: Request, res: Response) => {
@@ -83,7 +83,7 @@ class CollectionController {
   };
 
   public createCollection = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { name, desc, isActive, position },
     } = createColectionSchema.parse(req);
@@ -108,7 +108,7 @@ class CollectionController {
   };
 
   public updateCollection = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
       body: { name, desc, isActive, position },
@@ -152,7 +152,7 @@ class CollectionController {
   };
 
   public addProductToCollection = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { productId, position },
       params: { id: collectionId },
@@ -210,7 +210,7 @@ class CollectionController {
     req: Request,
     res: Response,
   ) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
       body: { position },

@@ -3,7 +3,7 @@ import { RateLimitPolicies } from "../middlewares/limiter.middleware";
 import redisService, { redisKeys } from "./redis.service";
 import { ICaptchaService, TurnstileCaptchaService } from "./captcha.service";
 import RateLimitError from "../errors/rate-limit.error";
-import { AccessTokenPayload } from "./jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 type RateLimitPolicy =
   (typeof RateLimitPolicies)[keyof typeof RateLimitPolicies];
@@ -29,7 +29,9 @@ export class RedisRateLimitService implements IRateLimitService {
   ): string {
     if (actorType === "USER") {
       return String(
-        (res.locals.auth as AccessTokenPayload)?.sub ?? req.ip ?? "unknown",
+        AccessTokenPayloadSchema.parse(res.locals.auth)?.sub ??
+          req.ip ??
+          "unknown",
       );
     } else {
       return req.ip ?? "unknown";

@@ -18,11 +18,10 @@ import {
 import categoryRepository from "../repositories/category.repository";
 import { AppError } from "../errors/app.error";
 import attributeRepository from "../repositories/attribute.repository";
-import { handleImagesUpload, validateFile } from "../utils/file.util";
+import { handleImagesUpload } from "../utils/file.util";
 import { createSlug } from "../utils/slug.util";
 import storage from "../storage";
 import { sanitizeHtml } from "../utils/sanitize.util";
-import attributeValueRepository from "../repositories/attribute-value.repository";
 import wholesaleRepository from "../repositories/wholesale.repository";
 import { NotFoundError } from "../errors/not-found.error";
 import productImageRepository from "../repositories/product-image.repository";
@@ -30,7 +29,7 @@ import { findByIdSchema } from "../schemas/shared.schema";
 import productAttributeRepository from "../repositories/product-attribute.repository";
 import { ValidateError } from "../errors/validate.error";
 import { ValidateResponseCode } from "../constants/codes/validate.code";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class ProductController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -110,7 +109,7 @@ class ProductController {
   };
 
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: {
         name,
@@ -180,7 +179,7 @@ class ProductController {
   };
 
   public updatePoster = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
     } = updatePosterSchema.parse(req);
@@ -219,7 +218,7 @@ class ProductController {
   };
 
   public updateInfo = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { datasheetLink, desc, name, weight },
       params: { id },
@@ -248,7 +247,7 @@ class ProductController {
   };
 
   public updateCategory = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { vids, categoryId },
       params: { id },
@@ -296,7 +295,7 @@ class ProductController {
   };
 
   public updateActive = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { isActive },
       params: { id },
@@ -314,7 +313,7 @@ class ProductController {
   };
 
   public updateWholesale = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { details, max_quantity, min_quantity, quantity_step, unit, vat },
       params: { id },

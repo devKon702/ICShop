@@ -12,11 +12,11 @@ import { AppError } from "../errors/app.error";
 import { findByIdSchema } from "../schemas/shared.schema";
 import locationRepository from "../repositories/location.repository";
 import { LocationType } from "../constants/db";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class AddressController {
   public getMyAddress = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const addresses = await addressRepository.findByUserId(sub);
     res
       .status(HttpStatus.OK)
@@ -29,7 +29,7 @@ class AddressController {
       );
   };
   public createAddress = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: {
         receiverName,
@@ -76,7 +76,7 @@ class AddressController {
       );
   };
   public updateAddress = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
       body: {
@@ -143,7 +143,7 @@ class AddressController {
       );
   };
   public deleteAddress = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
     } = deleteAddressSchema.parse(req);

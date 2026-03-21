@@ -18,7 +18,7 @@ import { successResponse } from "../utils/response.util";
 import { AddressResponseCode } from "../constants/codes/address.code";
 import { logger } from "../utils/logger.util";
 import { NotFoundError } from "../errors/not-found.error";
-import { AccessTokenPayload } from "../services/jwt.service";
+import { AccessTokenPayloadSchema } from "../schemas/jwt.schema";
 
 class CategoryController {
   public getBySlug = async (req: Request, res: Response) => {
@@ -128,7 +128,7 @@ class CategoryController {
   };
 
   public create = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       body: { name, parentId },
     } = createCategorySchema.parse(req);
@@ -194,7 +194,7 @@ class CategoryController {
       );
   };
   public update = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
       body: { name, parentId },
@@ -267,7 +267,7 @@ class CategoryController {
       );
   };
   public delete = async (req: Request, res: Response) => {
-    const { sub } = res.locals.auth as AccessTokenPayload;
+    const { sub } = AccessTokenPayloadSchema.parse(res.locals.auth);
     const {
       params: { id },
     } = deleteCategorySchema.parse(req);
