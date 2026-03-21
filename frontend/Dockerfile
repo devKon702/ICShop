@@ -23,7 +23,8 @@ ENV NEXT_PUBLIC_FILE_URL=$NEXT_PUBLIC_FILE_URL
 ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
 ENV NEXT_PUBLIC_TURNSTILE_KEY=$NEXT_PUBLIC_TURNSTILE_KEY
 
-# Build
+# Build with standalon
+ENV NEXT_PRIVATE_STANDALONE=true
 RUN npm run build
 
 
@@ -34,6 +35,7 @@ WORKDIR /app
 
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+# COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
 ENV NODE_ENV=production

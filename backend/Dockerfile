@@ -32,6 +32,6 @@ RUN chmod +x entrypoint.sh
 
 ENV NODE_ENV=production
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["sh", "entrypoint.sh"]

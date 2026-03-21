@@ -5,8 +5,8 @@ npx prisma migrate deploy
 
 if [ "$RUN_SEED" = "true" ]; then
   echo "🌱 Running seed..."
-  npx prisma db seed
+  node dist/prisma/seed.js
 fi
 
 echo "🔥 Starting app..."
-node dist/main.js
+node dist/src/server.js

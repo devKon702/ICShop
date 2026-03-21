@@ -10,7 +10,10 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "check": "npm run type-check & npm run build"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts",
@@ -50,6 +53,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^22.15.30",
     "@types/nodemailer": "^7.0.3",
+    "eslint": "^8.57.1",
     "nodemon": "^3.1.14",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
