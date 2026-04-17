@@ -21,7 +21,10 @@ import crypto from "crypto";
 import mailService from "./mail.service";
 import { generateResetPasswordHtml } from "../utils/html.util";
 import { OtpChannel, otpPolicies, OtpPurpose, otpService } from "./otp";
-import { RefreshTokenPayloadSchema } from "../schemas/jwt.schema";
+import {
+  AccessTokenPayloadSchema,
+  RefreshTokenPayloadSchema,
+} from "../schemas/jwt.schema";
 
 class AuthService {
   private createCookieToken = (res: Response, token: string, role: Role) => {
@@ -286,7 +289,7 @@ class AuthService {
   };
 
   public logout = async (res: Response) => {
-    const { sessionId } = RefreshTokenPayloadSchema.parse(res.locals.auth);
+    const { sessionId } = AccessTokenPayloadSchema.parse(res.locals.auth);
     // Delete session from database
     await sessionRepository.deleteById(sessionId);
     // Delete session from redis
@@ -358,7 +361,7 @@ class AuthService {
       const expiresAt = await otpService.sendOtp({
         target: email,
         channel: OtpChannel.EMAIL,
-        purpose: OtpPurpose.VERIFY_EMAIL_CHANGE_EMAIL,
+        purpose: OtpPurpose.VERIFY_EMAIL_REGISTER,
       });
       return { expiresAt };
     }

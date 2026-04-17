@@ -84,7 +84,7 @@ export const authService = {
   sendOtp: async ({ email, token }: { email: string; token?: string }) => {
     return axiosHandler(
       apiAxios.post(
-        "/v1/auth/otp",
+        "/v1/auth/signup/send-otp",
         { email },
         { headers: token ? { "X-Captcha-Token": token } : {} },
       ),

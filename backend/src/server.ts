@@ -35,7 +35,6 @@ app.use(cookieParser());
 app.use(requestLogger);
 
 // Rate Limiter
-// app.use(globalLimiter);
 app.use(createRateLimiter(RateLimitPolicies.GLOBAL));
 
 // Static route
